@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>GHOST · Comunicador asistivo</title>
+<style>
+/* =========================================================
+   GHOST — Comunicador CAA
+   Hoja de estilos — tokens de diseño
+   ========================================================= */
+:root{
+  --ink:#141A21;
+  --ink-soft:#48525E;
+  --bg:#F3F6F8;
+  --surface:#FFFFFF;
+  --rail:#101B30;
+  --rail-soft:#1C2C4A;
+  --rail-text:#E8EDF6;
+  --accent:#0E9E8C;
+  --accent-dark:#0A7C6E;
+  --accent-contrast:#FFFFFF;
+  --focus:#FFB238;
+  --focus-ink:#3A2600;
+  --danger:#D64550;
+  --danger-dark:#A8323C;
+  --line:#DCE3EA;
+  --radius:14px;
+  --btn-min:96px;
+  --font-scale:1;
+  --cols:4;
+  --retro-fg:#33FF33;
+  font-size:16px;
+}
+:root[data-contrast="high"]{
+  --ink:#000000;
+  --ink-soft:#000000;
+  --bg:#FFFFFF;
+  --surface:#FFFFFF;
+  --rail:#000000;
+  --rail-soft:#000000;
+  --rail-text:#FFFFFF;
+  --accent:#005A4E;
+  --accent-dark:#003D34;
+  --focus:#FFD700;
+  --focus-ink:#000000;
+  --line:#000000;
+}
+
+/* ---------- Modo retro: terminal de los años 80 ---------- */
+/* Fondo negro puro, un solo color de caracter (verde o ámbar,
+   seteable), sin iconos ni emojis, sin bordes redondeados ni
+   sombras: lo más parecido a una terminal antigua posible. */
+:root[data-retro="on"]{
+  --ink: var(--retro-fg);
+  --ink-soft: var(--retro-fg);
+  --bg:#000000;
+  --surface:#000000;
+  --rail:#000000;
+  --rail-soft:#000000;
+  --rail-text: var(--retro-fg);
+  --accent: var(--retro-fg);
+  --accent-dark: var(--retro-fg);
+  --accent-contrast:#000000;
+  --focus: var(--retro-fg);
+  --focus-ink:#000000;
+  --danger: var(--retro-fg);
+  --danger-dark: var(--retro-fg);
+  --line: var(--retro-fg);
+  --radius:0px;
+}
+[data-retro="on"] body{
+  font-family:"Courier New", Courier, monospace;
+  background:#000000;
+}
+[data-retro="on"] .em,
+[data-retro="on"] .ico,
+[data-retro="on"] .fav-mark{
+  display:none !important;
+}
+[data-retro="on"] .icon-btn,
+[data-retro="on"] .act-btn,
+[data-retro="on"] .cat-btn,
+[data-retro="on"] .btn,
+[data-retro="on"] .tile,
+[data-retro="on"] .emerg-tile,
+[data-retro="on"] .predict-chip,
+[data-retro="on"] .buffer-chip,
+[data-retro="on"] #bufferText,
+[data-retro="on"] .panel,
+[data-retro="on"] select,
+[data-retro="on"] textarea,
+[data-retro="on"] input[type=text],
+[data-retro="on"] .vocab-row .cat-tag,
+[data-retro="on"] .badge-otros,
+[data-retro="on"] .toast{
+  background:#000000 !important;
+  color: var(--retro-fg) !important;
+  border-color: var(--retro-fg) !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  text-shadow:0 0 3px var(--retro-fg);
+}
+[data-retro="on"] #topbar,
+[data-retro="on"] #bufferBar,
+[data-retro="on"] #predictStrip,
+[data-retro="on"] #catRail,
+[data-retro="on"] #scanBar{
+  background:#000000;
+  border-color: var(--retro-fg);
+}
+[data-retro="on"] #scanTrack{ background:#000000; border:1px solid var(--retro-fg); }
+[data-retro="on"] #scanFill{ background: var(--retro-fg); }
+[data-retro="on"] .toggle-switch{ background:#000000; border:1px solid var(--retro-fg); border-radius:0; }
+[data-retro="on"] .toggle-switch .knob{ background: var(--retro-fg); border-radius:0; }
+[data-retro="on"] .toggle-switch.on{ background:#000000; }
+[data-retro="on"] .overlay{ background:rgba(0,0,0,.92); }
+[data-retro="on"] .cat-btn{ border-left-color:#000000; }
+[data-retro="on"] .cat-btn.active{ background:#000000; border-left-color: var(--retro-fg); text-decoration:underline; }
+[data-retro="on"] .cat-btn:hover,
+[data-retro="on"] .icon-btn:hover{ background:#001a00; }
+[data-retro="on"] .tile.scan-hi,
+[data-retro="on"] .cat-btn.scan-hi,
+[data-retro="on"] .act-btn.scan-hi,
+[data-retro="on"] .icon-btn.scan-hi,
+[data-retro="on"] .emerg-tile.scan-hi{
+  background: var(--retro-fg) !important;
+  color:#000000 !important;
+  text-shadow:none;
+}
+[data-retro="on"] .tile.scan-hi::before,
+[data-retro="on"] .tile.scan-hi::after{ border-color:#000000; }
+[data-retro="on"] button:focus-visible,
+[data-retro="on"] [tabindex]:focus-visible,
+[data-retro="on"] a:focus-visible{ outline-color: var(--retro-fg); }
+[data-retro="on"] ::selection{ background: var(--retro-fg); color:#000000; }
+
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0;
+  font-family:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  overflow:hidden;
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms !important; transition-duration:.001ms !important;}
+}
+button{font-family:inherit;}
+.visually-hidden{
+  position:absolute; width:1px; height:1px; overflow:hidden;
+  clip:rect(0 0 0 0); white-space:nowrap;
+}
+
+/* ---------- App shell ---------- */
+#app{
+  display:flex; flex-direction:column; height:100vh; width:100vw;
+}
+#topbar{
+  display:flex; align-items:center; gap:12px;
+  padding:10px 16px;
+  background:var(--rail);
+  color:var(--rail-text);
+  flex:0 0 auto;
+}
+#topbar .brand{display:flex; align-items:center; gap:8px; margin-right:auto;}
+#topbar .brand b{font-size:1.15rem; letter-spacing:.04em; display:inline-flex; align-items:center; gap:6px;}
+#topbar .brand .brand-em{font-size:calc(2rem * var(--font-scale)); line-height:1;}
+#topbar .brand span{font-size:.72rem; color:#9FB0C9; letter-spacing:.03em;}
+.icon-btn{
+  background:var(--rail-soft); color:var(--rail-text); border:1px solid #2A3B5E;
+  border-radius:10px; padding:9px 12px; font-size:.85rem; cursor:pointer;
+  display:flex; align-items:center; gap:6px; min-height:44px;
+}
+.icon-btn:hover{background:#28406b;}
+.icon-btn.emergency{background:var(--danger); border-color:var(--danger-dark); font-weight:700;}
+.icon-btn.emergency:hover{background:var(--danger-dark);}
+button:focus-visible, [tabindex]:focus-visible, a:focus-visible{
+  outline:4px solid var(--focus); outline-offset:2px; z-index:5;
+}
+
+/* ---------- Buffer ---------- */
+#bufferBar{
+  flex:0 0 auto; background:var(--surface); border-bottom:1px solid var(--line);
+  padding:10px 16px; display:flex; gap:10px; align-items:stretch;
+}
+#bufferText{
+  flex:1; min-height:64px; max-height:120px; overflow:auto;
+  background:var(--bg); border:2px solid var(--line); border-radius:var(--radius);
+  padding:12px 16px; font-size:calc(1.6rem * var(--font-scale)); font-weight:600;
+  line-height:1.25; display:flex; align-items:center; flex-wrap:wrap; gap:6px;
+}
+#bufferText:empty::before{content:"Selecciona palabras para construir tu mensaje…"; color:#93A0AD; font-weight:400; font-size:calc(1.05rem * var(--font-scale));}
+.buffer-chip{background:#E4F5F2; border:1px solid #BEE6DE; border-radius:8px; padding:2px 10px;}
+#bufferActions{display:flex; flex-direction:column; gap:6px; justify-content:center; min-width:150px;}
+.act-btn{
+  min-height:44px; border-radius:10px; border:1px solid var(--line); background:var(--surface);
+  font-size:1rem; font-weight:700; cursor:pointer; padding:8px 10px; display:flex; align-items:center; gap:8px;
+}
+.act-btn.speak{background:var(--accent); color:var(--accent-contrast); border-color:var(--accent-dark); font-size:1.1rem;}
+.act-btn.speak:hover{background:var(--accent-dark);}
+.act-btn.del:hover, .act-btn.clear:hover{background:#F3E6E6;}
+
+/* ---------- Prediction strip ---------- */
+#predictStrip{
+  flex:0 0 auto; display:flex; gap:8px; padding:6px 16px; background:#EFF4F1;
+  border-bottom:1px solid var(--line); overflow-x:auto;
+}
+#predictStrip:empty{display:none;}
+.predict-chip{
+  background:var(--surface); border:1px solid var(--accent); color:var(--accent-dark);
+  border-radius:20px; padding:6px 14px; font-size:.92rem; font-weight:600; cursor:pointer; white-space:nowrap;
+}
+
+/* ---------- Main layout ---------- */
+#main{flex:1 1 auto; display:flex; min-height:0;}
+#catRail{
+  flex:0 0 190px; background:var(--rail); color:var(--rail-text); overflow-y:auto;
+  padding:10px 0;
+}
+.cat-btn{
+  display:flex; width:100%; align-items:center; gap:10px; text-align:left;
+  background:transparent; border:none; color:var(--rail-text);
+  padding:13px 16px; font-size:.98rem; font-weight:600; cursor:pointer;
+  border-left:4px solid transparent;
+}
+.cat-btn .em{font-size:1.2rem;}
+.cat-btn:hover{background:var(--rail-soft);}
+.cat-btn.active{background:var(--rail-soft); border-left-color:var(--accent);}
+.cat-btn.scan-hi{background:var(--focus); color:var(--focus-ink); border-left-color:var(--focus-ink);}
+
+#gridWrap{flex:1 1 auto; overflow-y:auto; padding:14px;}
+#grid{
+  display:grid; grid-template-columns:repeat(var(--cols), 1fr); gap:12px;
+}
+.tile{
+  position:relative;
+  min-height:calc(var(--btn-min) * 1px);
+  background:var(--surface); border:2px solid var(--line); border-radius:var(--radius);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+  cursor:pointer; padding:10px 6px; font-weight:700; color:var(--ink);
+  font-size:calc(1rem * var(--font-scale));
+}
+.tile:hover{border-color:var(--accent);}
+.tile .em{font-size:calc(2rem * var(--font-scale)); line-height:1;}
+.tile .fav-mark{position:absolute; top:6px; right:8px; font-size:.85rem; color:#E0A62B;}
+.tile.scan-hi{
+  border-color:var(--focus-ink); background:#FFF4DC;
+  box-shadow:0 0 0 4px var(--focus);
+}
+.tile.scan-hi::before, .tile.scan-hi::after{
+  content:""; position:absolute; width:18px; height:18px; border:4px solid var(--focus-ink);
+}
+.tile.scan-hi::before{top:-6px; left:-6px; border-right:none; border-bottom:none;}
+.tile.scan-hi::after{bottom:-6px; right:-6px; border-left:none; border-top:none;}
+.icon-btn.scan-hi{
+  background:var(--focus); color:var(--focus-ink); border-color:var(--focus-ink);
+  box-shadow:0 0 0 4px rgba(255,178,56,.55);
+}
+.act-btn.scan-hi{
+  border-color:var(--focus-ink); box-shadow:0 0 0 4px var(--focus);
+  background:var(--focus) !important; color:var(--focus-ink) !important;
+}
+.emerg-tile.scan-hi{
+  outline:4px solid var(--focus-ink); outline-offset:2px; box-shadow:0 0 0 4px var(--focus);
+}
+.mode-emoji-only .tile .label{display:none;}
+.mode-text .tile .em{display:none;}
+.phrase-tile{grid-column:span 2; align-items:flex-start; text-align:left; justify-content:center;}
+.phrase-tile .label{font-size:calc(1rem * var(--font-scale)); font-weight:600;}
+.exit-tile{
+  background:var(--bg); border-style:dashed; border-color:var(--ink-soft); color:var(--ink-soft);
+}
+.exit-tile:hover{border-color:var(--accent); color:var(--accent-dark);}
+.exit-tile .label{font-size:calc(.92rem * var(--font-scale)); font-weight:700;}
+
+.empty-note{color:var(--ink-soft); padding:20px; font-size:1rem;}
+
+/* ---------- Scan bar ---------- */
+#scanBar{
+  flex:0 0 auto; display:flex; align-items:center; gap:12px; padding:10px 16px;
+  background:var(--rail); color:var(--rail-text); font-size:.9rem;
+}
+#scanBar label{display:flex; align-items:center; gap:8px;}
+#scanTrack{flex:1; height:8px; background:#2A3B5E; border-radius:6px; overflow:hidden;}
+#scanFill{height:100%; width:0%; background:var(--accent); transition:width .05s linear;}
+.toggle-switch{
+  position:relative; width:46px; height:26px; border-radius:14px; background:#2A3B5E; border:1px solid #405480; cursor:pointer;
+}
+.toggle-switch.on{background:var(--accent); border-color:var(--accent-dark);}
+.toggle-switch .knob{
+  position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%; background:#fff; transition:left .15s;
+}
+.toggle-switch.on .knob{left:22px;}
+
+/* ---------- Overlays ---------- */
+.overlay{
+  position:fixed; inset:0; background:rgba(10,15,22,.55); display:flex; align-items:center; justify-content:center;
+  z-index:50; padding:20px;
+}
+.overlay[hidden]{display:none;}
+.panel{
+  background:var(--surface); border-radius:16px; max-width:760px; width:100%; max-height:88vh; overflow-y:auto;
+  padding:22px 24px 26px;
+}
+.panel h2{margin-top:0; font-size:1.3rem;}
+.panel h3{font-size:1rem; margin:18px 0 8px; color:var(--accent-dark); border-bottom:1px solid var(--line); padding-bottom:4px;}
+.field-row{display:flex; align-items:center; justify-content:space-between; gap:14px; padding:8px 0; flex-wrap:wrap;}
+.field-row > span{font-weight:600; flex:1 1 200px;}
+.field-row select, .field-row input[type=range]{flex:1 1 200px; min-width:140px;}
+select, textarea, input[type=text]{
+  font-family:inherit; font-size:1rem; padding:8px 10px; border-radius:8px; border:1px solid var(--line); background:#fff; color:var(--ink);
+}
+textarea{width:100%; min-height:130px; resize:vertical;}
+.close-x{float:right; background:none; border:none; font-size:1.4rem; cursor:pointer; color:var(--ink-soft); min-height:44px; min-width:44px;}
+.btnbar{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;}
+.btn{
+  border-radius:10px; border:1px solid var(--line); background:var(--surface); padding:10px 16px;
+  font-weight:700; cursor:pointer; min-height:44px;
+}
+.btn.primary{background:var(--accent); color:#fff; border-color:var(--accent-dark);}
+.btn.danger{background:var(--danger); color:#fff; border-color:var(--danger-dark);}
+.hint{font-size:.85rem; color:var(--ink-soft); margin-top:2px;}
+.toast{
+  position:fixed; left:50%; bottom:28px; transform:translateX(-50%);
+  background:var(--ink); color:#fff; padding:12px 20px; border-radius:10px; font-size:.95rem;
+  max-width:90vw; z-index:80; box-shadow:0 6px 20px rgba(0,0,0,.25);
+}
+.toast[hidden]{display:none;}
+.vocab-list{max-height:260px; overflow-y:auto; border:1px solid var(--line); border-radius:10px;}
+.vocab-row{display:flex; align-items:center; gap:10px; padding:8px 12px; border-bottom:1px solid var(--line); font-size:.92rem;}
+.vocab-row:last-child{border-bottom:none;}
+.vocab-row .cat-tag{font-size:.75rem; color:var(--ink-soft); background:var(--bg); padding:2px 8px; border-radius:10px;}
+.badge-otros{background:#FCE9E0; color:#8A4A24; border-radius:8px; padding:2px 8px; font-size:.72rem; margin-left:6px;}
+.emerg-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:14px;}
+.emerg-tile{
+  background:var(--danger); color:#fff; border-radius:12px; padding:18px 10px; text-align:center; font-weight:800;
+  font-size:1.1rem; cursor:pointer; border:2px solid var(--danger-dark);
+}
+.emerg-tile .em{font-size:2rem; display:block; margin-bottom:4px;}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px){
+  #catRail{flex-basis:130px;}
+  :root{--cols:3;}
+}
+@media (max-width: 640px){
+  #main{flex-direction:column;}
+  #catRail{flex:0 0 auto; display:flex; overflow-x:auto; padding:6px; width:100%;}
+  .cat-btn{flex:0 0 auto; padding:10px 12px; border-left:none; border-bottom:4px solid transparent; white-space:nowrap;}
+  .cat-btn.active{border-bottom-color:var(--accent);}
+  :root{--cols:2;}
+  #bufferBar{flex-direction:column;}
+  #bufferActions{flex-direction:row;}
+  .emerg-grid{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ===================== TOPBAR ===================== -->
+  <div id="topbar">
+    <div class="brand"><b><span class="ico em brand-em">👻</span> GHOST</b><span>Gesture-to-Human Output Speech Technology</span></div>
+    <button class="icon-btn emergency scan-target" id="btnEmergency" title="Modo emergencia"><span class="ico">🚨</span> Emergencia</button>
+    <button class="icon-btn" id="btnGhostLoad" title="Carga rápida de vocabulario"><span class="ico">⚡</span> Ghost Quick Load</button>
+    <button class="icon-btn" id="btnSettings" title="Configuración"><span class="ico">⚙️</span> Configuración</button>
+  </div>
+
+  <!-- ===================== BUFFER ===================== -->
+  <div id="bufferBar">
+    <div id="bufferText" role="textbox" aria-label="Mensaje en construcción" aria-live="polite"></div>
+    <div id="bufferActions">
+      <button class="act-btn speak scan-target" id="btnSpeak"><span class="ico">🔊</span> HABLAR</button>
+      <button class="act-btn del scan-target" id="btnDelete"><span class="ico">←</span> BORRAR</button>
+      <button class="act-btn clear scan-target" id="btnClear"><span class="ico">🗑</span> LIMPIAR</button>
+    </div>
+  </div>
+
+  <!-- ===================== PREDICTION ===================== -->
+  <div id="predictStrip" aria-live="polite"></div>
+
+  <!-- ===================== MAIN ===================== -->
+  <div id="main">
+    <nav id="catRail" aria-label="Categorías"></nav>
+    <div id="gridWrap">
+      <div id="grid" aria-label="Vocabulario"></div>
+    </div>
+  </div>
+
+  <!-- ===================== SCAN BAR ===================== -->
+  <div id="scanBar">
+    <label>
+      <span class="toggle-switch" id="scanToggle" role="switch" aria-checked="false" tabindex="0"><span class="knob"></span></span>
+      Barrido automático
+    </label>
+    <div id="scanTrack"><div id="scanFill"></div></div>
+    <span id="scanStatus">Desactivado</span>
+  </div>
+</div>
+
+<!-- ===================== OVERLAY: SETTINGS ===================== -->
+<div class="overlay" id="ovSettings" hidden>
+  <div class="panel">
+    <button class="close-x" data-close="ovSettings" aria-label="Cerrar">✕</button>
+    <h2><span class="ico">⚙️</span> Configuración</h2>
+
+    <h3>Comunicación / Barrido</h3>
+    <div class="field-row"><span>Modo de barrido</span>
+      <select id="cfgScanMode">
+        <option value="off">Sin barrido (selección manual)</option>
+        <option value="direct">Barrido directo</option>
+        <option value="hier">Barrido por categorías</option>
+      </select>
+    </div>
+    <div class="field-row"><span>Velocidad de barrido</span>
+      <input type="range" id="cfgScanSpeed" min="200" max="2000" step="1">
+      <span id="cfgScanSpeedVal">1000 ms</span>
+    </div>
+    <div class="field-row"><span>Método de selección</span>
+      <select id="cfgSelectKey">
+        <option value="enter">Enter</option>
+        <option value="space">Espacio</option>
+        <option value="any">Cualquier tecla</option>
+        <option value="click">Solo clic / interruptor</option>
+      </select>
+    </div>
+    <p class="hint">Diseñado para poder conectar un interruptor USB de contacto único que emule una tecla.</p>
+    <div class="field-row"><span>Salir de una categoría</span>
+      <span class="hint" style="flex:1 1 200px; margin-top:0;">Toca el botón "Salir de categoría" que aparece dentro de cada grupo de palabras. Funciona con clic, con el interruptor o durante el barrido.</span>
+    </div>
+    <div class="field-row"><span>Hablar en cualquier momento</span>
+      <span class="hint" style="flex:1 1 200px; margin-top:0;">Doble clic, o pulsar el interruptor dos veces seguidas, sobre cualquier palabra pronuncia el mensaje al instante, sin importar en qué categoría o fase del barrido estés.</span>
+    </div>
+    <div class="field-row"><span>Hablar rápido (sin usar el mensaje)</span>
+      <select id="cfgQuickSpeak">
+        <option value="rightclick">Clic derecho</option>
+        <option value="longpress">Mantener presionado</option>
+        <option value="space">Barra espaciadora</option>
+        <option value="off">Desactivado</option>
+      </select>
+    </div>
+    <p class="hint">Pronuncia una palabra al instante sin agregarla al mensaje en construcción.</p>
+
+    <h3>Voz</h3>
+    <div class="field-row"><span>Origen de voz</span>
+      <select id="cfgVoiceSource">
+        <option value="device">Voz del dispositivo</option>
+        <option value="api">Voz mediante API (experimental)</option>
+      </select>
+    </div>
+    <div class="field-row"><span>Voz del dispositivo</span>
+      <select id="cfgVoice"></select>
+    </div>
+    <div class="field-row"><span>Velocidad</span><input type="range" id="cfgRate" min="0.5" max="2" step="0.1"><span id="cfgRateVal">1.0</span></div>
+    <div class="field-row"><span>Tono</span><input type="range" id="cfgPitch" min="0" max="2" step="0.1"><span id="cfgPitchVal">1.0</span></div>
+    <div class="field-row"><span>Volumen</span><input type="range" id="cfgVolume" min="0" max="1" step="0.1"><span id="cfgVolumeVal">1.0</span></div>
+    <button class="btn" id="btnTestVoice"><span class="ico">🔊</span> Probar voz</button>
+
+    <h3>Interfaz</h3>
+    <div class="field-row"><span>Modo visual</span>
+      <select id="cfgVisualMode">
+        <option value="both">Emoji + texto</option>
+        <option value="text">Solo texto</option>
+        <option value="emoji">Solo emoji</option>
+      </select>
+    </div>
+    <div class="field-row"><span>Tamaño de texto</span><input type="range" id="cfgFontScale" min="0.8" max="1.8" step="0.1"><span id="cfgFontScaleVal">1.0</span></div>
+    <div class="field-row"><span>Columnas de la matriz</span><input type="range" id="cfgCols" min="2" max="6" step="1"><span id="cfgColsVal">4</span></div>
+    <div class="field-row"><span>Alto contraste</span>
+      <span class="toggle-switch" id="cfgContrast" role="switch" aria-checked="false" tabindex="0"><span class="knob"></span></span>
+    </div>
+    <div class="field-row"><span>Modo retro (terminal años 80)</span>
+      <span class="toggle-switch" id="cfgRetro" role="switch" aria-checked="false" tabindex="0"><span class="knob"></span></span>
+    </div>
+    <div class="field-row"><span>Color del modo retro</span>
+      <select id="cfgRetroColor">
+        <option value="green">Verde fósforo</option>
+        <option value="amber">Ámbar / naranja</option>
+      </select>
+    </div>
+    <p class="hint">Fondo negro, un solo color de texto, sin iconos ni emojis: lo más retro de lo retro.</p>
+    <div class="field-row"><span>Pantalla completa</span>
+      <button class="btn" id="btnFullscreen">Activar pantalla completa</button>
+    </div>
+
+    <h3>Vocabulario</h3>
+    <div class="btnbar">
+      <button class="btn" id="btnOpenGhostFromSettings"><span class="ico">⚡</span> Ghost Quick Load</button>
+      <button class="btn" id="btnImportJson"><span class="ico">📄</span> Importar JSON</button>
+      <input type="file" id="fileJson" accept="application/json" class="visually-hidden">
+      <button class="btn" id="btnManageVocab"><span class="ico">📋</span> Gestionar vocabulario / favoritos</button>
+      <button class="btn danger" id="btnRestoreGhost"><span class="ico">↺</span> Restaurar modo Ghost</button>
+    </div>
+    <div id="vocabManager" class="vocab-list" style="margin-top:10px; display:none;"></div>
+  </div>
+</div>
+
+<!-- ===================== OVERLAY: GHOST QUICK LOAD ===================== -->
+<div class="overlay" id="ovGhost" hidden>
+  <div class="panel">
+    <button class="close-x" data-close="ovGhost" aria-label="Cerrar">✕</button>
+    <h2><span class="ico">⚡</span> Ghost Quick Load</h2>
+    <p class="hint">Pega aquí palabras o frases, una por línea. La aplicación intentará clasificarlas automáticamente. Nada se descarta: lo que no reconozca se guarda en "Otros".</p>
+    <textarea id="ghostText" placeholder="Agua
+Baño
+Médico
+Aurora
+Dolor
+Tengo frío
+Necesito ayuda
+Quiero hablar con mi familia
+Sí
+No"></textarea>
+    <p class="hint">Presiona <b>Enter</b> dentro del cuadro (con Ctrl/Cmd) o el botón para cargar.</p>
+    <div class="btnbar">
+      <button class="btn primary" id="btnGhostLoadRun">Cargar vocabulario</button>
+      <button class="btn" data-close="ovGhost">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== OVERLAY: EMERGENCY ===================== -->
+<div class="overlay" id="ovEmergency" hidden>
+  <div class="panel">
+    <button class="close-x" data-close="ovEmergency" aria-label="Cerrar">✕</button>
+    <h2><span class="ico">🚨</span> Modo emergencia</h2>
+    <p class="hint">Estos elementos están siempre disponibles, sin importar el vocabulario cargado. Toca uno para hablarlo de inmediato.</p>
+    <div class="emerg-grid" id="emergGrid"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden role="status" aria-live="assertive"></div>
+
+<script>
+/* =========================================================
+   GHOST — Comunicador CAA
+   Arquitectura: CONFIG · CORE VOCAB · PHRASES · PREDICTION
+   EMOJI MAP · STATE · STORAGE · VOCAB ENGINE · CLASSIFICATION
+   PREDICTION ENGINE · UI ENGINE · SCANNING ENGINE · SPEECH ENGINE
+   GHOST ENGINE · SETTINGS ENGINE · EVENTS · INIT
+   ========================================================= */
+
+/* ---------------- CONFIG ---------------- */
+const CONFIG = {
+  storageKey: "ghost_caa_v1",
+  defaultSettings: {
+    scanMode: "hier",
+    scanSpeed: 500,
+    selectKey: "enter",
+    voiceSource: "device",
+    voiceName: "",
+    rate: 1.0, pitch: 1.0, volume: 1.0,
+    visualMode: "both",
+    fontScale: 1.0,
+    cols: 4,
+    contrast: false,
+    retroMode: false,
+    retroColor: "green",
+    quickSpeakMethod: "rightclick"
+  }
+};
+
+/* Ventana de tiempo (ms) para interpretar dos clics/pulsaciones
+   seguidas como el gesto de "salir de la categoría / emergencia". */
+const DOUBLE_PRESS_MS = 600;
+
+/* ---------------- CORE VOCABULARY ---------------- */
+/* Cada elemento: text, emoji, category, type, speech, priority, favorite */
+const CORE_VOCAB = [
+  // Necesidades
+  {text:"Agua", emoji:"💧", category:"necesidades", type:"noun", speech:"Agua", priority:10, favorite:true},
+  {text:"Comida", emoji:"🍽", category:"necesidades", type:"noun", speech:"Comida", priority:9, favorite:true},
+  {text:"Baño", emoji:"🚽", category:"necesidades", type:"noun", speech:"Baño", priority:9, favorite:true},
+  {text:"Dormir", emoji:"😴", category:"necesidades", type:"verb", speech:"Dormir", priority:6},
+  {text:"Descansar", emoji:"🛏", category:"necesidades", type:"verb", speech:"Descansar", priority:6},
+  {text:"Ayuda", emoji:"❤️", category:"necesidades", type:"noun", speech:"Ayuda", priority:10, favorite:true},
+  {text:"Frío", emoji:"🥶", category:"necesidades", type:"adj", speech:"Frío", priority:6},
+  {text:"Calor", emoji:"🥵", category:"necesidades", type:"adj", speech:"Calor", priority:6},
+  {text:"Aire", emoji:"💨", category:"necesidades", type:"noun", speech:"Aire", priority:5},
+  {text:"Ropa", emoji:"👕", category:"necesidades", type:"noun", speech:"Ropa", priority:4},
+  {text:"Dinero", emoji:"💵", category:"necesidades", type:"noun", speech:"Dinero", priority:3},
+  {text:"Transporte", emoji:"🚌", category:"necesidades", type:"noun", speech:"Transporte", priority:3},
+  {text:"Teléfono", emoji:"📞", category:"necesidades", type:"noun", speech:"Teléfono", priority:4},
+
+  // Personas
+  {text:"Mamá", emoji:"👩", category:"personas", type:"noun", speech:"Mamá", priority:9, favorite:true},
+  {text:"Papá", emoji:"👨", category:"personas", type:"noun", speech:"Papá", priority:9, favorite:true},
+  {text:"Familia", emoji:"👪", category:"personas", type:"noun", speech:"Familia", priority:9, favorite:true},
+  {text:"Médico", emoji:"🩺", category:"personas", type:"noun", speech:"Médico", priority:8},
+  {text:"Enfermera", emoji:"👩‍⚕️", category:"personas", type:"noun", speech:"Enfermera", priority:7},
+  {text:"Amigo", emoji:"🧑‍🤝‍🧑", category:"personas", type:"noun", speech:"Amigo", priority:5},
+
+  // Acciones
+  {text:"Quiero", emoji:"🙋", category:"acciones", type:"verb", speech:"Quiero", priority:10, favorite:true},
+  {text:"Necesito", emoji:"❗", category:"acciones", type:"verb", speech:"Necesito", priority:10, favorite:true},
+  {text:"Puedo", emoji:"👍", category:"acciones", type:"verb", speech:"Puedo", priority:6},
+  {text:"No puedo", emoji:"🚫", category:"acciones", type:"verb", speech:"No puedo", priority:6},
+  {text:"Comer", emoji:"🍴", category:"acciones", type:"verb", speech:"Comer", priority:7},
+  {text:"Beber", emoji:"🥤", category:"acciones", type:"verb", speech:"Beber", priority:7},
+  {text:"Ir", emoji:"➡️", category:"acciones", type:"verb", speech:"Ir", priority:6},
+  {text:"Venir", emoji:"⬅️", category:"acciones", type:"verb", speech:"Venir", priority:5},
+  {text:"Hablar", emoji:"💬", category:"acciones", type:"verb", speech:"Hablar", priority:6},
+  {text:"Esperar", emoji:"⏳", category:"acciones", type:"verb", speech:"Esperar", priority:5},
+  {text:"Repetir", emoji:"🔁", category:"acciones", type:"verb", speech:"Repetir", priority:5},
+
+  // Salud
+  {text:"Dolor", emoji:"🤕", category:"salud", type:"noun", speech:"Dolor", priority:10, favorite:true},
+  {text:"Medicamento", emoji:"💊", category:"salud", type:"noun", speech:"Medicamento", priority:7},
+  {text:"Respirar", emoji:"🫁", category:"salud", type:"verb", speech:"Respirar", priority:6},
+  {text:"Posición", emoji:"🔄", category:"salud", type:"noun", speech:"Cambiar de posición", priority:5},
+
+  // Lugares
+  {text:"Casa", emoji:"🏠", category:"lugares", type:"noun", speech:"Casa", priority:6},
+  {text:"Hospital", emoji:"🏥", category:"lugares", type:"noun", speech:"Hospital", priority:5},
+  {text:"Trabajo", emoji:"💼", category:"lugares", type:"noun", speech:"Trabajo", priority:4},
+  {text:"Colegio", emoji:"🏫", category:"lugares", type:"noun", speech:"Colegio", priority:4},
+
+  // Comida
+  {text:"Pan", emoji:"🍞", category:"comida", type:"noun", speech:"Pan", priority:5},
+  {text:"Fruta", emoji:"🍎", category:"comida", type:"noun", speech:"Fruta", priority:5},
+  {text:"Leche", emoji:"🥛", category:"comida", type:"noun", speech:"Leche", priority:5},
+  {text:"Sopa", emoji:"🍲", category:"comida", type:"noun", speech:"Sopa", priority:4},
+
+  // Emociones
+  {text:"Feliz", emoji:"😀", category:"emociones", type:"adj", speech:"Feliz", priority:5},
+  {text:"Triste", emoji:"😢", category:"emociones", type:"adj", speech:"Triste", priority:5},
+  {text:"Enojado", emoji:"😠", category:"emociones", type:"adj", speech:"Enojado", priority:4},
+  {text:"Cansado", emoji:"😩", category:"emociones", type:"adj", speech:"Cansado", priority:5},
+  {text:"Asustado", emoji:"😨", category:"emociones", type:"adj", speech:"Asustado", priority:4},
+
+  // Tiempo
+  {text:"Ahora", emoji:"⏰", category:"tiempo", type:"adv", speech:"Ahora", priority:6},
+  {text:"Después", emoji:"⏭", category:"tiempo", type:"adv", speech:"Después", priority:5},
+  {text:"Antes", emoji:"⏮", category:"tiempo", type:"adv", speech:"Antes", priority:4},
+  {text:"Hoy", emoji:"📅", category:"tiempo", type:"adv", speech:"Hoy", priority:4},
+  {text:"Mañana", emoji:"🌅", category:"tiempo", type:"adv", speech:"Mañana", priority:4},
+
+  // Preguntas
+  {text:"Qué", emoji:"❓", category:"preguntas", type:"pron", speech:"Qué", priority:6},
+  {text:"Quién", emoji:"❓", category:"preguntas", type:"pron", speech:"Quién", priority:5},
+  {text:"Dónde", emoji:"❓", category:"preguntas", type:"pron", speech:"Dónde", priority:5},
+  {text:"Cuándo", emoji:"❓", category:"preguntas", type:"pron", speech:"Cuándo", priority:5},
+  {text:"Cómo", emoji:"❓", category:"preguntas", type:"pron", speech:"Cómo", priority:5},
+  {text:"Por qué", emoji:"❓", category:"preguntas", type:"pron", speech:"Por qué", priority:5},
+
+  // Comunicación básica (viven en Frases útiles / favoritos)
+  {text:"Sí", emoji:"✅", category:"frases", type:"word", speech:"Sí", priority:10, favorite:true},
+  {text:"No", emoji:"❌", category:"frases", type:"word", speech:"No", priority:10, favorite:true},
+  {text:"Gracias", emoji:"🙏", category:"frases", type:"word", speech:"Gracias", priority:7},
+  {text:"Por favor", emoji:"🙏", category:"frases", type:"word", speech:"Por favor", priority:7},
+  {text:"No entiendo", emoji:"❔", category:"frases", type:"phrase", speech:"No entiendo", priority:6},
+  {text:"Repita", emoji:"🔁", category:"frases", type:"word", speech:"Repita", priority:6},
+  {text:"Espere", emoji:"✋", category:"frases", type:"word", speech:"Espere", priority:6},
+];
+
+/* ---------------- PHRASES (frases preconstruidas) ---------------- */
+const PHRASES = [
+  "Necesito ayuda.", "No puedo hablar.", "No entiendo.", "Repita, por favor.",
+  "Espere, por favor.", "Quiero agua.", "Quiero ir al baño.", "Tengo dolor.",
+  "Quiero hablar con mi familia.", "Necesito ayuda médica."
+].map((t,i)=>({text:t, emoji:"💬", category:"frases", type:"phrase", speech:t, priority:8-i*0.1, favorite:false, isPhrase:true}));
+
+/* ---------------- EMERGENCY SET (siempre disponible) ---------------- */
+const EMERGENCY_WORDS = [
+  {text:"Sí", emoji:"✅"}, {text:"No", emoji:"❌"}, {text:"Ayuda", emoji:"❤️"},
+  {text:"Dolor", emoji:"🤕"}, {text:"Agua", emoji:"💧"}, {text:"Baño", emoji:"🚽"},
+  {text:"Médico", emoji:"🩺"}, {text:"Familia", emoji:"👪"}, {text:"Peligro", emoji:"⚠️"},
+  {text:"Emergencia", emoji:"🚨"}
+];
+
+/* ---------------- PREDICTION RULES (sin IA, determinista) ---------------- */
+const PREDICTION_RULES = {
+  "quiero":    ["Comer","Beber","Dormir","Hablar","Ir","Agua"],
+  "necesito":  ["Ayuda","Agua","Hablar","Descansar","Medicamento"],
+  "tengo":     ["Dolor","Frío","Calor"],
+  "no puedo":  ["Hablar","Comer","Dormir","Respirar"],
+  "puedo":     ["Comer","Beber","Ir","Hablar"],
+  "quiero hablar con": ["Mamá","Papá","Familia","Médico"],
+};
+
+/* ---------------- CATEGORY DEFINITIONS ---------------- */
+const CATEGORIES = [
+  {id:"necesidades", label:"Necesidades", emoji:"💧"},
+  {id:"personas",    label:"Personas",    emoji:"👪"},
+  {id:"acciones",    label:"Acciones",    emoji:"🙋"},
+  {id:"salud",       label:"Salud",       emoji:"🩺"},
+  {id:"lugares",     label:"Lugares",     emoji:"🏠"},
+  {id:"comida",      label:"Comida",      emoji:"🍽"},
+  {id:"emociones",   label:"Emociones",   emoji:"😀"},
+  {id:"tiempo",      label:"Tiempo",      emoji:"⏰"},
+  {id:"preguntas",   label:"Preguntas",   emoji:"❓"},
+  {id:"frases",      label:"Frases útiles", emoji:"💬"},
+  {id:"favoritos",   label:"Favoritos",   emoji:"⭐"},
+  {id:"otros",       label:"Más / Otros", emoji:"⋯"},
+];
+
+/* ---------------- CLASSIFICATION DICTIONARY ---------------- */
+const CLASSIFY_DICT = {};
+CORE_VOCAB.forEach(w=>{ CLASSIFY_DICT[normalize(w.text)] = w.category; });
+// extra synonyms/aliases used only for classification
+Object.assign(CLASSIFY_DICT, {
+  "comer":"acciones", "beber":"acciones", "medico":"personas", "doctor":"personas",
+  "hospital":"lugares", "casa":"lugares", "escuela":"lugares", "trabajo":"lugares",
+  "hambre":"necesidades", "sed":"necesidades", "banio":"necesidades"
+});
+
+/* ---------------- STATE ---------------- */
+const state = {
+  appMode: "BOOT", // BOOT, READY, CONFIGURATION, GHOST_LOAD, COMMUNICATION, SCANNING, SPEAKING
+  vocab: [],          // active vocabulary (core + custom)
+  buffer: [],          // array of {text, speech}
+  activeCategory: "necesidades",
+  settings: {...CONFIG.defaultSettings},
+  scanTimer: null,
+  scanIndex: -1,
+  scanTargets: [],
+  scanPhase: "cat",     // for hierarchical scanning: 'cat' | 'item' | 'emergency'
+  voices: [],
+  lastActivationTs: 0,       // for double-click/double-key "hablar ahora" gesture
+  lastEmergActivationTs: 0,  // for double-click/double-key exit from emergency phase
+};
+
+/* ---------------- UTIL ---------------- */
+function normalize(s){
+  return (s||"").toString().trim().toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+}
+function uid(){ return "c" + Math.random().toString(36).slice(2,9); }
+function toast(msg, ms=3200){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.hidden = false;
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=>{ t.hidden = true; }, ms);
+}
+
+/* ---------------- LOCAL STORAGE ---------------- */
+const Storage = {
+  save(){
+    try{
+      const custom = state.vocab.filter(w=>w.custom);
+      const favOverrides = {};
+      state.vocab.forEach(w=>{ if(!w.custom) favOverrides[normalize(w.text)] = !!w.favorite; });
+      const payload = {
+        settings: state.settings,
+        custom,
+        favOverrides,
+        visualMode: state.settings.visualMode
+      };
+      localStorage.setItem(CONFIG.storageKey, JSON.stringify(payload));
+    }catch(e){ /* almacenamiento no disponible: continuar sin bloquear */ }
+  },
+  load(){
+    try{
+      const raw = localStorage.getItem(CONFIG.storageKey);
+      if(!raw) return null;
+      return JSON.parse(raw);
+    }catch(e){ return null; }
+  }
+};
+
+/* ---------------- VOCABULARY ENGINE ---------------- */
+const VocabEngine = {
+  init(){
+    const saved = Storage.load();
+    let base = CORE_VOCAB.map(w=>({...w, id: uid()}));
+    PHRASES.forEach(p=>base.push({...p, id: uid()}));
+
+    if(saved){
+      if(saved.settings) state.settings = {...CONFIG.defaultSettings, ...saved.settings};
+      if(saved.favOverrides){
+        base.forEach(w=>{
+          const key = normalize(w.text);
+          if(key in saved.favOverrides) w.favorite = saved.favOverrides[key];
+        });
+      }
+      if(Array.isArray(saved.custom)){
+        saved.custom.forEach(c=> base.push({...c, id: uid(), custom:true}));
+      }
+    }
+    state.vocab = base;
+  },
+  addWord(text, category, opts={}){
+    if(!text || !text.trim()) return null;
+    const item = {
+      id: uid(), text: text.trim(), emoji: opts.emoji || "🔹",
+      category: category || "otros", type: opts.type || "word",
+      speech: opts.speech || text.trim(), priority: opts.priority ?? 5,
+      favorite: !!opts.favorite, custom: true, isPhrase: !!opts.isPhrase
+    };
+    state.vocab.push(item);
+    return item;
+  },
+  byCategory(catId){
+    if(catId === "favoritos") return state.vocab.filter(w=>w.favorite);
+    return state.vocab.filter(w=>w.category === catId)
+      .sort((a,b)=> (b.priority||0) - (a.priority||0));
+  },
+  toggleFavorite(id){
+    const w = state.vocab.find(v=>v.id===id);
+    if(w){ w.favorite = !w.favorite; Storage.save(); }
+  },
+  restoreGhost(){
+    state.vocab = state.vocab.filter(w=>!w.custom);
+    // reset favorites to defaults
+    const defaults = new Set(CORE_VOCAB.filter(w=>w.favorite).map(w=>normalize(w.text)));
+    state.vocab.forEach(w=>{ if(!w.isPhrase) w.favorite = defaults.has(normalize(w.text)); });
+    Storage.save();
+    toast("Vocabulario restaurado al modo Ghost (básico y seguro).");
+  }
+};
+
+/* ---------------- CLASSIFICATION ENGINE ---------------- */
+const Classifier = {
+  classify(line){
+    const key = normalize(line);
+    if(CLASSIFY_DICT[key]) return CLASSIFY_DICT[key];
+    // try partial containment for short phrases e.g. "tengo frio"
+    for(const dictKey in CLASSIFY_DICT){
+      if(key.includes(dictKey)) return CLASSIFY_DICT[dictKey];
+    }
+    return "otros";
+  }
+};
+
+/* ---------------- PREDICTION ENGINE ---------------- */
+const Predictor = {
+  suggestionsFor(lastWord){
+    if(!lastWord) return [];
+    const key = normalize(lastWord);
+    return PREDICTION_RULES[key] || [];
+  }
+};
+
+/* ---------------- SPEECH ENGINE ---------------- */
+const Speech = {
+  ready:false,
+  loadVoices(){
+    if(!("speechSynthesis" in window)) return;
+    const populate = ()=>{
+      state.voices = window.speechSynthesis.getVoices();
+      const sel = document.getElementById("cfgVoice");
+      sel.innerHTML = "";
+      state.voices.forEach(v=>{
+        const opt = document.createElement("option");
+        opt.value = v.name; opt.textContent = `${v.name} (${v.lang})`;
+        sel.appendChild(opt);
+      });
+      if(state.settings.voiceName){ sel.value = state.settings.voiceName; }
+    };
+    populate();
+    window.speechSynthesis.onvoiceschanged = populate;
+  },
+  speakBrowser(text){
+    if(!("speechSynthesis" in window)){
+      toast("Este navegador no soporta voz. El mensaje quedó visible en pantalla.");
+      return;
+    }
+    try{
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      const voice = state.voices.find(v=>v.name===state.settings.voiceName);
+      if(voice) u.voice = voice;
+      u.rate = state.settings.rate;
+      u.pitch = state.settings.pitch;
+      u.volume = state.settings.volume;
+      u.lang = voice ? voice.lang : "es-ES";
+      state.appMode = "SPEAKING";
+      u.onend = ()=>{ state.appMode = "COMMUNICATION"; };
+      window.speechSynthesis.speak(u);
+    }catch(e){
+      toast("No se pudo reproducir la voz del dispositivo.");
+    }
+  },
+  speakViaAPI(text){
+    // Arquitectura preparada para conectar un proveedor de Text-to-Speech.
+    // No se realiza ninguna llamada real a un proveedor específico en esta versión.
+    return new Promise((resolve, reject)=>{
+      reject(new Error("API de voz no configurada"));
+    });
+  },
+  speak(text){
+    if(!text || !text.trim()) return;
+    if(state.settings.voiceSource === "api"){
+      this.speakViaAPI(text).catch(()=>{
+        toast("La voz avanzada no está disponible. Se utilizará la voz del dispositivo.");
+        this.speakBrowser(text);
+      });
+    }else{
+      this.speakBrowser(text);
+    }
+  }
+};
+
+/* ---------------- UI ENGINE ---------------- */
+const UI = {
+  els:{},
+  cacheEls(){
+    ["bufferText","predictStrip","catRail","grid","scanBar","scanFill","scanStatus"]
+      .forEach(id=> this.els[id]=document.getElementById(id));
+  },
+  applySettingsToDOM(){
+    document.documentElement.style.setProperty("--font-scale", state.settings.fontScale);
+    document.documentElement.style.setProperty("--cols", state.settings.cols);
+    document.documentElement.setAttribute("data-contrast", state.settings.contrast ? "high":"normal");
+    document.documentElement.setAttribute("data-retro", state.settings.retroMode ? "on":"off");
+    document.documentElement.style.setProperty("--retro-fg", state.settings.retroColor === "amber" ? "#FFB000" : "#33FF33");
+    document.getElementById("grid").className =
+      state.settings.visualMode === "text" ? "mode-text" :
+      state.settings.visualMode === "emoji" ? "mode-emoji-only" : "";
+  },
+  renderCategories(){
+    const rail = this.els.catRail;
+    rail.innerHTML = "";
+    CATEGORIES.forEach(cat=>{
+      const b = document.createElement("button");
+      b.className = "cat-btn scan-target" + (cat.id===state.activeCategory ? " active":"");
+      b.dataset.cat = cat.id;
+      b.innerHTML = `<span class="em">${cat.emoji}</span><span>${cat.label}</span>`;
+      b.addEventListener("click", ()=> UI.selectCategory(cat.id));
+      rail.appendChild(b);
+    });
+  },
+  selectCategory(catId){
+    state.activeCategory = catId;
+    this.renderCategories();
+    this.renderGrid();
+    if(state.settings.scanMode === "hier"){
+      Scanner.enterItemPhase();
+    }
+  },
+  renderGrid(){
+    const grid = this.els.grid;
+    grid.innerHTML = "";
+    // Botón de salida, presente en cada grupo de palabras. Funciona con
+    // clic, con el interruptor único o durante el barrido: en modo de
+    // barrido jerárquico regresa a la fase de categorías; en los demás
+    // modos, lleva el foco de vuelta al riel de categorías.
+    const exitTile = document.createElement("button");
+    exitTile.className = "tile exit-tile scan-target";
+    exitTile.innerHTML = `<span class="em">🔙</span><span class="label">Salir de categoría</span>`;
+    exitTile.addEventListener("click", ()=> UI.exitCategory());
+    grid.appendChild(exitTile);
+
+    const items = VocabEngine.byCategory(state.activeCategory);
+    if(!items.length){
+      const p = document.createElement("p");
+      p.className = "empty-note";
+      p.textContent = "Todavía no hay elementos aquí. Usa Ghost Quick Load o Importar JSON para añadir más.";
+      grid.appendChild(p);
+      Scanner.refreshTargets();
+      return;
+    }
+    items.forEach(w=>{
+      const tile = document.createElement("button");
+      tile.className = "tile scan-target" + (w.isPhrase ? " phrase-tile":"");
+      tile.dataset.id = w.id;
+      tile.innerHTML = `${w.favorite ? '<span class="fav-mark">★</span>':''}
+        <span class="em">${w.emoji||"🔹"}</span><span class="label">${w.text}</span>`;
+      attachTileHandlers(tile, w, ()=> handleWordActivation(w));
+      grid.appendChild(tile);
+    });
+    Scanner.refreshTargets();
+  },
+  selectWord(w){
+    state.buffer.push({text:w.text, speech:w.speech||w.text});
+    this.renderBuffer();
+    this.renderPrediction(w.text);
+  },
+  exitCategory(){
+    // En barrido jerárquico, mientras se recorren las palabras de una
+    // categoría, este botón devuelve el barrido a la fase de categorías.
+    if(state.settings.scanMode === "hier" && state.scanPhase === "item"){
+      Scanner.exitCurrentPhase();
+      return;
+    }
+    // En los demás modos no hay una "fase" que cerrar (el riel de
+    // categorías ya está siempre visible), así que simplemente se
+    // lleva el foco hacia allí para facilitar la navegación.
+    const rail = document.getElementById("catRail");
+    const activeBtn = rail.querySelector(".cat-btn.active") || rail.querySelector(".cat-btn");
+    if(activeBtn){ activeBtn.scrollIntoView({block:"nearest", inline:"nearest"}); activeBtn.focus(); }
+  },
+  renderBuffer(){
+    const el = this.els.bufferText;
+    el.innerHTML = "";
+    state.buffer.forEach(item=>{
+      const chip = document.createElement("span");
+      chip.className = "buffer-chip";
+      chip.textContent = item.text;
+      el.appendChild(chip);
+    });
+    el.scrollTop = el.scrollHeight;
+  },
+  renderPrediction(lastWord){
+    const strip = this.els.predictStrip;
+    strip.innerHTML = "";
+    const sugs = Predictor.suggestionsFor(lastWord);
+    sugs.forEach(word=>{
+      const chip = document.createElement("button");
+      chip.className = "predict-chip";
+      chip.textContent = word;
+      chip.addEventListener("click", ()=>{
+        state.buffer.push({text:word, speech:word});
+        UI.renderBuffer();
+        UI.renderPrediction(word);
+      });
+      strip.appendChild(chip);
+    });
+  },
+  bufferAsText(){
+    return state.buffer.map(b=>b.speech).join(" ");
+  }
+};
+
+/* ---------------- SCANNING ENGINE ---------------- */
+const Scanner = {
+  refreshTargets(){
+    if(state.settings.scanMode === "off") return;
+    if(state.settings.scanMode === "direct"){
+      state.scanTargets = Array.from(document.querySelectorAll("#grid .scan-target"));
+    }else if(state.settings.scanMode === "hier"){
+      if(state.scanPhase === "cat"){
+        // Categorías, y al final de la vuelta: Emergencia, Hablar, Borrar, Limpiar.
+        const cats = Array.from(document.querySelectorAll("#catRail .scan-target"));
+        const actions = ["btnEmergency","btnSpeak","btnDelete","btnClear"]
+          .map(id=>document.getElementById(id)).filter(Boolean);
+        state.scanTargets = cats.concat(actions);
+      }else if(state.scanPhase === "emergency"){
+        state.scanTargets = Array.from(document.querySelectorAll("#emergGrid .scan-target"));
+      }else{
+        state.scanTargets = Array.from(document.querySelectorAll("#grid .scan-target"));
+      }
+    }
+    state.scanIndex = -1;
+  },
+  enterItemPhase(){
+    // El barrido salta automáticamente a las palabras de la categoría
+    // recién seleccionada, sin volver a pasar por la fase de categorías.
+    if(state.settings.scanMode !== "hier") return;
+    state.scanPhase = "item";
+    this.refreshTargets();
+    this.resumeTimer();
+  },
+  enterCategoryPhase(){
+    // Vuelve el barrido a la lista de categorías (incluye Emergencia,
+    // Hablar, Borrar y Limpiar al final de la vuelta).
+    if(state.settings.scanMode !== "hier") return;
+    state.scanPhase = "cat";
+    this.refreshTargets();
+    this.resumeTimer();
+  },
+  enterEmergencyPhase(){
+    // El barrido entra al panel de emergencia y recorre sus palabras.
+    if(state.settings.scanMode !== "hier") return;
+    state.scanPhase = "emergency";
+    this.refreshTargets();
+    this.resumeTimer();
+  },
+  exitCurrentPhase(){
+    // Gesto de doble clic / doble pulsación: sale de palabras o de
+    // emergencia y continúa el barrido por las categorías.
+    if(state.scanPhase === "item"){
+      this.enterCategoryPhase();
+    }else if(state.scanPhase === "emergency"){
+      Overlays.close("ovEmergency"); // esto reactiva la fase de categorías
+    }
+  },
+  clearHighlights(){
+    document.querySelectorAll(".scan-hi").forEach(el=>el.classList.remove("scan-hi"));
+  },
+  start(){
+    if(state.settings.scanMode === "off") return;
+    this.stop();
+    state.appMode = "SCANNING";
+    state.scanPhase = state.settings.scanMode === "hier" ? "cat" : "direct";
+    this.refreshTargets();
+    document.getElementById("scanToggle").classList.add("on");
+    document.getElementById("scanToggle").setAttribute("aria-checked","true");
+    document.getElementById("scanStatus").textContent = "Barriendo…";
+    this.tick();
+    state.scanTimer = setInterval(()=>this.tick(), state.settings.scanSpeed);
+  },
+  stop(){
+    clearInterval(state.scanTimer);
+    state.scanTimer = null;
+    this.clearHighlights();
+    document.getElementById("scanToggle").classList.remove("on");
+    document.getElementById("scanToggle").setAttribute("aria-checked","false");
+    document.getElementById("scanStatus").textContent = "Desactivado";
+    document.getElementById("scanFill").style.width = "0%";
+    if(state.appMode === "SCANNING") state.appMode = "COMMUNICATION";
+  },
+  /* Reinicia el temporizador de barrido MANTENIENDO la fase actual
+     (cat/item) y los targets ya calculados — usado al cambiar de
+     categoría o al ajustar la velocidad, para no perder el lugar. */
+  resumeTimer(){
+    if(state.settings.scanMode === "off") return;
+    clearInterval(state.scanTimer);
+    this.clearHighlights();
+    state.appMode = "SCANNING";
+    document.getElementById("scanToggle").classList.add("on");
+    document.getElementById("scanToggle").setAttribute("aria-checked","true");
+    document.getElementById("scanStatus").textContent = "Barriendo…";
+    this.tick();
+    state.scanTimer = setInterval(()=>this.tick(), state.settings.scanSpeed);
+  },
+  restart(){
+    if(state.scanTimer){ this.resumeTimer(); }
+  },
+  tick(){
+    this.clearHighlights();
+    if(!state.scanTargets.length){ this.refreshTargets(); }
+    if(!state.scanTargets.length) return;
+    state.scanIndex = (state.scanIndex + 1) % state.scanTargets.length;
+    const el = state.scanTargets[state.scanIndex];
+    if(el){
+      el.classList.add("scan-hi");
+      el.scrollIntoView({block:"nearest", inline:"nearest"});
+    }
+    document.getElementById("scanFill").style.width = "100%";
+    requestAnimationFrame(()=>{
+      document.getElementById("scanFill").style.transition = `width ${state.settings.scanSpeed}ms linear`;
+      document.getElementById("scanFill").style.width = "0%";
+    });
+  },
+  selectCurrent(){
+    if(state.settings.scanMode === "off") return false;
+    const el = state.scanTargets[state.scanIndex];
+    if(!el) return false;
+    el.click();
+    return true;
+  }
+};
+
+/* ---------------- GHOST ENGINE ---------------- */
+const Ghost = {
+  quickLoad(rawText){
+    const lines = rawText.split("\n").map(l=>l.trim()).filter(Boolean);
+    if(!lines.length){ toast("No se detectó ningún texto para cargar."); return; }
+    let added = 0, otros = 0;
+    lines.forEach(line=>{
+      const cat = Classifier.classify(line);
+      if(cat === "otros") otros++;
+      const isPhrase = line.split(/\s+/).length > 2;
+      VocabEngine.addWord(line, cat, {
+        emoji: isPhrase ? "💬" : "🔹",
+        type: isPhrase ? "phrase" : "word",
+        speech: line, isPhrase
+      });
+      added++;
+    });
+    Storage.save();
+    UI.renderCategories();
+    UI.renderGrid();
+    toast(`Se cargaron ${added} elementos` + (otros ? ` (${otros} en "Otros / Personalizado")` : "") + ".");
+  },
+  importJSON(fileText){
+    try{
+      const data = JSON.parse(fileText);
+      if(!Array.isArray(data)) throw new Error("formato inválido");
+      let added = 0;
+      data.forEach(entry=>{
+        if(!entry || !entry.text) return;
+        VocabEngine.addWord(entry.text, entry.category || Classifier.classify(entry.text), {
+          emoji: entry.emoji, type: entry.type, speech: entry.speech,
+          priority: entry.priority, favorite: entry.favorite, isPhrase: entry.isPhrase
+        });
+        added++;
+      });
+      Storage.save();
+      UI.renderCategories();
+      UI.renderGrid();
+      toast(`Vocabulario JSON importado: ${added} elementos añadidos.`);
+    }catch(e){
+      toast("No se pudo cargar el vocabulario. Se mantiene el vocabulario básico.");
+    }
+  }
+};
+
+/* ---------------- SETTINGS ENGINE ---------------- */
+const Settings = {
+  syncFormFromState(){
+    document.getElementById("cfgScanMode").value = state.settings.scanMode;
+    document.getElementById("cfgScanSpeed").value = state.settings.scanSpeed;
+    document.getElementById("cfgScanSpeedVal").textContent = state.settings.scanSpeed + " ms";
+    document.getElementById("cfgSelectKey").value = state.settings.selectKey;
+    document.getElementById("cfgQuickSpeak").value = state.settings.quickSpeakMethod;
+    document.getElementById("cfgVoiceSource").value = state.settings.voiceSource;
+    document.getElementById("cfgRate").value = state.settings.rate;
+    document.getElementById("cfgRateVal").textContent = state.settings.rate.toFixed(1);
+    document.getElementById("cfgPitch").value = state.settings.pitch;
+    document.getElementById("cfgPitchVal").textContent = state.settings.pitch.toFixed(1);
+    document.getElementById("cfgVolume").value = state.settings.volume;
+    document.getElementById("cfgVolumeVal").textContent = state.settings.volume.toFixed(1);
+    document.getElementById("cfgVisualMode").value = state.settings.visualMode;
+    document.getElementById("cfgFontScale").value = state.settings.fontScale;
+    document.getElementById("cfgFontScaleVal").textContent = state.settings.fontScale.toFixed(1);
+    document.getElementById("cfgCols").value = state.settings.cols;
+    document.getElementById("cfgColsVal").textContent = state.settings.cols;
+    const contrastToggle = document.getElementById("cfgContrast");
+    contrastToggle.classList.toggle("on", !!state.settings.contrast);
+    contrastToggle.setAttribute("aria-checked", !!state.settings.contrast);
+    const retroToggle = document.getElementById("cfgRetro");
+    retroToggle.classList.toggle("on", !!state.settings.retroMode);
+    retroToggle.setAttribute("aria-checked", !!state.settings.retroMode);
+    document.getElementById("cfgRetroColor").value = state.settings.retroColor || "green";
+  },
+  bind(){
+    const s = state.settings;
+    document.getElementById("cfgScanMode").addEventListener("change", e=>{
+      s.scanMode = e.target.value; Storage.save(); Scanner.stop();
+      if(s.scanMode !== "off"){ Scanner.start(); }
+    });
+    document.getElementById("cfgScanSpeed").addEventListener("input", e=>{
+      s.scanSpeed = parseInt(e.target.value,10);
+      document.getElementById("cfgScanSpeedVal").textContent = s.scanSpeed + " ms";
+      Storage.save(); Scanner.restart();
+    });
+    document.getElementById("cfgSelectKey").addEventListener("change", e=>{
+      s.selectKey = e.target.value; Storage.save();
+    });
+    document.getElementById("cfgQuickSpeak").addEventListener("change", e=>{
+      s.quickSpeakMethod = e.target.value; Storage.save();
+    });
+    document.getElementById("cfgVoiceSource").addEventListener("change", e=>{
+      s.voiceSource = e.target.value; Storage.save();
+    });
+    document.getElementById("cfgVoice").addEventListener("change", e=>{
+      s.voiceName = e.target.value; Storage.save();
+    });
+    document.getElementById("cfgRate").addEventListener("input", e=>{
+      s.rate = parseFloat(e.target.value); document.getElementById("cfgRateVal").textContent = s.rate.toFixed(1); Storage.save();
+    });
+    document.getElementById("cfgPitch").addEventListener("input", e=>{
+      s.pitch = parseFloat(e.target.value); document.getElementById("cfgPitchVal").textContent = s.pitch.toFixed(1); Storage.save();
+    });
+    document.getElementById("cfgVolume").addEventListener("input", e=>{
+      s.volume = parseFloat(e.target.value); document.getElementById("cfgVolumeVal").textContent = s.volume.toFixed(1); Storage.save();
+    });
+    document.getElementById("cfgVisualMode").addEventListener("change", e=>{
+      s.visualMode = e.target.value; Storage.save(); UI.applySettingsToDOM();
+    });
+    document.getElementById("cfgFontScale").addEventListener("input", e=>{
+      s.fontScale = parseFloat(e.target.value); document.getElementById("cfgFontScaleVal").textContent = s.fontScale.toFixed(1);
+      Storage.save(); UI.applySettingsToDOM();
+    });
+    document.getElementById("cfgCols").addEventListener("input", e=>{
+      s.cols = parseInt(e.target.value,10); document.getElementById("cfgColsVal").textContent = s.cols;
+      Storage.save(); UI.applySettingsToDOM();
+    });
+    const contrastToggle = document.getElementById("cfgContrast");
+    contrastToggle.addEventListener("click", ()=>{
+      s.contrast = !s.contrast; Storage.save(); UI.applySettingsToDOM(); Settings.syncFormFromState();
+    });
+    contrastToggle.addEventListener("keydown", e=>{
+      if(e.key==="Enter"||e.key===" "){ e.preventDefault(); contrastToggle.click(); }
+    });
+    const retroToggle = document.getElementById("cfgRetro");
+    retroToggle.addEventListener("click", ()=>{
+      s.retroMode = !s.retroMode; Storage.save(); UI.applySettingsToDOM(); Settings.syncFormFromState();
+    });
+    retroToggle.addEventListener("keydown", e=>{
+      if(e.key==="Enter"||e.key===" "){ e.preventDefault(); retroToggle.click(); }
+    });
+    document.getElementById("cfgRetroColor").addEventListener("change", e=>{
+      s.retroColor = e.target.value; Storage.save(); UI.applySettingsToDOM();
+    });
+    document.getElementById("btnFullscreen").addEventListener("click", ()=>{
+      if(document.fullscreenElement){ document.exitFullscreen(); }
+      else{ document.documentElement.requestFullscreen?.().catch(()=>toast("La pantalla completa no está disponible en este navegador.")); }
+    });
+    document.getElementById("btnTestVoice").addEventListener("click", ()=> Speech.speak("Esta es la voz de GHOST."));
+    document.getElementById("btnImportJson").addEventListener("click", ()=> document.getElementById("fileJson").click());
+    document.getElementById("fileJson").addEventListener("change", e=>{
+      const file = e.target.files[0]; if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ()=> Ghost.importJSON(reader.result);
+      reader.onerror = ()=> toast("No se pudo leer el archivo. Se mantiene el vocabulario básico.");
+      reader.readAsText(file);
+      e.target.value = "";
+    });
+    document.getElementById("btnManageVocab").addEventListener("click", Settings.toggleManager);
+    document.getElementById("btnRestoreGhost").addEventListener("click", ()=>{
+      if(confirm("¿Restaurar el vocabulario básico de GHOST? Se eliminarán las palabras personalizadas (los favoritos volverán a los valores por defecto).")){
+        VocabEngine.restoreGhost();
+        UI.selectCategory("necesidades");
+        Settings.renderManager();
+      }
+    });
+    document.getElementById("btnOpenGhostFromSettings").addEventListener("click", ()=>{
+      Overlays.close("ovSettings"); Overlays.open("ovGhost");
+    });
+  },
+  toggleManager(){
+    const box = document.getElementById("vocabManager");
+    const show = box.style.display === "none";
+    box.style.display = show ? "block" : "none";
+    if(show) Settings.renderManager();
+  },
+  renderManager(){
+    const box = document.getElementById("vocabManager");
+    box.innerHTML = "";
+    state.vocab.forEach(w=>{
+      const row = document.createElement("div");
+      row.className = "vocab-row";
+      row.innerHTML = `
+        <label style="display:flex;align-items:center;gap:8px;flex:1;">
+          <input type="checkbox" ${w.favorite?"checked":""} data-fav="${w.id}">
+          <span>${w.emoji||"🔹"} ${w.text}</span>
+        </label>
+        <span class="cat-tag">${w.category}</span>
+        ${w.custom ? '<span class="badge-otros">personalizado</span>':''}
+      `;
+      box.appendChild(row);
+    });
+    box.querySelectorAll("[data-fav]").forEach(chk=>{
+      chk.addEventListener("change", e=>{
+        VocabEngine.toggleFavorite(e.target.dataset.fav);
+        UI.renderGrid(); UI.renderCategories();
+      });
+    });
+  }
+};
+
+/* ---------------- OVERLAYS ---------------- */
+const Overlays = {
+  open(id){
+    document.getElementById(id).hidden = false;
+    if(id === "ovSettings"){
+      state.appMode = "CONFIGURATION"; Settings.syncFormFromState(); Scanner.stop();
+    }else if(id === "ovGhost"){
+      state.appMode = "GHOST_LOAD"; document.getElementById("ghostText").focus(); Scanner.stop();
+    }else if(id === "ovEmergency"){
+      // Si el barrido jerárquico está activo, entra a la fase de
+      // emergencia en vez de detener el barrido.
+      if(state.settings.scanMode === "hier"){ Scanner.enterEmergencyPhase(); }
+      else{ Scanner.stop(); }
+    }else{
+      Scanner.stop();
+    }
+  },
+  close(id){
+    document.getElementById(id).hidden = true;
+    state.appMode = "COMMUNICATION";
+    if(id === "ovEmergency" && state.settings.scanMode === "hier"){
+      Scanner.enterCategoryPhase();
+    }
+  }
+};
+document.querySelectorAll("[data-close]").forEach(btn=>{
+  btn.addEventListener("click", ()=> Overlays.close(btn.dataset.close));
+});
+document.querySelectorAll(".overlay").forEach(ov=>{
+  ov.addEventListener("click", e=>{ if(e.target === ov) Overlays.close(ov.id); });
+});
+
+/* ---------------- ACTIVATION / QUICK-SPEAK HELPERS ----------------
+   Un solo clic (o una sola pulsación del interruptor) selecciona la palabra
+   y la agrega al mensaje en construcción. Un segundo clic/pulsación dentro
+   de DOUBLE_PRESS_MS —en cualquier momento, sin importar la categoría, el
+   modo o la fase del barrido— se interpreta como el gesto de "hablar ahora"
+   y pronuncia de inmediato el mensaje que se ha construido hasta ese punto
+   (o la palabra actual, si el mensaje está vacío). Para salir de una
+   categoría se usa el botón "Salir de categoría" de cada grupo de palabras.
+   Esto funciona igual si la activación viene de un clic real o de
+   el.click() disparado por el interruptor único, porque ambos pasan por el
+   mismo manejador. */
+function handleWordActivation(w){
+  const now = Date.now();
+  if((now - state.lastActivationTs) < DOUBLE_PRESS_MS){
+    state.lastActivationTs = 0;
+    const text = UI.bufferAsText();
+    Speech.speak(text || w.speech || w.text);
+    return;
+  }
+  state.lastActivationTs = now;
+  UI.selectWord(w);
+}
+function handleEmergencyActivation(w){
+  const now = Date.now();
+  if(state.scanPhase === "emergency" &&
+     (now - state.lastEmergActivationTs) < DOUBLE_PRESS_MS){
+    state.lastEmergActivationTs = 0;
+    Scanner.exitCurrentPhase();
+    return;
+  }
+  state.lastEmergActivationTs = now;
+  Speech.speak(w.text);
+}
+
+/* Añade a un botón de palabra: activación normal (clic/tecla), y un
+   acceso de "hablar rápido" configurable (clic derecho o mantener
+   presionado) que pronuncia la palabra sin agregarla al mensaje. */
+function attachTileHandlers(el, word, onActivate){
+  let pressTimer = null;
+  let longPressFired = false;
+
+  el.addEventListener("contextmenu", e=>{
+    if(state.settings.quickSpeakMethod !== "rightclick") return;
+    e.preventDefault();
+    Speech.speak(word.speech || word.text);
+  });
+  el.addEventListener("keydown", e=>{
+    if(state.settings.quickSpeakMethod !== "space") return;
+    if(e.key !== " " && e.key !== "Spacebar") return;
+    e.preventDefault();
+    Speech.speak(word.speech || word.text);
+  });
+  el.addEventListener("pointerdown", e=>{
+    if(state.settings.quickSpeakMethod !== "longpress" || e.button > 0) return;
+    longPressFired = false;
+    pressTimer = setTimeout(()=>{
+      longPressFired = true;
+      Speech.speak(word.speech || word.text);
+      if(navigator.vibrate) navigator.vibrate(30);
+    }, 600);
+  });
+  const cancelPress = ()=> clearTimeout(pressTimer);
+  el.addEventListener("pointerup", cancelPress);
+  el.addEventListener("pointerleave", cancelPress);
+  el.addEventListener("pointercancel", cancelPress);
+
+  el.addEventListener("click", ()=>{
+    if(longPressFired){ longPressFired = false; return; }
+    onActivate();
+  });
+}
+
+/* ---------------- EMERGENCY PANEL ---------------- */
+function renderEmergencyGrid(){
+  const grid = document.getElementById("emergGrid");
+  grid.innerHTML = "";
+  EMERGENCY_WORDS.forEach(w=>{
+    const t = document.createElement("button");
+    t.className = "emerg-tile scan-target";
+    t.innerHTML = `<span class="em">${w.emoji}</span>${w.text}`;
+    t.addEventListener("click", ()=> handleEmergencyActivation(w));
+    grid.appendChild(t);
+  });
+}
+
+/* ---------------- EVENT HANDLERS ---------------- */
+function bindTopLevel(){
+  document.getElementById("btnSpeak").addEventListener("click", ()=>{
+    const text = UI.bufferAsText();
+    if(!text){ toast("El mensaje está vacío. Selecciona palabras primero."); return; }
+    Speech.speak(text);
+  });
+  document.getElementById("btnDelete").addEventListener("click", ()=>{
+    state.buffer.pop(); UI.renderBuffer();
+  });
+  document.getElementById("btnClear").addEventListener("click", ()=>{
+    state.buffer = []; UI.renderBuffer(); document.getElementById("predictStrip").innerHTML="";
+  });
+  document.getElementById("btnSettings").addEventListener("click", ()=> Overlays.open("ovSettings"));
+  document.getElementById("btnGhostLoad").addEventListener("click", ()=> Overlays.open("ovGhost"));
+  document.getElementById("btnEmergency").addEventListener("click", ()=> Overlays.open("ovEmergency"));
+
+  document.getElementById("btnGhostLoadRun").addEventListener("click", ()=>{
+    Ghost.quickLoad(document.getElementById("ghostText").value);
+    Overlays.close("ovGhost");
+    document.getElementById("ghostText").value = "";
+  });
+  document.getElementById("ghostText").addEventListener("keydown", e=>{
+    if(e.key === "Enter" && (e.ctrlKey || e.metaKey)){
+      e.preventDefault();
+      document.getElementById("btnGhostLoadRun").click();
+    }
+  });
+
+  const scanToggle = document.getElementById("scanToggle");
+  scanToggle.addEventListener("click", ()=>{
+    if(state.scanTimer){ Scanner.stop(); state.settings.scanMode = "off"; }
+    else{ state.settings.scanMode = state.settings.scanMode === "off" ? "direct" : state.settings.scanMode; Scanner.start(); }
+    Storage.save();
+  });
+  scanToggle.addEventListener("keydown", e=>{
+    if(e.key==="Enter"||e.key===" "){ e.preventDefault(); scanToggle.click(); }
+  });
+
+  // Global keyboard: selection key for scanning + dual-function Enter
+  document.addEventListener("keydown", e=>{
+    const tag = (e.target && e.target.tagName) || "";
+    const inField = tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
+    if(inField) return; // never interfere with settings / ghost load fields
+
+    if(state.appMode === "SCANNING" || (state.appMode === "COMMUNICATION" && state.scanTimer)){
+      const key = state.settings.selectKey;
+      const matches =
+        (key === "enter" && e.key === "Enter") ||
+        (key === "space" && e.key === " ") ||
+        (key === "any");
+      if(matches){
+        e.preventDefault();
+        Scanner.selectCurrent();
+      }
+    }
+  });
+}
+
+/* ---------------- INITIALIZATION ---------------- */
+function init(){
+  state.appMode = "BOOT";
+  UI.cacheEls();
+  VocabEngine.init();
+  UI.applySettingsToDOM();
+  UI.renderCategories();
+  UI.renderGrid();
+  UI.renderBuffer();
+  renderEmergencyGrid();
+  bindTopLevel();
+  Settings.bind();
+  Settings.syncFormFromState();
+  Speech.loadVoices();
+
+  if(state.settings.scanMode !== "off"){
+    Scanner.start();
+  }
+
+  state.appMode = "READY";
+  state.appMode = "COMMUNICATION";
+
+  window.addEventListener("beforeunload", ()=> Storage.save());
+}
+
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>

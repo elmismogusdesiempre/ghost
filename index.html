@@ -1,573 +1,39 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>GHOST · Comunicador asistivo</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#173c38"><meta name="description" content="Comunicación a tu ritmo. Tres etapas, dos clics y una voz propia.">
+<title>GHOST · Tu voz, a tu ritmo</title>
 <style>
-/* =========================================================
-   GHOST — Comunicador CAA
-   Hoja de estilos — tokens de diseño
-   ========================================================= */
-:root{
-  --ink:#141A21;
-  --ink-soft:#48525E;
-  --bg:#F3F6F8;
-  --surface:#FFFFFF;
-  --rail:#101B30;
-  --rail-soft:#1C2C4A;
-  --rail-text:#E8EDF6;
-  --accent:#0E9E8C;
-  --accent-dark:#0A7C6E;
-  --accent-contrast:#FFFFFF;
-  --focus:#FFB238;
-  --focus-ink:#3A2600;
-  --danger:#D64550;
-  --danger-dark:#A8323C;
-  --line:#DCE3EA;
-  --radius:14px;
-  --btn-min:96px;
-  --font-scale:1;
-  --cols:4;
-  --retro-fg:#33FF33;
-  font-size:16px;
-}
-:root[data-contrast="high"]{
-  --ink:#000000;
-  --ink-soft:#000000;
-  --bg:#FFFFFF;
-  --surface:#FFFFFF;
-  --rail:#000000;
-  --rail-soft:#000000;
-  --rail-text:#FFFFFF;
-  --accent:#005A4E;
-  --accent-dark:#003D34;
-  --focus:#FFD700;
-  --focus-ink:#000000;
-  --line:#000000;
-}
-
-/* ---------- Modo retro: terminal de los años 80 ---------- */
-/* Fondo negro puro, un solo color de caracter (verde o ámbar,
-   seteable), sin iconos ni emojis, sin bordes redondeados ni
-   sombras: lo más parecido a una terminal antigua posible. */
-:root[data-retro="on"]{
-  --ink: var(--retro-fg);
-  --ink-soft: var(--retro-fg);
-  --bg:#000000;
-  --surface:#000000;
-  --rail:#000000;
-  --rail-soft:#000000;
-  --rail-text: var(--retro-fg);
-  --accent: var(--retro-fg);
-  --accent-dark: var(--retro-fg);
-  --accent-contrast:#000000;
-  --focus: var(--retro-fg);
-  --focus-ink:#000000;
-  --danger: var(--retro-fg);
-  --danger-dark: var(--retro-fg);
-  --line: var(--retro-fg);
-  --radius:0px;
-}
-[data-retro="on"] body{
-  font-family:"Courier New", Courier, monospace;
-  background:#000000;
-}
-[data-retro="on"] .em,
-[data-retro="on"] .ico,
-[data-retro="on"] .fav-mark{
-  display:none !important;
-}
-[data-retro="on"] .icon-btn,
-[data-retro="on"] .act-btn,
-[data-retro="on"] .cat-btn,
-[data-retro="on"] .btn,
-[data-retro="on"] .tile,
-[data-retro="on"] .emerg-tile,
-[data-retro="on"] .predict-chip,
-[data-retro="on"] .buffer-chip,
-[data-retro="on"] #bufferText,
-[data-retro="on"] .panel,
-[data-retro="on"] select,
-[data-retro="on"] textarea,
-[data-retro="on"] input[type=text],
-[data-retro="on"] .vocab-row .cat-tag,
-[data-retro="on"] .badge-otros,
-[data-retro="on"] .toast{
-  background:#000000 !important;
-  color: var(--retro-fg) !important;
-  border-color: var(--retro-fg) !important;
-  border-radius:0 !important;
-  box-shadow:none !important;
-  text-shadow:0 0 3px var(--retro-fg);
-}
-[data-retro="on"] #topbar,
-[data-retro="on"] #bufferBar,
-[data-retro="on"] #predictStrip,
-[data-retro="on"] #catRail,
-[data-retro="on"] #scanBar{
-  background:#000000;
-  border-color: var(--retro-fg);
-}
-[data-retro="on"] #scanTrack{ background:#000000; border:1px solid var(--retro-fg); }
-[data-retro="on"] #scanFill{ background: var(--retro-fg); }
-[data-retro="on"] .toggle-switch{ background:#000000; border:1px solid var(--retro-fg); border-radius:0; }
-[data-retro="on"] .toggle-switch .knob{ background: var(--retro-fg); border-radius:0; }
-[data-retro="on"] .toggle-switch.on{ background:#000000; }
-[data-retro="on"] .overlay{ background:rgba(0,0,0,.92); }
-[data-retro="on"] .cat-btn{ border-left-color:#000000; }
-[data-retro="on"] .cat-btn.active{ background:#000000; border-left-color: var(--retro-fg); text-decoration:underline; }
-[data-retro="on"] .cat-btn:hover,
-[data-retro="on"] .icon-btn:hover{ background:#001a00; }
-[data-retro="on"] .tile.scan-hi,
-[data-retro="on"] .cat-btn.scan-hi,
-[data-retro="on"] .act-btn.scan-hi,
-[data-retro="on"] .icon-btn.scan-hi,
-[data-retro="on"] .emerg-tile.scan-hi{
-  background: var(--retro-fg) !important;
-  color:#000000 !important;
-  text-shadow:none;
-}
-[data-retro="on"] .tile.scan-hi::before,
-[data-retro="on"] .tile.scan-hi::after{ border-color:#000000; }
-[data-retro="on"] button:focus-visible,
-[data-retro="on"] [tabindex]:focus-visible,
-[data-retro="on"] a:focus-visible{ outline-color: var(--retro-fg); }
-[data-retro="on"] ::selection{ background: var(--retro-fg); color:#000000; }
-
-*{box-sizing:border-box;}
-html,body{height:100%;}
-body{
-  margin:0;
-  font-family:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-  background:var(--bg);
-  color:var(--ink);
-  overflow:hidden;
-}
-@media (prefers-reduced-motion: reduce){
-  *{animation-duration:.001ms !important; transition-duration:.001ms !important;}
-}
-button{font-family:inherit;}
-.visually-hidden{
-  position:absolute; width:1px; height:1px; overflow:hidden;
-  clip:rect(0 0 0 0); white-space:nowrap;
-}
-
-/* ---------- App shell ---------- */
-#app{
-  display:flex; flex-direction:column; height:100vh; width:100vw;
-}
-#topbar{
-  display:flex; align-items:center; gap:12px;
-  padding:10px 16px;
-  background:var(--rail);
-  color:var(--rail-text);
-  flex:0 0 auto;
-}
-#topbar .brand{display:flex; align-items:center; gap:8px; margin-right:auto;}
-#topbar .brand b{font-size:1.15rem; letter-spacing:.04em; display:inline-flex; align-items:center; gap:6px;}
-#topbar .brand .brand-em{font-size:calc(2rem * var(--font-scale)); line-height:1;}
-#topbar .brand span{font-size:.72rem; color:#9FB0C9; letter-spacing:.03em;}
-.icon-btn{
-  background:var(--rail-soft); color:var(--rail-text); border:1px solid #2A3B5E;
-  border-radius:10px; padding:9px 12px; font-size:.85rem; cursor:pointer;
-  display:flex; align-items:center; gap:6px; min-height:44px;
-}
-.icon-btn:hover{background:#28406b;}
-.icon-btn.emergency{background:var(--danger); border-color:var(--danger-dark); font-weight:700;}
-.icon-btn.emergency:hover{background:var(--danger-dark);}
-button:focus-visible, [tabindex]:focus-visible, a:focus-visible{
-  outline:4px solid var(--focus); outline-offset:2px; z-index:5;
-}
-
-/* ---------- Buffer ---------- */
-#bufferBar{
-  flex:0 0 auto; background:var(--surface); border-bottom:1px solid var(--line);
-  padding:10px 16px; display:flex; gap:10px; align-items:stretch;
-}
-#bufferText{
-  flex:1; min-height:64px; max-height:120px; overflow:auto;
-  background:var(--bg); border:2px solid var(--line); border-radius:var(--radius);
-  padding:12px 16px; font-size:calc(1.6rem * var(--font-scale)); font-weight:600;
-  line-height:1.25; display:flex; align-items:center; flex-wrap:wrap; gap:6px;
-}
-#bufferText:empty::before{content:"Selecciona palabras para construir tu mensaje…"; color:#93A0AD; font-weight:400; font-size:calc(1.05rem * var(--font-scale));}
-.buffer-chip{background:#E4F5F2; border:1px solid #BEE6DE; border-radius:8px; padding:2px 10px;}
-#bufferActions{display:flex; flex-direction:column; gap:6px; justify-content:center; min-width:150px;}
-.act-btn{
-  min-height:44px; border-radius:10px; border:1px solid var(--line); background:var(--surface);
-  font-size:1rem; font-weight:700; cursor:pointer; padding:8px 10px; display:flex; align-items:center; gap:8px;
-}
-.act-btn.speak{background:var(--accent); color:var(--accent-contrast); border-color:var(--accent-dark); font-size:1.1rem;}
-.act-btn.speak:hover{background:var(--accent-dark);}
-.act-btn.del:hover, .act-btn.clear:hover{background:#F3E6E6;}
-
-/* ---------- Prediction strip ---------- */
-#predictStrip{
-  flex:0 0 auto; display:flex; gap:8px; padding:6px 16px; background:#EFF4F1;
-  border-bottom:1px solid var(--line); overflow-x:auto;
-}
-#predictStrip:empty{display:none;}
-.predict-chip{
-  background:var(--surface); border:1px solid var(--accent); color:var(--accent-dark);
-  border-radius:20px; padding:6px 14px; font-size:.92rem; font-weight:600; cursor:pointer; white-space:nowrap;
-}
-
-/* ---------- Main layout ---------- */
-#main{flex:1 1 auto; display:flex; min-height:0;}
-#catRail{
-  flex:0 0 190px; background:var(--rail); color:var(--rail-text); overflow-y:auto;
-  padding:10px 0;
-}
-.cat-btn{
-  display:flex; width:100%; align-items:center; gap:10px; text-align:left;
-  background:transparent; border:none; color:var(--rail-text);
-  padding:13px 16px; font-size:.98rem; font-weight:600; cursor:pointer;
-  border-left:4px solid transparent;
-}
-.cat-btn .em{font-size:1.2rem;}
-.cat-btn:hover{background:var(--rail-soft);}
-.cat-btn.active{background:var(--rail-soft); border-left-color:var(--accent);}
-.cat-btn.scan-hi{background:var(--focus); color:var(--focus-ink); border-left-color:var(--focus-ink);}
-
-#gridWrap{flex:1 1 auto; overflow-y:auto; padding:14px;}
-#grid{
-  display:grid; grid-template-columns:repeat(var(--cols), 1fr); gap:12px;
-}
-.tile{
-  position:relative;
-  min-height:calc(var(--btn-min) * 1px);
-  background:var(--surface); border:2px solid var(--line); border-radius:var(--radius);
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
-  cursor:pointer; padding:10px 6px; font-weight:700; color:var(--ink);
-  font-size:calc(1rem * var(--font-scale));
-}
-.tile:hover{border-color:var(--accent);}
-.tile .em{font-size:calc(2rem * var(--font-scale)); line-height:1;}
-.tile .fav-mark{position:absolute; top:6px; right:8px; font-size:.85rem; color:#E0A62B;}
-.tile.scan-hi{
-  border-color:var(--focus-ink); background:#FFF4DC;
-  box-shadow:0 0 0 4px var(--focus);
-}
-.tile.scan-hi::before, .tile.scan-hi::after{
-  content:""; position:absolute; width:18px; height:18px; border:4px solid var(--focus-ink);
-}
-.tile.scan-hi::before{top:-6px; left:-6px; border-right:none; border-bottom:none;}
-.tile.scan-hi::after{bottom:-6px; right:-6px; border-left:none; border-top:none;}
-.icon-btn.scan-hi{
-  background:var(--focus); color:var(--focus-ink); border-color:var(--focus-ink);
-  box-shadow:0 0 0 4px rgba(255,178,56,.55);
-}
-.act-btn.scan-hi{
-  border-color:var(--focus-ink); box-shadow:0 0 0 4px var(--focus);
-  background:var(--focus) !important; color:var(--focus-ink) !important;
-}
-.emerg-tile.scan-hi{
-  outline:4px solid var(--focus-ink); outline-offset:2px; box-shadow:0 0 0 4px var(--focus);
-}
-.mode-emoji-only .tile .label{display:none;}
-.mode-text .tile .em{display:none;}
-.phrase-tile{grid-column:span 2; align-items:flex-start; text-align:left; justify-content:center;}
-.phrase-tile .label{font-size:calc(1rem * var(--font-scale)); font-weight:600;}
-.exit-tile{
-  background:var(--bg); border-style:dashed; border-color:var(--ink-soft); color:var(--ink-soft);
-}
-.exit-tile:hover{border-color:var(--accent); color:var(--accent-dark);}
-.exit-tile .label{font-size:calc(.92rem * var(--font-scale)); font-weight:700;}
-
-.empty-note{color:var(--ink-soft); padding:20px; font-size:1rem;}
-
-/* ---------- Scan bar ---------- */
-#scanBar{
-  flex:0 0 auto; display:flex; align-items:center; gap:12px; padding:10px 16px;
-  background:var(--rail); color:var(--rail-text); font-size:.9rem;
-}
-#scanBar label{display:flex; align-items:center; gap:8px;}
-#scanTrack{flex:1; height:8px; background:#2A3B5E; border-radius:6px; overflow:hidden;}
-#scanFill{height:100%; width:0%; background:var(--accent); transition:width .05s linear;}
-.toggle-switch{
-  position:relative; width:46px; height:26px; border-radius:14px; background:#2A3B5E; border:1px solid #405480; cursor:pointer;
-}
-.toggle-switch.on{background:var(--accent); border-color:var(--accent-dark);}
-.toggle-switch .knob{
-  position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%; background:#fff; transition:left .15s;
-}
-.toggle-switch.on .knob{left:22px;}
-
-/* ---------- Overlays ---------- */
-.overlay{
-  position:fixed; inset:0; background:rgba(10,15,22,.55); display:flex; align-items:center; justify-content:center;
-  z-index:50; padding:20px;
-}
-.overlay[hidden]{display:none;}
-.panel{
-  background:var(--surface); border-radius:16px; max-width:760px; width:100%; max-height:88vh; overflow-y:auto;
-  padding:22px 24px 26px;
-}
-.panel h2{margin-top:0; font-size:1.3rem;}
-.panel h3{font-size:1rem; margin:18px 0 8px; color:var(--accent-dark); border-bottom:1px solid var(--line); padding-bottom:4px;}
-.field-row{display:flex; align-items:center; justify-content:space-between; gap:14px; padding:8px 0; flex-wrap:wrap;}
-.field-row > span{font-weight:600; flex:1 1 200px;}
-.field-row select, .field-row input[type=range]{flex:1 1 200px; min-width:140px;}
-select, textarea, input[type=text]{
-  font-family:inherit; font-size:1rem; padding:8px 10px; border-radius:8px; border:1px solid var(--line); background:#fff; color:var(--ink);
-}
-textarea{width:100%; min-height:130px; resize:vertical;}
-.close-x{float:right; background:none; border:none; font-size:1.4rem; cursor:pointer; color:var(--ink-soft); min-height:44px; min-width:44px;}
-.btnbar{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;}
-.btn{
-  border-radius:10px; border:1px solid var(--line); background:var(--surface); padding:10px 16px;
-  font-weight:700; cursor:pointer; min-height:44px;
-}
-.btn.primary{background:var(--accent); color:#fff; border-color:var(--accent-dark);}
-.btn.danger{background:var(--danger); color:#fff; border-color:var(--danger-dark);}
-.hint{font-size:.85rem; color:var(--ink-soft); margin-top:2px;}
-.toast{
-  position:fixed; left:50%; bottom:28px; transform:translateX(-50%);
-  background:var(--ink); color:#fff; padding:12px 20px; border-radius:10px; font-size:.95rem;
-  max-width:90vw; z-index:80; box-shadow:0 6px 20px rgba(0,0,0,.25);
-}
-.toast[hidden]{display:none;}
-.vocab-list{max-height:260px; overflow-y:auto; border:1px solid var(--line); border-radius:10px;}
-.vocab-row{display:flex; align-items:center; gap:10px; padding:8px 12px; border-bottom:1px solid var(--line); font-size:.92rem;}
-.vocab-row:last-child{border-bottom:none;}
-.vocab-row .cat-tag{font-size:.75rem; color:var(--ink-soft); background:var(--bg); padding:2px 8px; border-radius:10px;}
-.badge-otros{background:#FCE9E0; color:#8A4A24; border-radius:8px; padding:2px 8px; font-size:.72rem; margin-left:6px;}
-.emerg-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:14px;}
-.emerg-tile{
-  background:var(--danger); color:#fff; border-radius:12px; padding:18px 10px; text-align:center; font-weight:800;
-  font-size:1.1rem; cursor:pointer; border:2px solid var(--danger-dark);
-}
-.emerg-tile .em{font-size:2rem; display:block; margin-bottom:4px;}
-
-/* ---------- Responsive ---------- */
-@media (max-width: 900px){
-  #catRail{flex-basis:130px;}
-  :root{--cols:3;}
-}
-@media (max-width: 640px){
-  #main{flex-direction:column;}
-  #catRail{flex:0 0 auto; display:flex; overflow-x:auto; padding:6px; width:100%;}
-  .cat-btn{flex:0 0 auto; padding:10px 12px; border-left:none; border-bottom:4px solid transparent; white-space:nowrap;}
-  .cat-btn.active{border-bottom-color:var(--accent);}
-  :root{--cols:2;}
-  #bufferBar{flex-direction:column;}
-  #bufferActions{flex-direction:row;}
-  .emerg-grid{grid-template-columns:repeat(2,1fr);}
-}
+:root{--bg:#f4f3ee;--surface:#fff;--ink:#233c39;--muted:#5b706a;--accent:#174f47;--soft:#e6eee8;--scan:#f3ce6c;--negative:#84483e;--font:1;--cols:4;--line:#d9dfd7;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg);font-size:calc(16px * var(--font))}*{box-sizing:border-box;border-radius:0!important}body{margin:0;min-height:100dvh}body.communicating,body.communicating *{cursor:none!important;user-select:none}body.child{--bg:#f4f2fd;--ink:#343254;--muted:#666185;--accent:#514795;--soft:#e9e4fb;--scan:#ffd576;--negative:#a74666}body.contrast{--bg:#000;--surface:#111;--ink:#fff;--muted:#eee;--accent:#ffe066;--soft:#222;--scan:#ffe066;--negative:#ffb8a7}button,input,select,textarea{font:inherit}button{border:0;background:var(--soft);color:var(--ink);padding:.8rem 1rem;cursor:pointer;min-height:44px}button:hover{filter:brightness(.96)}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:3px}button:disabled{opacity:.35;cursor:default}button.primary{background:var(--accent);color:var(--bg)}.contrast button.primary{color:#000}input,select,textarea{width:100%;border:1px solid #94a69f;background:var(--surface);color:var(--ink);padding:.75rem}textarea{resize:vertical}input[type=checkbox]{width:auto;min-width:20px;min-height:20px}input[type=range]{padding:0}h1,h2,h3,p{margin:0}h1{font-weight:500;font-size:clamp(1.8rem,3vw,2.7rem);letter-spacing:-.04em}h2{font-size:1.4rem;letter-spacing:-.03em}h3{font-size:1.05rem}.eyebrow{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--muted)}.muted,.hint{color:var(--muted);font-size:.85rem;line-height:1.6}.brand{display:flex;align-items:center;gap:.65rem;font-size:1rem;font-weight:800;letter-spacing:.16em}.brand svg{width:29px;height:32px}header{display:flex;align-items:center;justify-content:space-between;padding:1.3rem 3rem;border-bottom:1px solid var(--line);gap:1rem}.mode-label{font-size:.75rem;color:var(--muted);display:flex;align-items:center;gap:.6rem}.dot{width:7px;height:7px;background:#2b8260;display:inline-block}.layout{max-width:1400px;padding:2.5rem 3rem;margin:auto}.intro{display:flex;justify-content:space-between;align-items:end;gap:1rem;margin-bottom:1.8rem}.intro h1{margin:.5rem 0}.stage-mark{color:var(--muted);font-size:.8rem}.stage-mark strong{font-size:2rem;font-weight:400;color:var(--ink)}.grid{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));gap:12px}.tile{background:var(--surface);min-height:155px;padding:1.2rem;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;text-align:left;position:relative;overflow-wrap:anywhere;gap:1rem;box-shadow:0 1px 0 #243a3510}.tile .emoji{font-size:2rem;line-height:1.3}.tile .label{font-size:1.15rem;font-weight:600;line-height:1.35}.tile.scanning{background:var(--scan);color:#26382e;box-shadow:inset 0 -6px 0 #7e5d16}.tile.chosen:after{content:'✓';position:absolute;top:12px;right:15px;font-size:1.2rem;font-weight:800}.tile.action{background:var(--soft);min-height:110px}.message{background:var(--surface);padding:1.2rem 1.5rem;margin-bottom:1.3rem;min-height:110px;box-shadow:inset 4px 0 0 var(--accent)}.message .eyebrow{margin-bottom:.65rem}.message-text{font-size:1.5rem;line-height:1.5;overflow-wrap:anywhere;white-space:pre-wrap}.message-text.empty{color:var(--muted);font-size:1rem}.trail{display:flex;justify-content:space-between;align-items:center;margin:1.2rem 0;color:var(--muted);font-size:.85rem;gap:1rem}.progress{height:3px;background:var(--line);margin-top:1.5rem}.progress span{display:block;height:100%;background:var(--accent);width:0}.legend{display:flex;justify-content:space-between;gap:1rem;padding-top:1.1rem;color:var(--muted);font-size:.8rem}.legend strong{color:var(--ink)}.key{font-size:.7rem;background:var(--soft);padding:.3rem .5rem;white-space:nowrap}.basic{height:100dvh;display:grid;grid-template-columns:1fr 1fr;padding:clamp(16px,4vw,56px);gap:clamp(16px,3vw,40px)}.basic .tile{align-items:center;justify-content:center;gap:1.4rem;background:#e1ece4;color:#214e3f}.basic .tile.no{background:#f0e4df;color:#78473e}.basic .label{font-size:clamp(4rem,12vw,11rem);letter-spacing:-.06em;font-weight:600}.basic .emoji{font-size:clamp(3rem,7vw,6rem)}.basic .caption{font-size:1rem}.basic .chosen{box-shadow:inset 0 -10px 0 currentColor}.child .basic .tile{background:#dceee9}.child .basic .no{background:#f9dfeb}.contrast .basic .tile{background:#111;color:#fff}.contrast .basic .chosen{background:#ffe066;color:#000}#settings{max-width:1100px;margin:auto;padding:2rem 2rem 5rem}#settings>h1{margin:.6rem 0}nav.tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin:1.8rem 0}nav.tabs button[aria-selected=true]{background:var(--accent);color:var(--bg)}.panel{background:var(--surface);padding:1.5rem;margin:1rem 0}.panel h2{margin-bottom:.6rem}.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.3rem;margin-top:1.3rem}label{display:flex;flex-direction:column;gap:.5rem;font-size:.9rem}label.check{flex-direction:row;align-items:center}.buttons{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem}.editor-list{display:grid;gap:.6rem;margin-top:1rem}.editor-row{display:grid;grid-template-columns:3.5rem minmax(80px,1fr) minmax(80px,1fr) auto;gap:.5rem;align-items:start;padding:.7rem;background:var(--bg)}.row-actions{display:flex;gap:.25rem}.row-actions button{padding:.6rem;min-width:40px}.editor-row small{grid-column:2/-1;color:var(--muted)}.notice{padding:.8rem 1rem;background:var(--soft);font-size:.85rem;line-height:1.6;margin-top:1rem}.settings-top{display:flex;justify-content:space-between;align-items:center;gap:1rem}#toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);max-width:90vw;padding:1rem 1.5rem;background:var(--ink);color:var(--bg);z-index:100;font-size:.9rem;pointer-events:none}#speechStatus{margin-top:.7rem;min-height:1.3em}.child .tile .emoji{font-size:2.5rem}.child .tile{min-height:170px}.hidden,[hidden]{display:none!important}.text-only .emoji{display:none}.symbols-only .tile .label{font-size:.85rem}.symbols-only .tile .emoji{font-size:3rem}a{color:var(--accent)}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}@media(max-width:750px){header{padding:1rem 1.2rem}.layout{padding:1.5rem 1.2rem}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.fields{grid-template-columns:1fr}.editor-row{grid-template-columns:3.5rem 1fr}.row-actions{grid-column:1/-1}.editor-row small{grid-column:1/-1}.intro{align-items:start}.legend{flex-wrap:wrap}.tile{min-height:145px}#settings{padding:1.5rem 1rem 4rem}.settings-top{align-items:start}.mode-label{max-width:55%;text-align:right}.basic .caption{font-size:.8rem}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 </style>
 </head>
-<body>
-<div id="app">
-
-  <!-- ===================== TOPBAR ===================== -->
-  <div id="topbar">
-    <div class="brand"><b><span class="ico em brand-em">👻</span> GHOST</b><span>Gesture-to-Human Output Speech Technology</span></div>
-    <button class="icon-btn emergency scan-target" id="btnEmergency" title="Modo emergencia"><span class="ico">🚨</span> Emergencia</button>
-    <button class="icon-btn" id="btnGhostLoad" title="Carga rápida de vocabulario"><span class="ico">⚡</span> Ghost Quick Load</button>
-    <button class="icon-btn" id="btnSettings" title="Configuración"><span class="ico">⚙️</span> Configuración</button>
-  </div>
-
-  <!-- ===================== BUFFER ===================== -->
-  <div id="bufferBar">
-    <div id="bufferText" role="textbox" aria-label="Mensaje en construcción" aria-live="polite"></div>
-    <div id="bufferActions">
-      <button class="act-btn speak scan-target" id="btnSpeak"><span class="ico">🔊</span> HABLAR</button>
-      <button class="act-btn del scan-target" id="btnDelete"><span class="ico">←</span> BORRAR</button>
-      <button class="act-btn clear scan-target" id="btnClear"><span class="ico">🗑</span> LIMPIAR</button>
-    </div>
-  </div>
-
-  <!-- ===================== PREDICTION ===================== -->
-  <div id="predictStrip" aria-live="polite"></div>
-
-  <!-- ===================== MAIN ===================== -->
-  <div id="main">
-    <nav id="catRail" aria-label="Categorías"></nav>
-    <div id="gridWrap">
-      <div id="grid" aria-label="Vocabulario"></div>
-    </div>
-  </div>
-
-  <!-- ===================== SCAN BAR ===================== -->
-  <div id="scanBar">
-    <label>
-      <span class="toggle-switch" id="scanToggle" role="switch" aria-checked="false" tabindex="0"><span class="knob"></span></span>
-      Barrido automático
-    </label>
-    <div id="scanTrack"><div id="scanFill"></div></div>
-    <span id="scanStatus">Desactivado</span>
-  </div>
-</div>
-
-<!-- ===================== OVERLAY: SETTINGS ===================== -->
-<div class="overlay" id="ovSettings" hidden>
-  <div class="panel">
-    <button class="close-x" data-close="ovSettings" aria-label="Cerrar">✕</button>
-    <h2><span class="ico">⚙️</span> Configuración</h2>
-
-    <h3>Comunicación / Barrido</h3>
-    <div class="field-row"><span>Modo de barrido</span>
-      <select id="cfgScanMode">
-        <option value="off">Sin barrido (selección manual)</option>
-        <option value="direct">Barrido directo</option>
-        <option value="hier">Barrido por categorías</option>
-      </select>
-    </div>
-    <div class="field-row"><span>Velocidad de barrido</span>
-      <input type="range" id="cfgScanSpeed" min="200" max="2000" step="1">
-      <span id="cfgScanSpeedVal">1000 ms</span>
-    </div>
-    <div class="field-row"><span>Método de selección</span>
-      <select id="cfgSelectKey">
-        <option value="enter">Enter</option>
-        <option value="space">Espacio</option>
-        <option value="any">Cualquier tecla</option>
-        <option value="click">Solo clic / interruptor</option>
-      </select>
-    </div>
-    <p class="hint">Diseñado para poder conectar un interruptor USB de contacto único que emule una tecla.</p>
-    <div class="field-row"><span>Salir de una categoría</span>
-      <span class="hint" style="flex:1 1 200px; margin-top:0;">Toca el botón "Salir de categoría" que aparece dentro de cada grupo de palabras. Funciona con clic, con el interruptor o durante el barrido.</span>
-    </div>
-    <div class="field-row"><span>Hablar en cualquier momento</span>
-      <span class="hint" style="flex:1 1 200px; margin-top:0;">Doble clic, o pulsar el interruptor dos veces seguidas, sobre cualquier palabra pronuncia el mensaje al instante, sin importar en qué categoría o fase del barrido estés.</span>
-    </div>
-    <div class="field-row"><span>Hablar rápido (sin usar el mensaje)</span>
-      <select id="cfgQuickSpeak">
-        <option value="rightclick">Clic derecho</option>
-        <option value="longpress">Mantener presionado</option>
-        <option value="space">Barra espaciadora</option>
-        <option value="off">Desactivado</option>
-      </select>
-    </div>
-    <p class="hint">Pronuncia una palabra al instante sin agregarla al mensaje en construcción.</p>
-
-    <h3>Voz</h3>
-    <div class="field-row"><span>Origen de voz</span>
-      <select id="cfgVoiceSource">
-        <option value="device">Voz del dispositivo</option>
-        <option value="api">Voz mediante API (experimental)</option>
-      </select>
-    </div>
-    <div class="field-row"><span>Voz del dispositivo</span>
-      <select id="cfgVoice"></select>
-    </div>
-    <div class="field-row"><span>Velocidad</span><input type="range" id="cfgRate" min="0.5" max="2" step="0.1"><span id="cfgRateVal">1.0</span></div>
-    <div class="field-row"><span>Tono</span><input type="range" id="cfgPitch" min="0" max="2" step="0.1"><span id="cfgPitchVal">1.0</span></div>
-    <div class="field-row"><span>Volumen</span><input type="range" id="cfgVolume" min="0" max="1" step="0.1"><span id="cfgVolumeVal">1.0</span></div>
-    <button class="btn" id="btnTestVoice"><span class="ico">🔊</span> Probar voz</button>
-
-    <h3>Interfaz</h3>
-    <div class="field-row"><span>Modo visual</span>
-      <select id="cfgVisualMode">
-        <option value="both">Emoji + texto</option>
-        <option value="text">Solo texto</option>
-        <option value="emoji">Solo emoji</option>
-      </select>
-    </div>
-    <div class="field-row"><span>Tamaño de texto</span><input type="range" id="cfgFontScale" min="0.8" max="1.8" step="0.1"><span id="cfgFontScaleVal">1.0</span></div>
-    <div class="field-row"><span>Columnas de la matriz</span><input type="range" id="cfgCols" min="2" max="6" step="1"><span id="cfgColsVal">4</span></div>
-    <div class="field-row"><span>Alto contraste</span>
-      <span class="toggle-switch" id="cfgContrast" role="switch" aria-checked="false" tabindex="0"><span class="knob"></span></span>
-    </div>
-    <div class="field-row"><span>Modo retro (terminal años 80)</span>
-      <span class="toggle-switch" id="cfgRetro" role="switch" aria-checked="false" tabindex="0"><span class="knob"></span></span>
-    </div>
-    <div class="field-row"><span>Color del modo retro</span>
-      <select id="cfgRetroColor">
-        <option value="green">Verde fósforo</option>
-        <option value="amber">Ámbar / naranja</option>
-      </select>
-    </div>
-    <p class="hint">Fondo negro, un solo color de texto, sin iconos ni emojis: lo más retro de lo retro.</p>
-    <div class="field-row"><span>Pantalla completa</span>
-      <button class="btn" id="btnFullscreen">Activar pantalla completa</button>
-    </div>
-
-    <h3>Vocabulario</h3>
-    <div class="btnbar">
-      <button class="btn" id="btnOpenGhostFromSettings"><span class="ico">⚡</span> Ghost Quick Load</button>
-      <button class="btn" id="btnImportJson"><span class="ico">📄</span> Importar JSON</button>
-      <input type="file" id="fileJson" accept="application/json" class="visually-hidden">
-      <button class="btn" id="btnManageVocab"><span class="ico">📋</span> Gestionar vocabulario / favoritos</button>
-      <button class="btn danger" id="btnRestoreGhost"><span class="ico">↺</span> Restaurar modo Ghost</button>
-    </div>
-    <div id="vocabManager" class="vocab-list" style="margin-top:10px; display:none;"></div>
-  </div>
-</div>
-
-<!-- ===================== OVERLAY: GHOST QUICK LOAD ===================== -->
-<div class="overlay" id="ovGhost" hidden>
-  <div class="panel">
-    <button class="close-x" data-close="ovGhost" aria-label="Cerrar">✕</button>
-    <h2><span class="ico">⚡</span> Ghost Quick Load</h2>
-    <p class="hint">Pega aquí palabras o frases, una por línea. La aplicación intentará clasificarlas automáticamente. Nada se descarta: lo que no reconozca se guarda en "Otros".</p>
-    <textarea id="ghostText" placeholder="Agua
-Baño
-Médico
-Aurora
-Dolor
-Tengo frío
-Necesito ayuda
-Quiero hablar con mi familia
-Sí
-No"></textarea>
-    <p class="hint">Presiona <b>Enter</b> dentro del cuadro (con Ctrl/Cmd) o el botón para cargar.</p>
-    <div class="btnbar">
-      <button class="btn primary" id="btnGhostLoadRun">Cargar vocabulario</button>
-      <button class="btn" data-close="ovGhost">Cancelar</button>
-    </div>
-  </div>
-</div>
-
-<!-- ===================== OVERLAY: EMERGENCY ===================== -->
-<div class="overlay" id="ovEmergency" hidden>
-  <div class="panel">
-    <button class="close-x" data-close="ovEmergency" aria-label="Cerrar">✕</button>
-    <h2><span class="ico">🚨</span> Modo emergencia</h2>
-    <p class="hint">Estos elementos están siempre disponibles, sin importar el vocabulario cargado. Toca uno para hablarlo de inmediato.</p>
-    <div class="emerg-grid" id="emergGrid"></div>
-  </div>
-</div>
-
-<div class="toast" id="toast" hidden role="status" aria-live="assertive"></div>
-
+<body class="communicating">
+<header id="header" hidden><div class="brand"><svg viewBox="0 0 30 34" fill="none" aria-hidden="true"><path d="M4 29V14C4 7 8 3 15 3s11 4 11 11v15l-5-3-6 4-6-4-5 3Z" stroke="currentColor" stroke-width="2"/><path d="M11 14v4m8-4v4" stroke="currentColor" stroke-width="3"/></svg>GHOST</div><div class="mode-label" id="modeLabel"></div></header>
+<main id="communication" aria-label="Comunicación"></main>
+<main id="settings" hidden aria-label="Configuración para acompañante">
+<div class="settings-top"><div><p class="eyebrow">Espacio del acompañante</p><h1 tabindex="-1" id="settingsTitle">Una voz propia.</h1></div><button id="resume" class="primary">Volver a comunicar →</button></div>
+<p class="hint">Barrido y clics de comunicación pausados. Aquí puedes usar el mouse y el teclado. Los cambios se guardan en este navegador.</p>
+<nav class="tabs" aria-label="Secciones de configuración" role="tablist"><button id="tab-general" role="tab" aria-selected="true" aria-controls="general" data-tab="general">Uso y apariencia</button><button id="tab-phrases" role="tab" aria-selected="false" aria-controls="phrases" data-tab="phrases">Frases útiles</button><button id="tab-vocabulary" role="tab" aria-selected="false" aria-controls="vocabulary" data-tab="vocabulary">Palabras y categorías</button><button id="tab-data" role="tab" aria-selected="false" aria-controls="data" data-tab="data">Cargar y respaldar</button></nav>
+<section id="general" role="tabpanel" aria-labelledby="tab-general">
+<div class="panel"><h2>La etapa adecuada</h2><p class="hint">Elige la etapa y el perfil visual por separado. No hay que completar una etapa para usar otra.</p><div class="fields">
+<label>Etapa de comunicación<select id="cfgStage"><option value="1">1 · Sí / No — sin barrido</option><option value="2">2 · Frases útiles — sin categorías</option><option value="3">3 · Construir mensajes — palabras y teclado</option></select></label>
+<label>Perfil<select id="cfgProfile"><option value="adult">Adulto · tranquilo</option><option value="child">Infantil · color y expresión</option></select></label>
+<label>Tiempo por opción (segundos)<input id="cfgSpeed" type="number" min="0.5" max="15" step="0.1"></label><label>Pausa después de seleccionar (segundos)<input id="cfgPause" type="number" min="0" max="10" step="0.1"></label>
+<label>Protección contra clics repetidos (milisegundos)<input id="cfgDebounce" type="number" min="0" max="1500" step="50"></label><label>Atajo del acompañante<select id="cfgShortcut"><option value="KeyM">Ctrl + Alt + M</option><option value="KeyG">Ctrl + Alt + G</option><option value="KeyY">Ctrl + Alt + Y</option></select></label>
+<label>Columnas en pantalla amplia<select id="cfgCols"><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></label><label>Tamaño del texto<select id="cfgScale"><option value="1">Normal</option><option value="1.2">Grande</option><option value="1.4">Muy grande</option></select></label>
+<label>Apoyo visual<select id="cfgVisual"><option value="both">Emojis y texto</option><option value="text">Priorizar texto</option><option value="symbols">Priorizar emojis</option></select></label>
+<label class="check"><input id="cfgContrast" type="checkbox">Alto contraste</label><label class="check"><input id="cfgClear" type="checkbox">Limpiar el mensaje después de hablar (etapa 3)</label></div>
+<div class="notice" id="shortcutHelp"></div><div class="buttons"><button id="fullscreen">Pantalla completa</button></div></div>
+<div class="panel"><h2>Voz del dispositivo</h2><div class="fields"><label>Voz<select id="cfgVoice"><option value="">Español · voz predeterminada</option></select></label><label>Velocidad de voz<input id="cfgRate" type="number" min="0.3" max="2" step="0.1"></label><label>Tono<input id="cfgPitch" type="number" min="0.5" max="2" step="0.1"></label><label>Volumen<input id="cfgVolume" type="number" min="0" max="1" step="0.1"></label></div><div class="buttons"><button id="testVoice">Escuchar voz</button></div><p class="hint" id="voiceHelp">La disponibilidad de las voces depende del navegador y del sistema operativo.</p></div>
+</section>
+<section id="phrases" role="tabpanel" aria-labelledby="tab-phrases" hidden><div class="panel"><h2>Sus frases, en su orden</h2><p class="hint">En la etapa 2, el barrido sigue esta lista. Sí y No están siempre presentes al principio. Usa las flechas para colocar después las frases más utilizadas. Cada perfil conserva su propia lista.</p><div class="editor-list" id="phraseEditor"></div><form id="addPhrase" class="fields"><label>Emoji<input name="emoji" value="💬" maxlength="20"></label><label>Nueva frase<input name="text" required maxlength="500" placeholder="Quiero cambiar de posición"></label><button class="primary" type="submit">Añadir frase</button></form><div class="buttons"><button id="restorePhrases">Restaurar frases de este perfil</button></div></div></section>
+<section id="vocabulary" role="tabpanel" aria-labelledby="tab-vocabulary" hidden><div class="panel"><h2>Vocabulario para construir mensajes</h2><p class="hint">Edita palabras, su pronunciación y sus categorías. El teclado siempre estará disponible en la etapa 3.</p><div class="fields"><label>Filtrar categoría<select id="vocabFilter"></select></label><label>Buscar palabra<input id="vocabSearch" type="search" placeholder="Escribe para buscar"></label></div><div id="vocabEditor" class="editor-list"></div><form id="addWord" class="fields"><label>Palabra o frase<input name="text" required maxlength="500"></label><label>Emoji<input name="emoji" value="🔹" maxlength="20"></label><label>Categoría<select name="category" id="newWordCategory"></select></label><button class="primary" type="submit">Añadir al vocabulario</button></form></div></section>
+<section id="data" role="tabpanel" aria-labelledby="tab-data" hidden><div class="panel"><h2>Carga rápida</h2><p class="hint">Escribe o pega una palabra o frase por línea.</p><form id="quickLoad"><label>Texto para cargar<textarea id="loadText" rows="6" maxlength="100000" placeholder="Quiero agua&#10;Necesito ayuda&#10;Quiero descansar"></textarea></label><div class="fields"><label>Destino<select id="loadTarget"><option value="phrases">Frases útiles del perfil actual</option><option value="vocab">Vocabulario avanzado · clasificación automática</option></select></label></div><div class="buttons"><button class="primary" type="submit">Cargar texto</button></div></form></div><div class="panel"><h2>Importar y exportar</h2><p class="hint">Acepta los archivos JSON de vocabulario de la versión original y los respaldos completos de esta versión. Un vocabulario se añade a las palabras existentes; un respaldo completo reemplaza la configuración y las listas.</p><div class="buttons"><button id="import">Importar JSON</button><button id="export">Descargar respaldo completo</button><button id="exportWords">Exportar vocabulario JSON</button></div><input id="file" type="file" accept=".json,application/json" hidden><p class="notice">El vocabulario personal se guarda localmente. Exporta un respaldo para trasladarlo a otro equipo o navegador. La versión anterior está conservada en <a href="ghost-original.html" target="_blank" rel="noopener">ghost-original.html</a>.</p></div></section>
+</main>
+<div id="toast" role="status" hidden></div><div id="announcement" class="sr-only" aria-live="polite"></div>
 <script>
-/* =========================================================
-   GHOST — Comunicador CAA
-   Arquitectura: CONFIG · CORE VOCAB · PHRASES · PREDICTION
-   EMOJI MAP · STATE · STORAGE · VOCAB ENGINE · CLASSIFICATION
-   PREDICTION ENGINE · UI ENGINE · SCANNING ENGINE · SPEECH ENGINE
-   GHOST ENGINE · SETTINGS ENGINE · EVENTS · INIT
-   ========================================================= */
-
-/* ---------------- CONFIG ---------------- */
-const CONFIG = {
-  storageKey: "ghost_caa_v1",
-  defaultSettings: {
-    scanMode: "hier",
-    scanSpeed: 500,
-    selectKey: "enter",
-    voiceSource: "device",
-    voiceName: "",
-    rate: 1.0, pitch: 1.0, volume: 1.0,
-    visualMode: "both",
-    fontScale: 1.0,
-    cols: 4,
-    contrast: false,
-    retroMode: false,
-    retroColor: "green",
-    quickSpeakMethod: "rightclick"
-  }
-};
-
-/* Ventana de tiempo (ms) para interpretar dos clics/pulsaciones
-   seguidas como el gesto de "salir de la categoría / emergencia". */
-const DOUBLE_PRESS_MS = 600;
-
-/* ---------------- CORE VOCABULARY ---------------- */
-/* Cada elemento: text, emoji, category, type, speech, priority, favorite */
+'use strict';
 const CORE_VOCAB = [
   // Necesidades
   {text:"Agua", emoji:"💧", category:"necesidades", type:"noun", speech:"Agua", priority:10, favorite:true},
@@ -654,33 +120,11 @@ const CORE_VOCAB = [
   {text:"Repita", emoji:"🔁", category:"frases", type:"word", speech:"Repita", priority:6},
   {text:"Espere", emoji:"✋", category:"frases", type:"word", speech:"Espere", priority:6},
 ];
-
-/* ---------------- PHRASES (frases preconstruidas) ---------------- */
 const PHRASES = [
   "Necesito ayuda.", "No puedo hablar.", "No entiendo.", "Repita, por favor.",
   "Espere, por favor.", "Quiero agua.", "Quiero ir al baño.", "Tengo dolor.",
   "Quiero hablar con mi familia.", "Necesito ayuda médica."
 ].map((t,i)=>({text:t, emoji:"💬", category:"frases", type:"phrase", speech:t, priority:8-i*0.1, favorite:false, isPhrase:true}));
-
-/* ---------------- EMERGENCY SET (siempre disponible) ---------------- */
-const EMERGENCY_WORDS = [
-  {text:"Sí", emoji:"✅"}, {text:"No", emoji:"❌"}, {text:"Ayuda", emoji:"❤️"},
-  {text:"Dolor", emoji:"🤕"}, {text:"Agua", emoji:"💧"}, {text:"Baño", emoji:"🚽"},
-  {text:"Médico", emoji:"🩺"}, {text:"Familia", emoji:"👪"}, {text:"Peligro", emoji:"⚠️"},
-  {text:"Emergencia", emoji:"🚨"}
-];
-
-/* ---------------- PREDICTION RULES (sin IA, determinista) ---------------- */
-const PREDICTION_RULES = {
-  "quiero":    ["Comer","Beber","Dormir","Hablar","Ir","Agua"],
-  "necesito":  ["Ayuda","Agua","Hablar","Descansar","Medicamento"],
-  "tengo":     ["Dolor","Frío","Calor"],
-  "no puedo":  ["Hablar","Comer","Dormir","Respirar"],
-  "puedo":     ["Comer","Beber","Ir","Hablar"],
-  "quiero hablar con": ["Mamá","Papá","Familia","Médico"],
-};
-
-/* ---------------- CATEGORY DEFINITIONS ---------------- */
 const CATEGORIES = [
   {id:"necesidades", label:"Necesidades", emoji:"💧"},
   {id:"personas",    label:"Personas",    emoji:"👪"},
@@ -695,837 +139,240 @@ const CATEGORIES = [
   {id:"favoritos",   label:"Favoritos",   emoji:"⭐"},
   {id:"otros",       label:"Más / Otros", emoji:"⋯"},
 ];
-
-/* ---------------- CLASSIFICATION DICTIONARY ---------------- */
-const CLASSIFY_DICT = {};
-CORE_VOCAB.forEach(w=>{ CLASSIFY_DICT[normalize(w.text)] = w.category; });
-// extra synonyms/aliases used only for classification
-Object.assign(CLASSIFY_DICT, {
-  "comer":"acciones", "beber":"acciones", "medico":"personas", "doctor":"personas",
-  "hospital":"lugares", "casa":"lugares", "escuela":"lugares", "trabajo":"lugares",
-  "hambre":"necesidades", "sed":"necesidades", "banio":"necesidades"
+const KEY = 'ghost_caa_v2';
+const $ = id => document.getElementById(id);
+const norm = s => String(s || '').trim().toLocaleLowerCase('es').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+const defaults = {stage:1,profile:'adult',speed:1800,pause:1600,debounce:250,shortcut:'KeyM',cols:4,scale:1,visual:'both',contrast:false,clearAfter:false,voice:'',rate:1,pitch:1,volume:1};
+const BASIC = [{text:'Sí',speech:'Sí',emoji:'✅'},{text:'No',speech:'No',emoji:'❌'}];
+const phraseDefaults = {
+ adult:[['Necesito ayuda','🙋'],['Quiero agua','💧'],['Quiero ir al baño','🚽'],['Tengo dolor','🤕'],['Quiero cambiar de posición','🛏️'],['Espere, por favor','✋'],['No entiendo','❔'],['Gracias','🙏'],['Quiero hablar con mi familia','👪'],['Necesito ayuda médica','🩺']],
+ child:[['Quiero agua','💧'],['Tengo hambre','🍎'],['Quiero ir al baño','🚽'],['Me duele','🤕'],['Quiero jugar','🧸'],['Quiero a mi familia','👪'],['Necesito ayuda','🙋'],['Estoy cansado','😴'],['Otra vez, por favor','🔁'],['Gracias','💛']]
+};
+const clone = x => JSON.parse(JSON.stringify(x));
+const categoryIds = new Set(CATEGORIES.map(c=>c.id));
+function validEntry(w){
+ if(!w || typeof w.text!=='string' || !w.text.trim()) return null;
+ return {text:w.text.trim().slice(0,500),speech:typeof w.speech==='string'&&w.speech.trim()?w.speech.trim().slice(0,500):w.text.trim().slice(0,500),emoji:typeof w.emoji==='string'?w.emoji.slice(0,20):'💬',category:categoryIds.has(w.category)?w.category:'otros',favorite:!!w.favorite,custom:!!w.custom};
+}
+const baseWords = [...CORE_VOCAB,...PHRASES].map(validEntry);
+function defaultPhrases(profile){return phraseDefaults[profile].map(([text,emoji])=>validEntry({text,emoji,category:'frases'}));}
+function sanitizeSettings(raw={}){
+ const s={...defaults};
+ for(const key of ['stage','speed','pause','debounce','cols','scale','rate','pitch','volume']){
+  const bounds={stage:[1,3],speed:[500,15000],pause:[0,10000],debounce:[0,1500],cols:[2,6],scale:[1,1.4],rate:[.3,2],pitch:[.5,2],volume:[0,1]}[key];
+  if(typeof raw[key]==='number'&&Number.isFinite(raw[key])) s[key]=Math.max(bounds[0],Math.min(bounds[1],raw[key]));
+ }
+ s.stage=Math.round(s.stage);s.cols=Math.round(s.cols);
+ for(const key of ['contrast','clearAfter']) if(typeof raw[key]==='boolean') s[key]=raw[key];
+ if(['adult','child'].includes(raw.profile)) s.profile=raw.profile;
+ if(['both','text','symbols'].includes(raw.visual)) s.visual=raw.visual;
+ if(['KeyM','KeyG','KeyY'].includes(raw.shortcut)) s.shortcut=raw.shortcut;
+ if(typeof raw.voice==='string') s.voice=raw.voice.slice(0,300);
+ return s;
+}
+function cleanList(list){if(!Array.isArray(list)||list.length>5000) throw Error('Lista inválida o demasiado extensa (máximo 5000 elementos).');return list.map(validEntry).filter(Boolean);}
+function parseBackup(data){
+ if(!data || data.version!==2 || !data.settings || !data.phrases) throw Error('El respaldo no tiene un formato compatible.');
+ return {version:2,settings:sanitizeSettings(data.settings),phrases:{adult:cleanList(data.phrases.adult),child:cleanList(data.phrases.child)},words:cleanList(data.words)};
+}
+let db={version:2,settings:{...defaults},phrases:{adult:defaultPhrases('adult'),child:defaultPhrases('child')},words:clone(baseWords)};
+let loadNotice='';
+try{
+ const saved=localStorage.getItem(KEY);
+ if(saved) db=parseBackup(JSON.parse(saved));
+ else{
+  const legacy=JSON.parse(localStorage.getItem('ghost_caa_v1')||'null');
+  if(legacy){
+   if(Array.isArray(legacy.custom)) db.words.push(...cleanList(legacy.custom));
+   if(legacy.favOverrides) db.words.forEach(w=>{if(typeof legacy.favOverrides[norm(w.text)]==='boolean')w.favorite=legacy.favOverrides[norm(w.text)];});
+   const old=legacy.settings||{};
+   db.settings=sanitizeSettings({...defaults,speed:old.scanSpeed,voice:old.voiceName,rate:old.rate,pitch:old.pitch,volume:old.volume,cols:old.cols,scale:old.fontScale,contrast:old.contrast,visual:old.visualMode});
+   const imported=db.words.filter(w=>w.custom&&(w.category==='frases'||w.text.split(/\s+/).length>2));
+   for(const p of ['adult','child']) db.phrases[p].push(...imported.map(clone));
+   loadNotice='Se conservó el vocabulario de la versión anterior.';
+  }
+ }
+}catch{loadNotice='No se pudo recuperar la configuración guardada. Puedes importar tu respaldo en configuración.';}
+let config=false,category=null,index=0,targets=[],message='',selected=null,timer=null,pauseUntil=0,lastInput=-Infinity,lastButton=-1,voices=[],speaking=false,speechToken=0,spokenTimer=null,progressStart=0,currentTab='general';
+let activeWindow=!document.hidden;
+function notify(text){$('toast').textContent=text;$('toast').hidden=false;clearTimeout(notify.timer);notify.timer=setTimeout(()=>$('toast').hidden=true,4500);}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(db));}catch{notify('No se pudo guardar en este navegador. Descarga un respaldo antes de cerrar.');}}
+function applyAppearance(){
+ const s=db.settings;
+ document.body.classList.toggle('child',s.profile==='child');document.body.classList.toggle('contrast',s.contrast);
+ document.body.classList.toggle('text-only',s.visual==='text');document.body.classList.toggle('symbols-only',s.visual==='symbols');
+ document.documentElement.style.setProperty('--cols',s.cols);document.documentElement.style.setProperty('--font',s.scale);
+}
+function element(tag,className,text){const el=document.createElement(tag);if(className)el.className=className;if(text!==undefined)el.textContent=text;return el;}
+function tile(item,action,extra=''){
+ const b=element('button','tile '+extra);b.type='button';b.append(element('span','emoji',item.emoji),element('span','label',item.text));b.setAttribute('aria-label',item.text);
+ targets.push({el:b,action,item});return b;
+}
+function phraseList(){return [...BASIC,...db.phrases[db.settings.profile].filter(w=>!['si','no'].includes(norm(w.text)))];}
+function wordsFor(cat){return db.words.filter(w=>cat==='favoritos'?w.favorite:w.category===cat);}
+function stopScan(){clearTimeout(timer);timer=null;}
+function canScan(){return !config&&db.settings.stage!==1&&activeWindow&&!document.hidden&&!speaking;}
+function scheduleScan(delay=db.settings.speed){
+ stopScan();if(!canScan())return;
+ const actual=Math.max(delay,pauseUntil-Date.now());progressStart=Date.now();
+ timer=setTimeout(()=>{if(!canScan())return;index=(index+1)%targets.length;highlight();scheduleScan();},actual);
+ const fill=$('scanProgress');if(fill){fill.style.transition='none';fill.style.width='0%';requestAnimationFrame(()=>{if(fill.isConnected){fill.style.transition=`width ${actual}ms linear`;fill.style.width='100%';}});}
+}
+function highlight(){
+ targets.forEach((t,i)=>{t.el.classList.toggle('scanning',i===index&&db.settings.stage!==1);if(i===index)t.el.setAttribute('aria-current','true');else t.el.removeAttribute('aria-current');});
+ const status=$('scanStatus');if(status) status.textContent=!activeWindow?'Barrido en pausa · vuelve a esta ventana':speaking?'Hablando…':`Barrido automático · ${index+1} / ${targets.length}`;
+ if(canScan()) targets[index]?.el.scrollIntoView({block:'nearest',behavior:'instant'});
+}
+function updateMessage(){const m=$('messageText');if(m){m.textContent=db.settings.stage===2?(selected?.text||'Selecciona una frase'):message||'Tu mensaje aparecerá aquí';m.classList.toggle('empty',db.settings.stage===2?!selected:!message);}targets.forEach(t=>t.el.classList.toggle('chosen',db.settings.stage===2&&t.item===selected));}
+function renderCommunication(){
+ stopScan();applyAppearance();targets=[];index=0;
+ const root=$('communication');root.replaceChildren();const s=db.settings;
+ $('header').hidden=s.stage===1;
+ if(s.stage===1){
+  root.className='basic';BASIC.forEach((w,i)=>{const b=tile(w,()=>basicSay(i),i?'no':'yes');b.append(element('span','caption',i?'Clic derecho':'Clic izquierdo'));root.append(b);});return;
+ }
+ root.className='layout';$('modeLabel').replaceChildren(element('span','dot'),document.createTextNode('Modo de comunicación'));
+ const intro=element('div','intro');const title=element('div');title.append(element('p','eyebrow','TU VOZ, A TU RITMO'),element('h1','',s.stage===2?'Lo que quiero decir.':'Cada palabra cuenta.'),element('p','hint',s.stage===2?'Elige una frase. Hazla escuchar.':'Construye tu mensaje, palabra a palabra.'));const mark=element('div','stage-mark');mark.append(element('strong','',`0${s.stage}`),document.createTextNode(' / 03'));intro.append(title,mark);root.append(intro);
+ const box=element('section','message');box.setAttribute('aria-label',s.stage===2?'Frase seleccionada':'Mensaje');box.append(element('p','eyebrow',s.stage===2?'FRASE PREPARADA · CLIC DERECHO PARA HABLAR':'MI MENSAJE · CLIC DERECHO PARA HABLAR'),element('p','message-text',''));box.lastChild.id='messageText';root.append(box);
+ const trail=element('div','trail');trail.append(element('span','',s.stage===2?'Tus frases útiles':category?category==='keyboard'?'Teclado':CATEGORIES.find(c=>c.id===category)?.label||category:'Elige una categoría'),element('span','',''));trail.lastChild.id='scanStatus';root.append(trail);
+ const grid=element('div','grid');grid.id='grid';root.append(grid);
+ if(s.stage===2){phraseList().forEach(w=>grid.append(tile(w,()=>{selected=w;updateMessage();pauseAfter();})));}
+ else if(!category){
+  for(const c of CATEGORIES){if(wordsFor(c.id).length)grid.append(tile({text:c.label,emoji:c.emoji},()=>{category=c.id;renderCommunication();}));}
+  grid.append(tile({text:'Escribir con letras',emoji:'⌨️'},()=>{category='keyboard';renderCommunication();}));addMessageActions(grid);
+ }else{
+  grid.append(tile({text:'Volver a categorías',emoji:'↩'},()=>{category=null;renderCommunication();},'action'));
+  if(category==='keyboard'){
+   for(const char of 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZÁÉÍÓÚÜ0123456789.,¿?¡!') grid.append(tile({text:char,emoji:''},()=>{message+=char.toLocaleLowerCase('es');updateMessage();pauseAfter();}));
+   grid.append(tile({text:'Espacio',emoji:'␣'},()=>{message+=' ';updateMessage();pauseAfter();}));
+  }else wordsFor(category).forEach(w=>grid.append(tile(w,()=>{message+=(message&&!message.endsWith(' ')?' ':'')+w.speech;updateMessage();pauseAfter();})));
+  addMessageActions(grid);
+ }
+ const progress=element('div','progress');progress.setAttribute('aria-hidden','true');const fill=element('span');fill.id='scanProgress';progress.append(fill);root.append(progress);
+ const legend=element('footer','legend');for(const [key,text] of [['Clic izquierdo','Seleccionar'],['Clic derecho','Hablar']]){const p=element('span');p.append(element('strong','',key),document.createTextNode(' · '+text));legend.append(p);}legend.append(element('span','key',shortcutLabel()+' · Configurar'));root.append(legend);
+ const status=element('p','hint');status.id='speechStatus';status.setAttribute('role','status');root.append(status);
+ updateMessage();highlight();scheduleScan();
+}
+function addMessageActions(grid){
+ grid.append(tile({text:category==='keyboard'?'Borrar letra':'Borrar última palabra',emoji:'⌫'},()=>{message=category==='keyboard'?message.slice(0,-1):message.trimEnd().replace(/\S+\s*$/,'').trimEnd();updateMessage();pauseAfter();},'action'));
+ grid.append(tile({text:'Limpiar mensaje',emoji:'✕'},()=>{message='';updateMessage();pauseAfter();},'action'));
+}
+function pauseAfter(){pauseUntil=Date.now()+db.settings.pause;scheduleScan();}
+function basicSay(i){targets.forEach((t,j)=>t.el.classList.toggle('chosen',i===j));speak(BASIC[i].speech);}
+function speechStatus(text){const el=$('speechStatus');if(el)el.textContent=text;else $('announcement').textContent=text;}
+function finishSpeech(token){if(token!==speechToken)return;speaking=false;clearTimeout(spokenTimer);highlight();scheduleScan();}
+function cancelSpeech(){speechToken++;speaking=false;clearTimeout(spokenTimer);window.speechSynthesis?.cancel();}
+function speak(text){
+ if(!text.trim()){speechStatus('Primero selecciona una frase o construye un mensaje.');return;}
+ cancelSpeech();speechStatus('');
+ if(!('speechSynthesis' in window)){notify('La voz no está disponible. El mensaje permanece visible.');return;}
+ const token=++speechToken;const u=new SpeechSynthesisUtterance(text);const s=db.settings;const voice=voices.find(v=>v.name===s.voice)||voices.find(v=>v.lang.toLowerCase().startsWith('es'));
+ if(voice)u.voice=voice;u.lang=voice?.lang||'es-ES';u.rate=s.rate;u.pitch=s.pitch;u.volume=s.volume;speaking=true;stopScan();highlight();
+ u.onend=()=>{if(token!==speechToken)return;if(!config&&s.stage===3&&s.clearAfter){message='';updateMessage();}speechStatus('Mensaje pronunciado.');finishSpeech(token);};
+ u.onerror=e=>{if(token!==speechToken)return;speechStatus('No se pudo reproducir la voz. El mensaje permanece visible.');notify('No se pudo reproducir la voz. Revisa la voz del dispositivo en configuración.');finishSpeech(token);};
+ try{window.speechSynthesis.speak(u);spokenTimer=setTimeout(()=>{if(token===speechToken){cancelSpeech();speechStatus('La voz no respondió. Prueba otra voz en configuración.');highlight();scheduleScan();}},Math.max(15000,text.length*400/s.rate));}catch{finishSpeech(token);notify('No se pudo iniciar la voz del dispositivo.');}
+}
+function shortcutLabel(){return 'Ctrl + Alt + '+db.settings.shortcut.slice(-1);}
+function toggleConfig(){
+ config=!config;stopScan();cancelSpeech();lastInput=-Infinity;lastButton=-1;
+ document.body.classList.toggle('communicating',!config);$('communication').hidden=config;$('settings').hidden=!config;
+ if(config){$('header').hidden=false;$('modeLabel').textContent='Configuración · comunicación en pausa';syncSettings();showTab(currentTab);$('settingsTitle').focus();}
+ else{document.activeElement?.blur();pauseUntil=0;renderCommunication();}
+}
+// Capture before any target handlers: a switch click never depends on pointer location.
+for(const name of ['mousedown','mouseup','click','dblclick','auxclick','contextmenu']){
+ window.addEventListener(name,e=>{
+  if(config)return;
+  e.preventDefault();e.stopImmediatePropagation();
+  if(name!=='mousedown'||![0,2].includes(e.button))return;
+  const now=performance.now();if(e.button===lastButton&&now-lastInput<db.settings.debounce)return;
+  lastInput=now;lastButton=e.button;
+  if(!activeWindow){activeWindow=true;highlight();scheduleScan();}
+  if(db.settings.stage===1){basicSay(e.button===0?0:1);return;}
+  if(e.button===2){speak(db.settings.stage===2?selected?.speech||'':message);return;}
+  if(speaking)return;
+  targets[index]?.action();
+ },{capture:true});
+}
+window.addEventListener('keydown',e=>{
+ if(e.ctrlKey&&e.altKey&&!e.shiftKey&&e.code===db.settings.shortcut){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)toggleConfig();return;}
+ if(!config&&['Tab','Enter',' ','ContextMenu'].includes(e.key)){e.preventDefault();e.stopImmediatePropagation();}
+},{capture:true});
+window.addEventListener('blur',()=>{activeWindow=false;stopScan();highlight();});
+window.addEventListener('focus',()=>{activeWindow=true;highlight();scheduleScan();});
+document.addEventListener('visibilitychange',()=>{activeWindow=!document.hidden;if(!activeWindow)stopScan();else scheduleScan();highlight();});
+function populateVoices(){
+ voices=window.speechSynthesis?.getVoices()||[];const sel=$('cfgVoice');sel.replaceChildren(new Option('Español · voz predeterminada',''));
+ for(const v of voices)sel.add(new Option(`${v.name} (${v.lang})`,v.name));
+ if(db.settings.voice&&!voices.some(v=>v.name===db.settings.voice))sel.add(new Option(db.settings.voice+' · no disponible',db.settings.voice));
+ sel.value=db.settings.voice;
+}
+const configFields={cfgStage:['stage',Number],cfgProfile:['profile',String],cfgSpeed:['speed',v=>Number(v)*1000],cfgPause:['pause',v=>Number(v)*1000],cfgDebounce:['debounce',Number],cfgShortcut:['shortcut',String],cfgCols:['cols',Number],cfgScale:['scale',Number],cfgVisual:['visual',String],cfgContrast:['contrast',Boolean],cfgClear:['clearAfter',Boolean],cfgVoice:['voice',String],cfgRate:['rate',Number],cfgPitch:['pitch',Number],cfgVolume:['volume',Number]};
+function syncSettings(){
+ for(const [id,[key]] of Object.entries(configFields)){const el=$(id);if(el.type==='checkbox')el.checked=db.settings[key];else el.value=['speed','pause'].includes(key)?db.settings[key]/1000:db.settings[key];}
+ $('shortcutHelp').textContent=`${shortcutLabel()} alterna entre comunicación y configuración. El cursor desaparece en comunicación y vuelve aquí. Los clics se reciben dentro de esta página; mantén la ventana activa. En Sí/No: izquierdo = sí y derecho = no. En las otras etapas: izquierdo = seleccionar y derecho = hablar.`;
+ populateVoices();
+}
+for(const [id,[key,convert]] of Object.entries(configFields))$(id).addEventListener('change',e=>{
+ if(!config)return;const el=e.target;if(!el.checkValidity()){el.reportValidity();syncSettings();return;}
+ db.settings=sanitizeSettings({...db.settings,[key]:convert(el.type==='checkbox'?el.checked:el.value)});save();applyAppearance();syncSettings();
+ if(key==='stage'){category=null;selected=null;}if(key==='profile'){selected=null;renderPhraseEditor();}
 });
-
-/* ---------------- STATE ---------------- */
-const state = {
-  appMode: "BOOT", // BOOT, READY, CONFIGURATION, GHOST_LOAD, COMMUNICATION, SCANNING, SPEAKING
-  vocab: [],          // active vocabulary (core + custom)
-  buffer: [],          // array of {text, speech}
-  activeCategory: "necesidades",
-  settings: {...CONFIG.defaultSettings},
-  scanTimer: null,
-  scanIndex: -1,
-  scanTargets: [],
-  scanPhase: "cat",     // for hierarchical scanning: 'cat' | 'item' | 'emergency'
-  voices: [],
-  lastActivationTs: 0,       // for double-click/double-key "hablar ahora" gesture
-  lastEmergActivationTs: 0,  // for double-click/double-key exit from emergency phase
-};
-
-/* ---------------- UTIL ---------------- */
-function normalize(s){
-  return (s||"").toString().trim().toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+function showTab(name){
+ currentTab=name;document.querySelectorAll('[data-tab]').forEach(b=>{const active=b.dataset.tab===name;b.setAttribute('aria-selected',active);$(b.dataset.tab).hidden=!active;});
+ if(name==='phrases')renderPhraseEditor();if(name==='vocabulary')renderVocabEditor();
 }
-function uid(){ return "c" + Math.random().toString(36).slice(2,9); }
-function toast(msg, ms=3200){
-  const t = document.getElementById("toast");
-  t.textContent = msg; t.hidden = false;
-  clearTimeout(toast._t);
-  toast._t = setTimeout(()=>{ t.hidden = true; }, ms);
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+$('resume').addEventListener('click',toggleConfig);
+$('fullscreen').addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{notify('No se pudo activar pantalla completa.');}});
+$('testVoice').addEventListener('click',()=>speak('Esta es mi voz. Estoy listo para comunicarme.'));
+function editorInput(value,label,onChange){const input=element('input');input.value=value;input.setAttribute('aria-label',label);input.maxLength=label.startsWith('Emoji')?20:500;input.addEventListener('change',()=>onChange(input.value));return input;}
+function rowButton(label,text,fn,disabled=false){const b=element('button','',text);b.type='button';b.setAttribute('aria-label',label);b.disabled=disabled;b.addEventListener('click',fn);return b;}
+function renderPhraseEditor(){
+ const box=$('phraseEditor');box.replaceChildren();
+ const fixed=element('p','notice','✅ Sí    ·    ❌ No — siempre disponibles');box.append(fixed);
+ const list=db.phrases[db.settings.profile];list.forEach((w,i)=>{
+  const row=element('div','editor-row');row.append(editorInput(w.emoji,`Emoji de frase ${i+1}`,v=>{w.emoji=v;save();}),editorInput(w.text,`Frase ${i+1}`,v=>{if(v.trim()){if(w.speech===w.text)w.speech=v.trim();w.text=v.trim();save();}else renderPhraseEditor();}),editorInput(w.speech,`Pronunciación de frase ${i+1}`,v=>{w.speech=v.trim()||w.text;save();}));
+  const actions=element('div','row-actions');actions.append(rowButton('Subir frase '+(i+1),'↑',()=>{[list[i-1],list[i]]=[list[i],list[i-1]];save();renderPhraseEditor();},i===0),rowButton('Bajar frase '+(i+1),'↓',()=>{[list[i+1],list[i]]=[list[i],list[i+1]];save();renderPhraseEditor();},i===list.length-1),rowButton('Eliminar frase '+(i+1),'×',()=>{list.splice(i,1);save();renderPhraseEditor();}));row.append(actions,element('small','',`Frase ${i+1} · Texto y pronunciación`));box.append(row);
+ });
 }
-
-/* ---------------- LOCAL STORAGE ---------------- */
-const Storage = {
-  save(){
-    try{
-      const custom = state.vocab.filter(w=>w.custom);
-      const favOverrides = {};
-      state.vocab.forEach(w=>{ if(!w.custom) favOverrides[normalize(w.text)] = !!w.favorite; });
-      const payload = {
-        settings: state.settings,
-        custom,
-        favOverrides,
-        visualMode: state.settings.visualMode
-      };
-      localStorage.setItem(CONFIG.storageKey, JSON.stringify(payload));
-    }catch(e){ /* almacenamiento no disponible: continuar sin bloquear */ }
-  },
-  load(){
-    try{
-      const raw = localStorage.getItem(CONFIG.storageKey);
-      if(!raw) return null;
-      return JSON.parse(raw);
-    }catch(e){ return null; }
-  }
-};
-
-/* ---------------- VOCABULARY ENGINE ---------------- */
-const VocabEngine = {
-  init(){
-    const saved = Storage.load();
-    let base = CORE_VOCAB.map(w=>({...w, id: uid()}));
-    PHRASES.forEach(p=>base.push({...p, id: uid()}));
-
-    if(saved){
-      if(saved.settings) state.settings = {...CONFIG.defaultSettings, ...saved.settings};
-      if(saved.favOverrides){
-        base.forEach(w=>{
-          const key = normalize(w.text);
-          if(key in saved.favOverrides) w.favorite = saved.favOverrides[key];
-        });
-      }
-      if(Array.isArray(saved.custom)){
-        saved.custom.forEach(c=> base.push({...c, id: uid(), custom:true}));
-      }
-    }
-    state.vocab = base;
-  },
-  addWord(text, category, opts={}){
-    if(!text || !text.trim()) return null;
-    const item = {
-      id: uid(), text: text.trim(), emoji: opts.emoji || "🔹",
-      category: category || "otros", type: opts.type || "word",
-      speech: opts.speech || text.trim(), priority: opts.priority ?? 5,
-      favorite: !!opts.favorite, custom: true, isPhrase: !!opts.isPhrase
-    };
-    state.vocab.push(item);
-    return item;
-  },
-  byCategory(catId){
-    if(catId === "favoritos") return state.vocab.filter(w=>w.favorite);
-    return state.vocab.filter(w=>w.category === catId)
-      .sort((a,b)=> (b.priority||0) - (a.priority||0));
-  },
-  toggleFavorite(id){
-    const w = state.vocab.find(v=>v.id===id);
-    if(w){ w.favorite = !w.favorite; Storage.save(); }
-  },
-  restoreGhost(){
-    state.vocab = state.vocab.filter(w=>!w.custom);
-    // reset favorites to defaults
-    const defaults = new Set(CORE_VOCAB.filter(w=>w.favorite).map(w=>normalize(w.text)));
-    state.vocab.forEach(w=>{ if(!w.isPhrase) w.favorite = defaults.has(normalize(w.text)); });
-    Storage.save();
-    toast("Vocabulario restaurado al modo Ghost (básico y seguro).");
-  }
-};
-
-/* ---------------- CLASSIFICATION ENGINE ---------------- */
-const Classifier = {
-  classify(line){
-    const key = normalize(line);
-    if(CLASSIFY_DICT[key]) return CLASSIFY_DICT[key];
-    // try partial containment for short phrases e.g. "tengo frio"
-    for(const dictKey in CLASSIFY_DICT){
-      if(key.includes(dictKey)) return CLASSIFY_DICT[dictKey];
-    }
-    return "otros";
-  }
-};
-
-/* ---------------- PREDICTION ENGINE ---------------- */
-const Predictor = {
-  suggestionsFor(lastWord){
-    if(!lastWord) return [];
-    const key = normalize(lastWord);
-    return PREDICTION_RULES[key] || [];
-  }
-};
-
-/* ---------------- SPEECH ENGINE ---------------- */
-const Speech = {
-  ready:false,
-  loadVoices(){
-    if(!("speechSynthesis" in window)) return;
-    const populate = ()=>{
-      state.voices = window.speechSynthesis.getVoices();
-      const sel = document.getElementById("cfgVoice");
-      sel.innerHTML = "";
-      state.voices.forEach(v=>{
-        const opt = document.createElement("option");
-        opt.value = v.name; opt.textContent = `${v.name} (${v.lang})`;
-        sel.appendChild(opt);
-      });
-      if(state.settings.voiceName){ sel.value = state.settings.voiceName; }
-    };
-    populate();
-    window.speechSynthesis.onvoiceschanged = populate;
-  },
-  speakBrowser(text){
-    if(!("speechSynthesis" in window)){
-      toast("Este navegador no soporta voz. El mensaje quedó visible en pantalla.");
-      return;
-    }
-    try{
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      const voice = state.voices.find(v=>v.name===state.settings.voiceName);
-      if(voice) u.voice = voice;
-      u.rate = state.settings.rate;
-      u.pitch = state.settings.pitch;
-      u.volume = state.settings.volume;
-      u.lang = voice ? voice.lang : "es-ES";
-      state.appMode = "SPEAKING";
-      u.onend = ()=>{ state.appMode = "COMMUNICATION"; };
-      window.speechSynthesis.speak(u);
-    }catch(e){
-      toast("No se pudo reproducir la voz del dispositivo.");
-    }
-  },
-  speakViaAPI(text){
-    // Arquitectura preparada para conectar un proveedor de Text-to-Speech.
-    // No se realiza ninguna llamada real a un proveedor específico en esta versión.
-    return new Promise((resolve, reject)=>{
-      reject(new Error("API de voz no configurada"));
-    });
-  },
-  speak(text){
-    if(!text || !text.trim()) return;
-    if(state.settings.voiceSource === "api"){
-      this.speakViaAPI(text).catch(()=>{
-        toast("La voz avanzada no está disponible. Se utilizará la voz del dispositivo.");
-        this.speakBrowser(text);
-      });
-    }else{
-      this.speakBrowser(text);
-    }
-  }
-};
-
-/* ---------------- UI ENGINE ---------------- */
-const UI = {
-  els:{},
-  cacheEls(){
-    ["bufferText","predictStrip","catRail","grid","scanBar","scanFill","scanStatus"]
-      .forEach(id=> this.els[id]=document.getElementById(id));
-  },
-  applySettingsToDOM(){
-    document.documentElement.style.setProperty("--font-scale", state.settings.fontScale);
-    document.documentElement.style.setProperty("--cols", state.settings.cols);
-    document.documentElement.setAttribute("data-contrast", state.settings.contrast ? "high":"normal");
-    document.documentElement.setAttribute("data-retro", state.settings.retroMode ? "on":"off");
-    document.documentElement.style.setProperty("--retro-fg", state.settings.retroColor === "amber" ? "#FFB000" : "#33FF33");
-    document.getElementById("grid").className =
-      state.settings.visualMode === "text" ? "mode-text" :
-      state.settings.visualMode === "emoji" ? "mode-emoji-only" : "";
-  },
-  renderCategories(){
-    const rail = this.els.catRail;
-    rail.innerHTML = "";
-    CATEGORIES.forEach(cat=>{
-      const b = document.createElement("button");
-      b.className = "cat-btn scan-target" + (cat.id===state.activeCategory ? " active":"");
-      b.dataset.cat = cat.id;
-      b.innerHTML = `<span class="em">${cat.emoji}</span><span>${cat.label}</span>`;
-      b.addEventListener("click", ()=> UI.selectCategory(cat.id));
-      rail.appendChild(b);
-    });
-  },
-  selectCategory(catId){
-    state.activeCategory = catId;
-    this.renderCategories();
-    this.renderGrid();
-    if(state.settings.scanMode === "hier"){
-      Scanner.enterItemPhase();
-    }
-  },
-  renderGrid(){
-    const grid = this.els.grid;
-    grid.innerHTML = "";
-    // Botón de salida, presente en cada grupo de palabras. Funciona con
-    // clic, con el interruptor único o durante el barrido: en modo de
-    // barrido jerárquico regresa a la fase de categorías; en los demás
-    // modos, lleva el foco de vuelta al riel de categorías.
-    const exitTile = document.createElement("button");
-    exitTile.className = "tile exit-tile scan-target";
-    exitTile.innerHTML = `<span class="em">🔙</span><span class="label">Salir de categoría</span>`;
-    exitTile.addEventListener("click", ()=> UI.exitCategory());
-    grid.appendChild(exitTile);
-
-    const items = VocabEngine.byCategory(state.activeCategory);
-    if(!items.length){
-      const p = document.createElement("p");
-      p.className = "empty-note";
-      p.textContent = "Todavía no hay elementos aquí. Usa Ghost Quick Load o Importar JSON para añadir más.";
-      grid.appendChild(p);
-      Scanner.refreshTargets();
-      return;
-    }
-    items.forEach(w=>{
-      const tile = document.createElement("button");
-      tile.className = "tile scan-target" + (w.isPhrase ? " phrase-tile":"");
-      tile.dataset.id = w.id;
-      tile.innerHTML = `${w.favorite ? '<span class="fav-mark">★</span>':''}
-        <span class="em">${w.emoji||"🔹"}</span><span class="label">${w.text}</span>`;
-      attachTileHandlers(tile, w, ()=> handleWordActivation(w));
-      grid.appendChild(tile);
-    });
-    Scanner.refreshTargets();
-  },
-  selectWord(w){
-    state.buffer.push({text:w.text, speech:w.speech||w.text});
-    this.renderBuffer();
-    this.renderPrediction(w.text);
-  },
-  exitCategory(){
-    // En barrido jerárquico, mientras se recorren las palabras de una
-    // categoría, este botón devuelve el barrido a la fase de categorías.
-    if(state.settings.scanMode === "hier" && state.scanPhase === "item"){
-      Scanner.exitCurrentPhase();
-      return;
-    }
-    // En los demás modos no hay una "fase" que cerrar (el riel de
-    // categorías ya está siempre visible), así que simplemente se
-    // lleva el foco hacia allí para facilitar la navegación.
-    const rail = document.getElementById("catRail");
-    const activeBtn = rail.querySelector(".cat-btn.active") || rail.querySelector(".cat-btn");
-    if(activeBtn){ activeBtn.scrollIntoView({block:"nearest", inline:"nearest"}); activeBtn.focus(); }
-  },
-  renderBuffer(){
-    const el = this.els.bufferText;
-    el.innerHTML = "";
-    state.buffer.forEach(item=>{
-      const chip = document.createElement("span");
-      chip.className = "buffer-chip";
-      chip.textContent = item.text;
-      el.appendChild(chip);
-    });
-    el.scrollTop = el.scrollHeight;
-  },
-  renderPrediction(lastWord){
-    const strip = this.els.predictStrip;
-    strip.innerHTML = "";
-    const sugs = Predictor.suggestionsFor(lastWord);
-    sugs.forEach(word=>{
-      const chip = document.createElement("button");
-      chip.className = "predict-chip";
-      chip.textContent = word;
-      chip.addEventListener("click", ()=>{
-        state.buffer.push({text:word, speech:word});
-        UI.renderBuffer();
-        UI.renderPrediction(word);
-      });
-      strip.appendChild(chip);
-    });
-  },
-  bufferAsText(){
-    return state.buffer.map(b=>b.speech).join(" ");
-  }
-};
-
-/* ---------------- SCANNING ENGINE ---------------- */
-const Scanner = {
-  refreshTargets(){
-    if(state.settings.scanMode === "off") return;
-    if(state.settings.scanMode === "direct"){
-      state.scanTargets = Array.from(document.querySelectorAll("#grid .scan-target"));
-    }else if(state.settings.scanMode === "hier"){
-      if(state.scanPhase === "cat"){
-        // Categorías, y al final de la vuelta: Emergencia, Hablar, Borrar, Limpiar.
-        const cats = Array.from(document.querySelectorAll("#catRail .scan-target"));
-        const actions = ["btnEmergency","btnSpeak","btnDelete","btnClear"]
-          .map(id=>document.getElementById(id)).filter(Boolean);
-        state.scanTargets = cats.concat(actions);
-      }else if(state.scanPhase === "emergency"){
-        state.scanTargets = Array.from(document.querySelectorAll("#emergGrid .scan-target"));
-      }else{
-        state.scanTargets = Array.from(document.querySelectorAll("#grid .scan-target"));
-      }
-    }
-    state.scanIndex = -1;
-  },
-  enterItemPhase(){
-    // El barrido salta automáticamente a las palabras de la categoría
-    // recién seleccionada, sin volver a pasar por la fase de categorías.
-    if(state.settings.scanMode !== "hier") return;
-    state.scanPhase = "item";
-    this.refreshTargets();
-    this.resumeTimer();
-  },
-  enterCategoryPhase(){
-    // Vuelve el barrido a la lista de categorías (incluye Emergencia,
-    // Hablar, Borrar y Limpiar al final de la vuelta).
-    if(state.settings.scanMode !== "hier") return;
-    state.scanPhase = "cat";
-    this.refreshTargets();
-    this.resumeTimer();
-  },
-  enterEmergencyPhase(){
-    // El barrido entra al panel de emergencia y recorre sus palabras.
-    if(state.settings.scanMode !== "hier") return;
-    state.scanPhase = "emergency";
-    this.refreshTargets();
-    this.resumeTimer();
-  },
-  exitCurrentPhase(){
-    // Gesto de doble clic / doble pulsación: sale de palabras o de
-    // emergencia y continúa el barrido por las categorías.
-    if(state.scanPhase === "item"){
-      this.enterCategoryPhase();
-    }else if(state.scanPhase === "emergency"){
-      Overlays.close("ovEmergency"); // esto reactiva la fase de categorías
-    }
-  },
-  clearHighlights(){
-    document.querySelectorAll(".scan-hi").forEach(el=>el.classList.remove("scan-hi"));
-  },
-  start(){
-    if(state.settings.scanMode === "off") return;
-    this.stop();
-    state.appMode = "SCANNING";
-    state.scanPhase = state.settings.scanMode === "hier" ? "cat" : "direct";
-    this.refreshTargets();
-    document.getElementById("scanToggle").classList.add("on");
-    document.getElementById("scanToggle").setAttribute("aria-checked","true");
-    document.getElementById("scanStatus").textContent = "Barriendo…";
-    this.tick();
-    state.scanTimer = setInterval(()=>this.tick(), state.settings.scanSpeed);
-  },
-  stop(){
-    clearInterval(state.scanTimer);
-    state.scanTimer = null;
-    this.clearHighlights();
-    document.getElementById("scanToggle").classList.remove("on");
-    document.getElementById("scanToggle").setAttribute("aria-checked","false");
-    document.getElementById("scanStatus").textContent = "Desactivado";
-    document.getElementById("scanFill").style.width = "0%";
-    if(state.appMode === "SCANNING") state.appMode = "COMMUNICATION";
-  },
-  /* Reinicia el temporizador de barrido MANTENIENDO la fase actual
-     (cat/item) y los targets ya calculados — usado al cambiar de
-     categoría o al ajustar la velocidad, para no perder el lugar. */
-  resumeTimer(){
-    if(state.settings.scanMode === "off") return;
-    clearInterval(state.scanTimer);
-    this.clearHighlights();
-    state.appMode = "SCANNING";
-    document.getElementById("scanToggle").classList.add("on");
-    document.getElementById("scanToggle").setAttribute("aria-checked","true");
-    document.getElementById("scanStatus").textContent = "Barriendo…";
-    this.tick();
-    state.scanTimer = setInterval(()=>this.tick(), state.settings.scanSpeed);
-  },
-  restart(){
-    if(state.scanTimer){ this.resumeTimer(); }
-  },
-  tick(){
-    this.clearHighlights();
-    if(!state.scanTargets.length){ this.refreshTargets(); }
-    if(!state.scanTargets.length) return;
-    state.scanIndex = (state.scanIndex + 1) % state.scanTargets.length;
-    const el = state.scanTargets[state.scanIndex];
-    if(el){
-      el.classList.add("scan-hi");
-      el.scrollIntoView({block:"nearest", inline:"nearest"});
-    }
-    document.getElementById("scanFill").style.width = "100%";
-    requestAnimationFrame(()=>{
-      document.getElementById("scanFill").style.transition = `width ${state.settings.scanSpeed}ms linear`;
-      document.getElementById("scanFill").style.width = "0%";
-    });
-  },
-  selectCurrent(){
-    if(state.settings.scanMode === "off") return false;
-    const el = state.scanTargets[state.scanIndex];
-    if(!el) return false;
-    el.click();
-    return true;
-  }
-};
-
-/* ---------------- GHOST ENGINE ---------------- */
-const Ghost = {
-  quickLoad(rawText){
-    const lines = rawText.split("\n").map(l=>l.trim()).filter(Boolean);
-    if(!lines.length){ toast("No se detectó ningún texto para cargar."); return; }
-    let added = 0, otros = 0;
-    lines.forEach(line=>{
-      const cat = Classifier.classify(line);
-      if(cat === "otros") otros++;
-      const isPhrase = line.split(/\s+/).length > 2;
-      VocabEngine.addWord(line, cat, {
-        emoji: isPhrase ? "💬" : "🔹",
-        type: isPhrase ? "phrase" : "word",
-        speech: line, isPhrase
-      });
-      added++;
-    });
-    Storage.save();
-    UI.renderCategories();
-    UI.renderGrid();
-    toast(`Se cargaron ${added} elementos` + (otros ? ` (${otros} en "Otros / Personalizado")` : "") + ".");
-  },
-  importJSON(fileText){
-    try{
-      const data = JSON.parse(fileText);
-      if(!Array.isArray(data)) throw new Error("formato inválido");
-      let added = 0;
-      data.forEach(entry=>{
-        if(!entry || !entry.text) return;
-        VocabEngine.addWord(entry.text, entry.category || Classifier.classify(entry.text), {
-          emoji: entry.emoji, type: entry.type, speech: entry.speech,
-          priority: entry.priority, favorite: entry.favorite, isPhrase: entry.isPhrase
-        });
-        added++;
-      });
-      Storage.save();
-      UI.renderCategories();
-      UI.renderGrid();
-      toast(`Vocabulario JSON importado: ${added} elementos añadidos.`);
-    }catch(e){
-      toast("No se pudo cargar el vocabulario. Se mantiene el vocabulario básico.");
-    }
-  }
-};
-
-/* ---------------- SETTINGS ENGINE ---------------- */
-const Settings = {
-  syncFormFromState(){
-    document.getElementById("cfgScanMode").value = state.settings.scanMode;
-    document.getElementById("cfgScanSpeed").value = state.settings.scanSpeed;
-    document.getElementById("cfgScanSpeedVal").textContent = state.settings.scanSpeed + " ms";
-    document.getElementById("cfgSelectKey").value = state.settings.selectKey;
-    document.getElementById("cfgQuickSpeak").value = state.settings.quickSpeakMethod;
-    document.getElementById("cfgVoiceSource").value = state.settings.voiceSource;
-    document.getElementById("cfgRate").value = state.settings.rate;
-    document.getElementById("cfgRateVal").textContent = state.settings.rate.toFixed(1);
-    document.getElementById("cfgPitch").value = state.settings.pitch;
-    document.getElementById("cfgPitchVal").textContent = state.settings.pitch.toFixed(1);
-    document.getElementById("cfgVolume").value = state.settings.volume;
-    document.getElementById("cfgVolumeVal").textContent = state.settings.volume.toFixed(1);
-    document.getElementById("cfgVisualMode").value = state.settings.visualMode;
-    document.getElementById("cfgFontScale").value = state.settings.fontScale;
-    document.getElementById("cfgFontScaleVal").textContent = state.settings.fontScale.toFixed(1);
-    document.getElementById("cfgCols").value = state.settings.cols;
-    document.getElementById("cfgColsVal").textContent = state.settings.cols;
-    const contrastToggle = document.getElementById("cfgContrast");
-    contrastToggle.classList.toggle("on", !!state.settings.contrast);
-    contrastToggle.setAttribute("aria-checked", !!state.settings.contrast);
-    const retroToggle = document.getElementById("cfgRetro");
-    retroToggle.classList.toggle("on", !!state.settings.retroMode);
-    retroToggle.setAttribute("aria-checked", !!state.settings.retroMode);
-    document.getElementById("cfgRetroColor").value = state.settings.retroColor || "green";
-  },
-  bind(){
-    const s = state.settings;
-    document.getElementById("cfgScanMode").addEventListener("change", e=>{
-      s.scanMode = e.target.value; Storage.save(); Scanner.stop();
-      if(s.scanMode !== "off"){ Scanner.start(); }
-    });
-    document.getElementById("cfgScanSpeed").addEventListener("input", e=>{
-      s.scanSpeed = parseInt(e.target.value,10);
-      document.getElementById("cfgScanSpeedVal").textContent = s.scanSpeed + " ms";
-      Storage.save(); Scanner.restart();
-    });
-    document.getElementById("cfgSelectKey").addEventListener("change", e=>{
-      s.selectKey = e.target.value; Storage.save();
-    });
-    document.getElementById("cfgQuickSpeak").addEventListener("change", e=>{
-      s.quickSpeakMethod = e.target.value; Storage.save();
-    });
-    document.getElementById("cfgVoiceSource").addEventListener("change", e=>{
-      s.voiceSource = e.target.value; Storage.save();
-    });
-    document.getElementById("cfgVoice").addEventListener("change", e=>{
-      s.voiceName = e.target.value; Storage.save();
-    });
-    document.getElementById("cfgRate").addEventListener("input", e=>{
-      s.rate = parseFloat(e.target.value); document.getElementById("cfgRateVal").textContent = s.rate.toFixed(1); Storage.save();
-    });
-    document.getElementById("cfgPitch").addEventListener("input", e=>{
-      s.pitch = parseFloat(e.target.value); document.getElementById("cfgPitchVal").textContent = s.pitch.toFixed(1); Storage.save();
-    });
-    document.getElementById("cfgVolume").addEventListener("input", e=>{
-      s.volume = parseFloat(e.target.value); document.getElementById("cfgVolumeVal").textContent = s.volume.toFixed(1); Storage.save();
-    });
-    document.getElementById("cfgVisualMode").addEventListener("change", e=>{
-      s.visualMode = e.target.value; Storage.save(); UI.applySettingsToDOM();
-    });
-    document.getElementById("cfgFontScale").addEventListener("input", e=>{
-      s.fontScale = parseFloat(e.target.value); document.getElementById("cfgFontScaleVal").textContent = s.fontScale.toFixed(1);
-      Storage.save(); UI.applySettingsToDOM();
-    });
-    document.getElementById("cfgCols").addEventListener("input", e=>{
-      s.cols = parseInt(e.target.value,10); document.getElementById("cfgColsVal").textContent = s.cols;
-      Storage.save(); UI.applySettingsToDOM();
-    });
-    const contrastToggle = document.getElementById("cfgContrast");
-    contrastToggle.addEventListener("click", ()=>{
-      s.contrast = !s.contrast; Storage.save(); UI.applySettingsToDOM(); Settings.syncFormFromState();
-    });
-    contrastToggle.addEventListener("keydown", e=>{
-      if(e.key==="Enter"||e.key===" "){ e.preventDefault(); contrastToggle.click(); }
-    });
-    const retroToggle = document.getElementById("cfgRetro");
-    retroToggle.addEventListener("click", ()=>{
-      s.retroMode = !s.retroMode; Storage.save(); UI.applySettingsToDOM(); Settings.syncFormFromState();
-    });
-    retroToggle.addEventListener("keydown", e=>{
-      if(e.key==="Enter"||e.key===" "){ e.preventDefault(); retroToggle.click(); }
-    });
-    document.getElementById("cfgRetroColor").addEventListener("change", e=>{
-      s.retroColor = e.target.value; Storage.save(); UI.applySettingsToDOM();
-    });
-    document.getElementById("btnFullscreen").addEventListener("click", ()=>{
-      if(document.fullscreenElement){ document.exitFullscreen(); }
-      else{ document.documentElement.requestFullscreen?.().catch(()=>toast("La pantalla completa no está disponible en este navegador.")); }
-    });
-    document.getElementById("btnTestVoice").addEventListener("click", ()=> Speech.speak("Esta es la voz de GHOST."));
-    document.getElementById("btnImportJson").addEventListener("click", ()=> document.getElementById("fileJson").click());
-    document.getElementById("fileJson").addEventListener("change", e=>{
-      const file = e.target.files[0]; if(!file) return;
-      const reader = new FileReader();
-      reader.onload = ()=> Ghost.importJSON(reader.result);
-      reader.onerror = ()=> toast("No se pudo leer el archivo. Se mantiene el vocabulario básico.");
-      reader.readAsText(file);
-      e.target.value = "";
-    });
-    document.getElementById("btnManageVocab").addEventListener("click", Settings.toggleManager);
-    document.getElementById("btnRestoreGhost").addEventListener("click", ()=>{
-      if(confirm("¿Restaurar el vocabulario básico de GHOST? Se eliminarán las palabras personalizadas (los favoritos volverán a los valores por defecto).")){
-        VocabEngine.restoreGhost();
-        UI.selectCategory("necesidades");
-        Settings.renderManager();
-      }
-    });
-    document.getElementById("btnOpenGhostFromSettings").addEventListener("click", ()=>{
-      Overlays.close("ovSettings"); Overlays.open("ovGhost");
-    });
-  },
-  toggleManager(){
-    const box = document.getElementById("vocabManager");
-    const show = box.style.display === "none";
-    box.style.display = show ? "block" : "none";
-    if(show) Settings.renderManager();
-  },
-  renderManager(){
-    const box = document.getElementById("vocabManager");
-    box.innerHTML = "";
-    state.vocab.forEach(w=>{
-      const row = document.createElement("div");
-      row.className = "vocab-row";
-      row.innerHTML = `
-        <label style="display:flex;align-items:center;gap:8px;flex:1;">
-          <input type="checkbox" ${w.favorite?"checked":""} data-fav="${w.id}">
-          <span>${w.emoji||"🔹"} ${w.text}</span>
-        </label>
-        <span class="cat-tag">${w.category}</span>
-        ${w.custom ? '<span class="badge-otros">personalizado</span>':''}
-      `;
-      box.appendChild(row);
-    });
-    box.querySelectorAll("[data-fav]").forEach(chk=>{
-      chk.addEventListener("change", e=>{
-        VocabEngine.toggleFavorite(e.target.dataset.fav);
-        UI.renderGrid(); UI.renderCategories();
-      });
-    });
-  }
-};
-
-/* ---------------- OVERLAYS ---------------- */
-const Overlays = {
-  open(id){
-    document.getElementById(id).hidden = false;
-    if(id === "ovSettings"){
-      state.appMode = "CONFIGURATION"; Settings.syncFormFromState(); Scanner.stop();
-    }else if(id === "ovGhost"){
-      state.appMode = "GHOST_LOAD"; document.getElementById("ghostText").focus(); Scanner.stop();
-    }else if(id === "ovEmergency"){
-      // Si el barrido jerárquico está activo, entra a la fase de
-      // emergencia en vez de detener el barrido.
-      if(state.settings.scanMode === "hier"){ Scanner.enterEmergencyPhase(); }
-      else{ Scanner.stop(); }
-    }else{
-      Scanner.stop();
-    }
-  },
-  close(id){
-    document.getElementById(id).hidden = true;
-    state.appMode = "COMMUNICATION";
-    if(id === "ovEmergency" && state.settings.scanMode === "hier"){
-      Scanner.enterCategoryPhase();
-    }
-  }
-};
-document.querySelectorAll("[data-close]").forEach(btn=>{
-  btn.addEventListener("click", ()=> Overlays.close(btn.dataset.close));
+$('addPhrase').addEventListener('submit',e=>{e.preventDefault();const form=e.target;const w=validEntry({text:form.elements.text.value,emoji:form.elements.emoji.value,category:'frases'});if(!w)return;if(['si','no'].includes(norm(w.text))){notify('Sí y No ya están siempre presentes.');return;}db.phrases[db.settings.profile].push(w);save();form.elements.text.value='';renderPhraseEditor();notify('Frase añadida.');});
+$('restorePhrases').addEventListener('click',()=>{if(confirm('¿Restaurar las frases predeterminadas de este perfil? Exporta antes un respaldo para conservar las actuales.')){db.phrases[db.settings.profile]=defaultPhrases(db.settings.profile);save();renderPhraseEditor();}});
+function categorySelect(selected){const sel=element('select');for(const c of CATEGORIES.filter(c=>c.id!=='favoritos'))sel.add(new Option(c.label,c.id));sel.value=selected;return sel;}
+for(const id of ['vocabFilter','newWordCategory']){const sel=$(id);if(id==='vocabFilter')sel.add(new Option('Todas las categorías',''));for(const c of CATEGORIES)if(c.id!=='favoritos')sel.add(new Option(c.label,c.id));}
+$('vocabFilter').addEventListener('change',renderVocabEditor);$('vocabSearch').addEventListener('input',renderVocabEditor);
+function renderVocabEditor(){
+ const box=$('vocabEditor');box.replaceChildren();const cat=$('vocabFilter').value,query=norm($('vocabSearch').value);
+ const filtered=db.words.map((w,i)=>({w,i})).filter(({w})=>(!cat||w.category===cat)&&(!query||norm(w.text).includes(query)));
+ box.append(element('p','hint',`${filtered.length} elemento${filtered.length===1?'':'s'}`));
+ for(const {w,i} of filtered){
+  const row=element('div','editor-row');row.append(editorInput(w.emoji,'Emoji de '+w.text,v=>{w.emoji=v;save();}),editorInput(w.text,'Texto de '+w.text,v=>{if(v.trim()){if(w.speech===w.text)w.speech=v.trim();w.text=v.trim();save();}else renderVocabEditor();}),editorInput(w.speech,'Pronunciación de '+w.text,v=>{w.speech=v.trim()||w.text;save();}));
+  const actions=element('div','row-actions');actions.append(rowButton('Favorito: '+w.text,w.favorite?'★':'☆',()=>{w.favorite=!w.favorite;save();renderVocabEditor();}),rowButton('Eliminar palabra: '+w.text,'×',()=>{db.words.splice(i,1);save();renderVocabEditor();}));row.append(actions);
+  const label=element('label','', 'Categoría');const sel=categorySelect(w.category);sel.setAttribute('aria-label','Categoría de '+w.text);sel.addEventListener('change',()=>{w.category=sel.value;save();});label.append(sel);row.append(label);box.append(row);
+ }
+}
+$('addWord').addEventListener('submit',e=>{e.preventDefault();const f=e.target;const w=validEntry({text:f.elements.text.value,emoji:f.elements.emoji.value,category:f.elements.category.value,custom:true});if(!w)return;db.words.push(w);save();f.elements.text.value='';renderVocabEditor();notify('Palabra añadida.');});
+function classify(text){const n=norm(text);const exact=CORE_VOCAB.find(w=>norm(w.text)===n);if(exact)return exact.category;if(text.trim().split(/\s+/).length>2)return 'frases';return 'otros';}
+$('quickLoad').addEventListener('submit',e=>{
+ e.preventDefault();const lines=$('loadText').value.split('\n').map(t=>t.trim()).filter(Boolean);if(!lines.length){notify('Escribe al menos una palabra o frase.');return;}
+ if(lines.length>5000){notify('Carga un máximo de 5000 líneas a la vez.');return;}
+ const toPhrases=$('loadTarget').value==='phrases';const dest=toPhrases?db.phrases[db.settings.profile]:db.words;let count=0;
+ for(const text of lines){if(toPhrases&&['si','no'].includes(norm(text)))continue;dest.push(validEntry({text,category:toPhrases?'frases':classify(text),emoji:'💬',custom:true}));count++;}
+ save();$('loadText').value='';notify(`${count} elementos cargados.`);
 });
-document.querySelectorAll(".overlay").forEach(ov=>{
-  ov.addEventListener("click", e=>{ if(e.target === ov) Overlays.close(ov.id); });
+function download(data,name){const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=element('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+$('export').addEventListener('click',()=>download(db,'ghost-respaldo.json'));$('exportWords').addEventListener('click',()=>download(db.words,'ghost-vocabulario.json'));
+$('import').addEventListener('click',()=>$('file').click());
+$('file').addEventListener('change',async e=>{
+ const file=e.target.files[0];e.target.value='';if(!file)return;
+ if(file.size>5*1024*1024){notify('El archivo supera el límite de 5 MB.');return;}
+ try{
+  const data=JSON.parse(await file.text());
+  if(Array.isArray(data)){const words=cleanList(data);if(!words.length)throw Error('No hay palabras válidas en el archivo.');db.words.push(...words);save();notify(`${words.length} elementos añadidos al vocabulario avanzado.`);}
+  else{const next=parseBackup(data);if(!confirm('¿Reemplazar las listas y la configuración con este respaldo?'))return;db=next;selected=null;category=null;save();applyAppearance();syncSettings();notify('Respaldo restaurado.');}
+ }catch(err){notify('No se pudo importar: '+err.message);}
 });
-
-/* ---------------- ACTIVATION / QUICK-SPEAK HELPERS ----------------
-   Un solo clic (o una sola pulsación del interruptor) selecciona la palabra
-   y la agrega al mensaje en construcción. Un segundo clic/pulsación dentro
-   de DOUBLE_PRESS_MS —en cualquier momento, sin importar la categoría, el
-   modo o la fase del barrido— se interpreta como el gesto de "hablar ahora"
-   y pronuncia de inmediato el mensaje que se ha construido hasta ese punto
-   (o la palabra actual, si el mensaje está vacío). Para salir de una
-   categoría se usa el botón "Salir de categoría" de cada grupo de palabras.
-   Esto funciona igual si la activación viene de un clic real o de
-   el.click() disparado por el interruptor único, porque ambos pasan por el
-   mismo manejador. */
-function handleWordActivation(w){
-  const now = Date.now();
-  if((now - state.lastActivationTs) < DOUBLE_PRESS_MS){
-    state.lastActivationTs = 0;
-    const text = UI.bufferAsText();
-    Speech.speak(text || w.speech || w.text);
-    return;
-  }
-  state.lastActivationTs = now;
-  UI.selectWord(w);
-}
-function handleEmergencyActivation(w){
-  const now = Date.now();
-  if(state.scanPhase === "emergency" &&
-     (now - state.lastEmergActivationTs) < DOUBLE_PRESS_MS){
-    state.lastEmergActivationTs = 0;
-    Scanner.exitCurrentPhase();
-    return;
-  }
-  state.lastEmergActivationTs = now;
-  Speech.speak(w.text);
-}
-
-/* Añade a un botón de palabra: activación normal (clic/tecla), y un
-   acceso de "hablar rápido" configurable (clic derecho o mantener
-   presionado) que pronuncia la palabra sin agregarla al mensaje. */
-function attachTileHandlers(el, word, onActivate){
-  let pressTimer = null;
-  let longPressFired = false;
-
-  el.addEventListener("contextmenu", e=>{
-    if(state.settings.quickSpeakMethod !== "rightclick") return;
-    e.preventDefault();
-    Speech.speak(word.speech || word.text);
-  });
-  el.addEventListener("keydown", e=>{
-    if(state.settings.quickSpeakMethod !== "space") return;
-    if(e.key !== " " && e.key !== "Spacebar") return;
-    e.preventDefault();
-    Speech.speak(word.speech || word.text);
-  });
-  el.addEventListener("pointerdown", e=>{
-    if(state.settings.quickSpeakMethod !== "longpress" || e.button > 0) return;
-    longPressFired = false;
-    pressTimer = setTimeout(()=>{
-      longPressFired = true;
-      Speech.speak(word.speech || word.text);
-      if(navigator.vibrate) navigator.vibrate(30);
-    }, 600);
-  });
-  const cancelPress = ()=> clearTimeout(pressTimer);
-  el.addEventListener("pointerup", cancelPress);
-  el.addEventListener("pointerleave", cancelPress);
-  el.addEventListener("pointercancel", cancelPress);
-
-  el.addEventListener("click", ()=>{
-    if(longPressFired){ longPressFired = false; return; }
-    onActivate();
-  });
-}
-
-/* ---------------- EMERGENCY PANEL ---------------- */
-function renderEmergencyGrid(){
-  const grid = document.getElementById("emergGrid");
-  grid.innerHTML = "";
-  EMERGENCY_WORDS.forEach(w=>{
-    const t = document.createElement("button");
-    t.className = "emerg-tile scan-target";
-    t.innerHTML = `<span class="em">${w.emoji}</span>${w.text}`;
-    t.addEventListener("click", ()=> handleEmergencyActivation(w));
-    grid.appendChild(t);
-  });
-}
-
-/* ---------------- EVENT HANDLERS ---------------- */
-function bindTopLevel(){
-  document.getElementById("btnSpeak").addEventListener("click", ()=>{
-    const text = UI.bufferAsText();
-    if(!text){ toast("El mensaje está vacío. Selecciona palabras primero."); return; }
-    Speech.speak(text);
-  });
-  document.getElementById("btnDelete").addEventListener("click", ()=>{
-    state.buffer.pop(); UI.renderBuffer();
-  });
-  document.getElementById("btnClear").addEventListener("click", ()=>{
-    state.buffer = []; UI.renderBuffer(); document.getElementById("predictStrip").innerHTML="";
-  });
-  document.getElementById("btnSettings").addEventListener("click", ()=> Overlays.open("ovSettings"));
-  document.getElementById("btnGhostLoad").addEventListener("click", ()=> Overlays.open("ovGhost"));
-  document.getElementById("btnEmergency").addEventListener("click", ()=> Overlays.open("ovEmergency"));
-
-  document.getElementById("btnGhostLoadRun").addEventListener("click", ()=>{
-    Ghost.quickLoad(document.getElementById("ghostText").value);
-    Overlays.close("ovGhost");
-    document.getElementById("ghostText").value = "";
-  });
-  document.getElementById("ghostText").addEventListener("keydown", e=>{
-    if(e.key === "Enter" && (e.ctrlKey || e.metaKey)){
-      e.preventDefault();
-      document.getElementById("btnGhostLoadRun").click();
-    }
-  });
-
-  const scanToggle = document.getElementById("scanToggle");
-  scanToggle.addEventListener("click", ()=>{
-    if(state.scanTimer){ Scanner.stop(); state.settings.scanMode = "off"; }
-    else{ state.settings.scanMode = state.settings.scanMode === "off" ? "direct" : state.settings.scanMode; Scanner.start(); }
-    Storage.save();
-  });
-  scanToggle.addEventListener("keydown", e=>{
-    if(e.key==="Enter"||e.key===" "){ e.preventDefault(); scanToggle.click(); }
-  });
-
-  // Global keyboard: selection key for scanning + dual-function Enter
-  document.addEventListener("keydown", e=>{
-    const tag = (e.target && e.target.tagName) || "";
-    const inField = tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
-    if(inField) return; // never interfere with settings / ghost load fields
-
-    if(state.appMode === "SCANNING" || (state.appMode === "COMMUNICATION" && state.scanTimer)){
-      const key = state.settings.selectKey;
-      const matches =
-        (key === "enter" && e.key === "Enter") ||
-        (key === "space" && e.key === " ") ||
-        (key === "any");
-      if(matches){
-        e.preventDefault();
-        Scanner.selectCurrent();
-      }
-    }
-  });
-}
-
-/* ---------------- INITIALIZATION ---------------- */
-function init(){
-  state.appMode = "BOOT";
-  UI.cacheEls();
-  VocabEngine.init();
-  UI.applySettingsToDOM();
-  UI.renderCategories();
-  UI.renderGrid();
-  UI.renderBuffer();
-  renderEmergencyGrid();
-  bindTopLevel();
-  Settings.bind();
-  Settings.syncFormFromState();
-  Speech.loadVoices();
-
-  if(state.settings.scanMode !== "off"){
-    Scanner.start();
-  }
-
-  state.appMode = "READY";
-  state.appMode = "COMMUNICATION";
-
-  window.addEventListener("beforeunload", ()=> Storage.save());
-}
-
-document.addEventListener("DOMContentLoaded", init);
+applyAppearance();populateVoices();if(window.speechSynthesis)window.speechSynthesis.addEventListener('voiceschanged',populateVoices);renderCommunication();
+if(loadNotice)notify(loadNotice);
 </script>
-</body>
-</html>
+</body></html>
