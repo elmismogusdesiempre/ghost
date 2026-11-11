@@ -13,13 +13,15 @@ let leftClicks = 0, rightClicks = 0, appliedClicks = 0, invalidPackets = 0;
 let enabled = false, fault = false, connected = false, connecting = false, stopping = false;
 let port = null, reader = null, readTask = null, lastReadAt = 0, connectionMessage = 'USB desconectado';
 let wasAvailable = false, lastUI = 0;
+let demo = false, demoSnapshot = null, demoTick = 0, demoSample = 0, demoPackets = 0;
 const supported = window.isSecureContext && typeof navigator.serial?.requestPort === 'function';
 const stateLabels = { left: 'Clic izquierdo', rest: 'Reposo', right: 'Clic derecho' };
 $('monitor').innerHTML = `
 <div class="panel">
  <div class="monitor-head"><div><p class="eyebrow">GHOST · Segunda versión</p><h2>Monitor STM32</h2></div><span class="monitor-pill"><span id="usbLED" class="monitor-led"></span><span id="usbStatus" role="status">USB desconectado</span></span></div>
  <p class="hint">PA0 · ADC de 12 bits · USB CDC · 115200 baudios · aproximadamente 500 muestras/s.</p>
- <div class="buttons"><button id="connectSTM" class="primary">Conectar STM32</button><button id="disconnectSTM" disabled>Desconectar</button><button id="resetCounts">Reiniciar contadores</button></div>
+ <div class="buttons"><button id="connectSTM" class="primary">Conectar STM32</button><button id="disconnectSTM" disabled>Desconectar</button><button id="resetCounts">Reiniciar contadores</button><button id="toggleDemo" aria-pressed="false">Activar modo demo</button></div>
+ <p class="hint">El modo demo permite revisar la gráfica y el monitor compacto sin STM32. Sus datos y contadores son simulados y no activan acciones de comunicación.</p>
  <p id="monitorError" role="alert"></p><p id="monitorInfo"></p>
  <div class="monitor-stats">
   <div class="monitor-stat"><small>ADC actual</small><strong id="adcValue">—</strong></div>
@@ -53,11 +55,12 @@ function syncForm() {
   $('bandLeft').textContent = `Izquierdo > ${settings.upper}`; $('bandRest').textContent = `Reposo ${settings.lower}–${settings.upper}`; $('bandRight').textContent = `Derecho < ${settings.lower}`;
 }
 function syncDock() {
-  const show = connected && settings.showDock;
+  const show = demo || (connected && settings.showDock);
   $('monitorDock').hidden = !show; document.body.classList.toggle('monitor-visible', show);
   window.GhostBridge.refresh();
 }
 function gateText() {
+  if (demo) return 'DEMO · señal simulada · no activa acciones de comunicación.';
   if (!connected) return 'Conecta el STM32 para recibir muestras.';
   if (fault) return 'Integración pausada: datos inválidos. Reconecta para recuperar la alineación.';
   if (!lastPacketAt || performance.now() - lastPacketAt > 1000) return 'Sin muestras recientes · acciones pausadas.';
@@ -73,18 +76,21 @@ function updateUI() {
   for (const id of ['adcState', 'dockState']) $(id).textContent = label;
   $('leftCount').textContent = leftClicks; $('rightCount').textContent = rightClicks;
   $('dockCounters').textContent = `Izq. ${leftClicks} · Der. ${rightClicks} · Aplicados ${appliedClicks}`;
-  const status = connecting ? 'Solicitando puerto…' : stopping ? 'Desconectando…' : connected ? fresh ? 'USB conectado · recibiendo' : 'USB conectado · esperando datos' : connectionMessage;
+  const status = demo ? 'DEMO · sin USB real' : connecting ? 'Solicitando puerto…' : stopping ? 'Desconectando…' : connected ? fresh ? 'USB conectado · recibiendo' : 'USB conectado · esperando datos' : connectionMessage;
   for (const id of ['usbStatus','dockUSB']) $(id).textContent = status;
-  for (const id of ['usbLED','dockLED']) $(id).className = `monitor-led${connected && fresh ? ' connected' : fault ? ' error' : ''}`;
-  $('connectSTM').disabled = !supported || connecting || connected || stopping;
+  for (const id of ['usbLED','dockLED']) $(id).className = `monitor-led${demo ? ' demo' : connected && fresh ? ' connected' : fault ? ' error' : ''}`;
+  $('connectSTM').disabled = !supported || demo || connecting || connected || stopping;
   $('disconnectSTM').disabled = !connected || stopping;
-  $('stmEnabled').checked = enabled; $('stmEnabled').disabled = fault;
-  $('monitorGate').textContent = gateText(); $('dockGate').textContent = !enabled ? 'Solo observación' : fault ? 'Datos inválidos · pausado' : gateText();
-  $('streamStats').textContent = `${sampleCount} muestras · ${decoder.packets} paquetes válidos · ${invalidPackets} inválidos · ${appliedClicks} acciones aplicadas · ventana de 5 s a 500 Hz`;
+  $('toggleDemo').textContent = demo ? 'Detener demo' : 'Activar modo demo';
+  $('toggleDemo').setAttribute('aria-pressed', String(demo));
+  $('toggleDemo').disabled = connected || connecting || stopping;
+  $('stmEnabled').checked = enabled; $('stmEnabled').disabled = demo || fault;
+  $('monitorGate').textContent = gateText(); $('dockGate').textContent = demo ? gateText() : !enabled ? 'Solo observación' : fault ? 'Datos inválidos · pausado' : gateText();
+  $('streamStats').textContent = `${demo ? 'DEMO · ' : ''}${sampleCount} muestras ${demo ? 'simuladas' : ''} · ${demo ? demoPackets : decoder.packets} paquetes ${demo ? 'simulados' : 'válidos'} · ${invalidPackets} inválidos · ${appliedClicks} acciones aplicadas · ventana de 5 s a 500 Hz`;
 }
 function packet(samples, canForward) {
   lastPacketAt = performance.now();
-  const available = canForward && enabled && !fault && window.GhostBridge.available();
+  const available = !demo && canForward && enabled && !fault && window.GhostBridge.available();
   if (!available || available !== wasAvailable) forwardDetector.reset();
   wasAvailable = available;
   for (const adc of samples) {
@@ -129,7 +135,7 @@ async function readLoop() {
   }
 }
 async function connect() {
-  if (!supported || connected || connecting || stopping) return;
+  if (!supported || demo || connected || connecting || stopping) return;
   connecting = true; $('monitorError').textContent = ''; updateUI();
   let chosen;
   try {
@@ -152,10 +158,42 @@ async function disconnect() {
   try { await reader?.cancel(); } catch {}
   await readTask;
 }
+function toggleDemo() {
+  if (connected || connecting || stopping) return;
+  if (!demo) {
+    demoSnapshot = { ring: ring.slice(), ringIndex, ringSize, sampleCount, lastADC, lastPacketAt, leftClicks, rightClicks, appliedClicks, invalidPackets, fault, error: $('monitorError').textContent };
+    demo = true; enabled = false; fault = false; ringSize = ringIndex = sampleCount = 0; lastADC = null; lastPacketAt = 0;
+    leftClicks = rightClicks = appliedClicks = invalidPackets = 0; demoPackets = demoSample = 0; demoTick = performance.now(); $('monitorError').textContent = '';
+  } else {
+    demo = false; ring.set(demoSnapshot.ring);
+    ({ ringIndex, ringSize, sampleCount, lastADC, lastPacketAt, leftClicks, rightClicks, appliedClicks, invalidPackets, fault } = demoSnapshot);
+    $('monitorError').textContent = demoSnapshot.error; demoSnapshot = null;
+  }
+  resetDetection();
+  $('monitorDock').dataset.demo = String(demo);
+  for (const id of ['signalCanvas','dockCanvas']) {
+    const canvas = $(id); canvas.dataset.originalLabel ||= canvas.getAttribute('aria-label');
+    canvas.setAttribute('aria-label', demo ? 'DEMO · señal ADC simulada con tres franjas de estados' : canvas.dataset.originalLabel);
+  }
+  syncDock(); updateUI();
+}
+function tickDemo(now) {
+  if (!demo) return;
+  if (now - demoTick > 250) demoTick = now - 50;
+  while (now - demoTick >= 50) {
+    demoTick += 50;
+    const samples = Array.from({ length: 25 }, () => {
+      const t = demoSample++ / 500;
+      return Math.round(2048 + 1850 * Math.sin(2 * Math.PI * t / 6) + 60 * Math.sin(2 * Math.PI * t * 7));
+    });
+    demoPackets++; packet(samples, false);
+  }
+}
+$('toggleDemo').addEventListener('click', toggleDemo);
 $('connectSTM').addEventListener('click', connect);
 $('disconnectSTM').addEventListener('click', disconnect);
 $('resetCounts').addEventListener('click', () => { leftClicks = rightClicks = appliedClicks = 0; updateUI(); });
-$('stmEnabled').addEventListener('change', e => { enabled = e.target.checked && connected && !fault; forwardDetector.reset(); wasAvailable = false; updateUI(); });
+$('stmEnabled').addEventListener('change', e => { enabled = e.target.checked && !demo && connected && !fault; forwardDetector.reset(); wasAvailable = false; updateUI(); });
 $('thresholdForm').addEventListener('submit', e => {
   e.preventDefault();
   try {
@@ -201,6 +239,7 @@ function draw(canvas) {
   ctx.stroke();
 }
 function frame(now) {
+  tickDemo(now);
   if (now-lastUI > 66) {
     lastUI=now;
     if (!lastPacketAt || now-lastPacketAt>1000) { forwardDetector.reset(); wasAvailable=false; }

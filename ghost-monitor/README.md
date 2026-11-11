@@ -74,3 +74,9 @@ Se prueba también en Chromium con un puerto Web Serial simulado y paquetes bina
 
 - [Chrome Developers: lectura y escritura con Web Serial](https://developer.chrome.com/docs/capabilities/serial): permiso mediante gesto del usuario, puerto, opciones de apertura, flujo de lectura y liberación del lector antes de cerrar.
 - [MDN: Web Serial API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API): contexto seguro, USB CDC y disponibilidad de navegador.
+
+## Modo demo sin hardware
+
+En **Ctrl + Alt + M → Monitor STM32**, pulsa **Activar modo demo** y luego **Volver a comunicar** para revisar el monitor compacto. La señal artificial recorre los tres estados usando los umbrales actuales y actualiza ADC, franjas y contadores simulados. La interfaz indica **DEMO · sin USB real**. El compacto se muestra durante la demo aunque normalmente lo hayas ocultado.
+
+La demo no solicita puertos ni produce acciones de comunicación; los clics habituales del mouse siguen funcionando. El control de integración USB queda deshabilitado. Demo y adquisición USB son excluyentes: detén la demo antes de conectar y desconecta el STM32 antes de iniciar una demo. Para salir, vuelve a configuración y pulsa **Detener demo**. Se restaura la visualización y los contadores anteriores; las muestras simuladas no se mezclan con la sesión real. El modo demo no queda activado al recargar. Los cambios de umbrales que apliques sí se guardan como de costumbre.
