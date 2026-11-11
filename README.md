@@ -34,3 +34,9 @@ La voz depende del navegador y del sistema operativo. Los mensajes permanecen vi
 ## Verificación
 
 Se comprobó en Chromium: clics globales en posiciones ajenas a los botones, Sí/No, selección y pronunciación de frases, barrido automático, pausa en configuración, perfiles, construcción de mensajes, teclado, persistencia, importación JSON válida e inválida, migración v1 y diseño en escritorio y pantalla estrecha. La prueba de despacho de voz utilizó un sustituto de `speechSynthesis.speak`; la voz y el hardware físicos requieren una prueba en el dispositivo de uso.
+
+## Regreso automático y pantalla completa sin desplazamiento
+
+La configuración regresa al modo de comunicación después de 30 segundos sin usar el teclado, pulsar un control, editar o desplazar la configuración. Un contador muestra el tiempo restante. Mover el puntero no reinicia el contador. Los cambios del campo activo se guardan antes de salir. Al volver de una pestaña suspendida se comprueba el tiempo transcurrido.
+
+Las tres etapas ocupan el ancho y alto disponibles sin scroll. Las casillas se adaptan al tamaño y orientación de la ventana. Si hay demasiadas opciones para mantenerlas legibles, se dividen en páginas; «Página anterior» y «Página siguiente» se eligen mediante el mismo barrido y clic izquierdo. No se necesita apuntar ni desplazar. El mensaje largo conserva todo su contenido para la voz y muestra automáticamente su parte más reciente.
