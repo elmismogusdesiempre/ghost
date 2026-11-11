@@ -42,13 +42,13 @@ $('monitor').innerHTML = `
   <label>Estabilidad de señal y de reposo (ms)<input type="number" id="holdADC" min="0" max="500" step="2" required></label>
   <label class="check"><input id="showMonitorDock" type="checkbox">Mostrar monitor compacto durante la comunicación</label>
  </div><div class="buttons"><button type="submit" class="primary">Aplicar opciones</button></div><p id="thresholdResult" role="status" class="hint"></p></form>
- <p class="hint">Los sliders y los valores numéricos de umbral se aplican y guardan al instante. El botón aplica las demás opciones. Para ajustar los sliders del compacto, entra con Ctrl + Alt + M: el monitor permanece visible y las acciones de comunicación se pausan.</p>
+ <p class="hint">Los sliders y los valores numéricos de umbral se aplican y guardan al instante. El botón aplica las demás opciones. Para ajustar los sliders del compacto sin salir de la comunicación, usa Ctrl + Alt + U. También puedes entrar con Ctrl + Alt + M: el monitor permanece visible y las acciones de comunicación se pausan.</p>
  <p class="hint">Los límites exactos pertenecen al reposo. La estabilidad utiliza el tiempo de las muestras, suponiendo 500 Hz. Tras conectar, cambiar umbrales o volver a comunicación, primero debe detectarse reposo estable.</p>
  <p class="notice">El puerto debe estar libre: cierra la conexión de MATLAB antes de conectar aquí. Selecciona el puerto USB CDC del STM32 en el diálogo del navegador. Si no aparece, revisa el cable USB, el firmware CDC y el controlador del sistema.</p>
  <p class="hint">Formato esperado: 50 bytes, 25 muestras, byte alto primero; ADC = alto × 100 + bajo. No se envían comandos ni se modifica el firmware. El protocolo no incluye cabecera ni checksum: si se conecta a mitad de una muestra o se pierde un byte, no es posible garantizar la sincronización. Ante datos inválidos, la integración se pausa; reconecta y reinicia la transmisión desde un límite de paquete conocido.</p>
  <p class="hint"><a href="../">Abrir GHOST actual</a> · <a href="/ghost-monitor/README.md" target="_blank" rel="noopener">Guía técnica</a> · <a href="https://developer.chrome.com/docs/capabilities/serial" target="_blank" rel="noopener">Web Serial: documentación oficial</a></p>
 </div>`;
-$('monitorDock').innerHTML = `<div class="dock-summary"><div class="monitor-pill"><span id="dockLED" class="monitor-led"></span><span id="dockUSB">USB desconectado</span></div><div><strong class="dock-value" id="dockADC">—</strong> <span id="dockState">Sin datos</span></div><div class="dock-counters" id="dockCounters">Izq. 0 · Der. 0</div><div id="dockGate">Solo observación</div><div class="dock-hint">Ctrl + Alt + M → Monitor STM32</div></div><div class="monitor-chart"><canvas id="dockCanvas" role="img" aria-label="Monitor compacto de señal ADC con tres franjas de estados"></canvas></div><div class="dock-controls"><label for="dockLowerRange">Derecho &lt; <output id="dockLowerValue">1500</output><input id="dockLowerRange" type="range" min="0" max="4094" step="1" aria-label="Umbral inferior del monitor compacto"></label><label for="dockUpperRange">Izquierdo &gt; <output id="dockUpperValue">2500</output><input id="dockUpperRange" type="range" min="1" max="4095" step="1" aria-label="Umbral superior del monitor compacto"></label><p id="dockSliderHint">Ctrl + Alt + M para ajustar</p></div>`;
+$('monitorDock').innerHTML = `<div class="dock-summary"><div class="monitor-pill"><span id="dockLED" class="monitor-led"></span><span id="dockUSB">USB desconectado</span></div><div><strong class="dock-value" id="dockADC">—</strong> <span id="dockState">Sin datos</span></div><div class="dock-counters" id="dockCounters">Izq. 0 · Der. 0</div><div id="dockGate">Solo observación</div><div class="dock-hint">Ctrl + Alt + U: ajustar · Ctrl + F1: ayuda</div></div><div class="monitor-chart"><canvas id="dockCanvas" role="img" aria-label="Monitor compacto de señal ADC con tres franjas de estados"></canvas></div><div class="dock-controls"><label for="dockLowerRange">Derecho &lt; <output id="dockLowerValue">1500</output><input id="dockLowerRange" type="range" min="0" max="4094" step="1" aria-label="Umbral inferior del monitor compacto"></label><label for="dockUpperRange">Izquierdo &gt; <output id="dockUpperValue">2500</output><input id="dockUpperRange" type="range" min="1" max="4095" step="1" aria-label="Umbral superior del monitor compacto"></label><p id="dockSliderHint">Ctrl + Alt + M para ajustar</p></div>`;
 function saveSettings() { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch { $('thresholdResult').textContent = 'No se pudo guardar en este navegador.'; } }
 function resetDetection() { detector.reset(); forwardDetector.reset(); wasAvailable = false; }
 function syncThresholdControls() {
@@ -62,7 +62,7 @@ function syncThresholdControls() {
   $('bandLeft').textContent = `Izquierdo > ${settings.upper}`; $('bandRest').textContent = `Reposo ${settings.lower}–${settings.upper}`; $('bandRight').textContent = `Derecho < ${settings.lower}`;
 }
 function applyLiveThreshold(key, value) {
-  if (!window.GhostBridge.configuration()) return;
+  if (!window.GhostBridge.adjustable()) return;
   try {
     const next = validateSettings({ ...settings, [key]: Number(value) });
     if (settings[key] === next[key]) return;
@@ -81,12 +81,14 @@ function syncForm() {
   $('holdADC').value = settings.hold; $('showMonitorDock').checked = settings.showDock;
 }
 function syncDock() {
-  const show = demo || (connected && settings.showDock);
+  const show = window.GhostBridge.quickAdjust() || demo || (connected && settings.showDock);
   $('monitorDock').hidden = !show; document.body.classList.toggle('monitor-visible', show);
   window.GhostBridge.refresh();
 }
 function gateText() {
   if (demo) return 'DEMO · señal simulada · no activa acciones de comunicación.';
+  if (window.GhostBridge.helpOpen()) return 'Ayuda abierta · acciones de comunicación pausadas.';
+  if (window.GhostBridge.quickAdjust()) return 'Ajuste rápido · acciones pausadas; la señal continúa en vivo.';
   if (!connected) return 'Conecta el STM32 para recibir muestras.';
   if (fault) return 'Integración pausada: datos inválidos. Reconecta para recuperar la alineación.';
   if (!lastPacketAt || performance.now() - lastPacketAt > 1000) return 'Sin muestras recientes · acciones pausadas.';
@@ -110,8 +112,8 @@ function updateUI() {
   $('toggleDemo').textContent = demo ? 'Detener demo' : 'Activar modo demo';
   $('toggleDemo').setAttribute('aria-pressed', String(demo));
   $('toggleDemo').disabled = connected || connecting || stopping;
-  for (const id of ['dockLowerRange','dockUpperRange']) $(id).disabled = !window.GhostBridge.configuration();
-  $('dockSliderHint').textContent = window.GhostBridge.configuration() ? 'Ajuste en vivo · comunicación pausada' : 'Ctrl + Alt + M para ajustar';
+  for (const id of ['dockLowerRange','dockUpperRange']) $(id).disabled = !window.GhostBridge.adjustable();
+  $('dockSliderHint').textContent = window.GhostBridge.adjustable() ? 'Ajuste en vivo · comunicación pausada' : 'Ctrl + Alt + U para ajustar';
   $('stmEnabled').checked = enabled; $('stmEnabled').disabled = demo || fault;
   $('monitorGate').textContent = gateText(); $('dockGate').textContent = demo ? gateText() : !enabled ? 'Solo observación' : fault ? 'Datos inválidos · pausado' : gateText();
   $('streamStats').textContent = `${demo ? 'DEMO · ' : ''}${sampleCount} muestras ${demo ? 'simuladas' : ''} · ${demo ? demoPackets : decoder.packets} paquetes ${demo ? 'simulados' : 'válidos'} · ${invalidPackets} inválidos · ${appliedClicks} acciones aplicadas · ventana de 5 s a 500 Hz`;
@@ -232,7 +234,7 @@ $('thresholdForm').addEventListener('submit', e => {
   } catch (error) { $('thresholdResult').textContent = error.message; }
   updateUI();
 });
-window.addEventListener('ghost-mode-change', () => { forwardDetector.reset(); wasAvailable = false; });
+window.addEventListener('ghost-mode-change', () => { forwardDetector.reset(); wasAvailable = false; syncDock(); updateUI(); });
 window.addEventListener('blur', () => { forwardDetector.reset(); wasAvailable = false; });
 document.addEventListener('visibilitychange', () => { forwardDetector.reset(); wasAvailable = false; });
 navigator.serial?.addEventListener('disconnect', e => { if (port && (e.target === port || e.port === port)) void disconnect(); });

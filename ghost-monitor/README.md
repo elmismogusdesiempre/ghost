@@ -86,3 +86,10 @@ La demo no solicita puertos ni produce acciones de comunicación; los clics habi
 Los umbrales inferior y superior tienen sliders en la configuración y en el monitor compacto. Mover cualquiera aplica y guarda inmediatamente el umbral: se sincronizan los valores numéricos, los otros sliders, las franjas y la clasificación de la señal. No requiere pulsar un botón. Los sliders no permiten que los límites se crucen. Cada cambio reinicia el detector y exige volver a reposo estable.
 
 Para mover los sliders del compacto, entra con **Ctrl + Alt + M**: el compacto permanece visible al pie de la configuración y el cursor vuelve a estar disponible. Al regresar a comunicación, los sliders muestran los valores activos y quedan bloqueados para que los dos clics sigan siendo entradas de comunicación en cualquier posición. El retorno automático por inactividad se conserva. Funciona tanto con USB real como en modo demo; ajustar umbrales en demo también guarda los valores para el uso posterior.
+
+## Ajuste rápido y ayuda de atajos
+
+- **Ctrl + Alt + U:** entra y sale del ajuste rápido. Mantiene visible la pantalla de comunicación, muestra el compacto incluso sin conexión, recupera el cursor y habilita sus sliders. Se pausan barrido, voz y entradas de comunicación; las gráficas y la lectura USB/demo continúan. El botón «Volver a comunicar», Esc o 30 segundos sin actividad regresan al uso normal y ocultan el cursor.
+- **Ctrl + F1:** abre o cierra una ayuda modal con todos los atajos implementados. Incluye el atajo de configuración realmente seleccionado (M, G o Y), las tres etapas, el ajuste rápido y Esc. Se puede cerrar con su botón o Esc. Al cerrar normalmente vuelve al contexto anterior; tras 30 segundos sin actividad vuelve directamente a comunicación.
+
+La actividad en controles/teclado reinicia el contador. Cambiar de etapa desde la ayuda o el ajuste rápido regresa directamente a comunicación. La versión principal fuera de `/ghost-monitor/` no se modifica.

@@ -46,6 +46,7 @@ body.communicating .grid .tile.letter-key .label{font-size:min(78cqw,78cqh);line
 </head>
 <body class="communicating">
 <header id="header" hidden><div class="brand"><svg viewBox="0 0 30 34" fill="none" aria-hidden="true"><path d="M4 29V14C4 7 8 3 15 3s11 4 11 11v15l-5-3-6 4-6-4-5 3Z" stroke="currentColor" stroke-width="2"/><path d="M11 14v4m8-4v4" stroke="currentColor" stroke-width="3"/></svg>GHOST</div><div class="mode-label" id="modeLabel"></div></header>
+<div id="quickBar" hidden><div><strong>Ajuste rápido del monitor</strong><span id="quickCountdown"></span></div><button id="endQuickAdjust">Volver a comunicar</button></div>
 <main id="communication" aria-label="Comunicación"></main>
 <aside id="monitorDock" aria-label="Monitor STM32 en vivo" hidden></aside>
 <main id="settings" hidden aria-label="Configuración para acompañante">
@@ -70,6 +71,18 @@ body.communicating .grid .tile.letter-key .label{font-size:min(78cqw,78cqh);line
 <section id="data" role="tabpanel" aria-labelledby="tab-data" hidden><div class="panel"><h2>Carga rápida</h2><p class="hint">Escribe o pega una palabra o frase por línea.</p><form id="quickLoad"><label>Texto para cargar<textarea id="loadText" rows="6" maxlength="100000" placeholder="Quiero agua&#10;Necesito ayuda&#10;Quiero descansar"></textarea></label><div class="fields"><label>Destino<select id="loadTarget"><option value="phrases">Frases útiles del perfil actual</option><option value="vocab">Vocabulario avanzado · clasificación automática</option></select></label></div><div class="buttons"><button class="primary" type="submit">Cargar texto</button></div></form></div><div class="panel"><h2>Importar y exportar</h2><p class="hint">Acepta los archivos JSON de vocabulario de la versión original y los respaldos completos de esta versión. Un vocabulario se añade a las palabras existentes; un respaldo completo reemplaza la configuración y las listas.</p><div class="buttons"><button id="import">Importar JSON</button><button id="export">Descargar respaldo completo</button><button id="exportWords">Exportar vocabulario JSON</button></div><input id="file" type="file" accept=".json,application/json" hidden><p class="notice">El vocabulario personal se guarda localmente. Exporta un respaldo para trasladarlo a otro equipo o navegador. La versión anterior está conservada en <a href="../ghost-original.html" target="_blank" rel="noopener">ghost-original.html</a>.</p></div></section>
 <section id="monitor" role="tabpanel" aria-labelledby="tab-monitor" hidden><div class="panel"><h2>Monitor STM32</h2><p id="monitorLoadStatus" role="status">Cargando el panel de monitoreo…</p><p class="hint">No necesitas conectar el STM32 para ver el panel. Si no termina de cargar, recarga la página y comprueba la conexión a Internet.</p></div></section>
 </main>
+<dialog id="shortcutsDialog" aria-labelledby="shortcutsTitle">
+<div class="help-heading"><h2 id="shortcutsTitle">Atajos de GHOST Monitor</h2><button id="closeShortcuts" autofocus aria-label="Cerrar ayuda">Cerrar ✕</button></div>
+<p class="hint">Mientras esta ayuda está abierta, la comunicación está pausada y el cursor está visible. La señal y la gráfica continúan.</p>
+<table class="shortcut-table"><thead><tr><th>Atajo</th><th>Acción</th></tr></thead><tbody>
+<tr><td>Ctrl + Alt + 1</td><td>Etapa 1 · Sí / No</td></tr><tr><td>Ctrl + Alt + 2</td><td>Etapa 2 · Frases útiles</td></tr><tr><td>Ctrl + Alt + 3</td><td>Etapa 3 · Construir mensajes</td></tr>
+<tr><td id="helpConfigShortcut">Ctrl + Alt + M</td><td>Entrar o salir de configuración</td></tr>
+<tr><td>Ctrl + Alt + U</td><td>Ajuste rápido: cursor y sliders, conservando visible la pantalla de comunicación</td></tr>
+<tr><td>Ctrl + F1</td><td>Abrir o cerrar esta ayuda</td></tr><tr><td>Esc</td><td>Cerrar ayuda o salir del ajuste rápido</td></tr>
+</tbody></table>
+<p id="helpShortcutNote" class="hint"></p><p class="hint">Los números superiores y el teclado numérico permiten cambiar de etapa. En Sí/No: izquierdo = sí, derecho = no. En las etapas 2 y 3: izquierdo = seleccionar, derecho = hablar. Los sliders se aplican al instante.</p>
+<p id="helpCountdown" role="timer" aria-live="off"></p>
+</dialog>
 <div id="toast" role="status" hidden></div><div id="announcement" class="sr-only" aria-live="polite"></div>
 <script>
 'use strict';
@@ -232,6 +245,7 @@ try{
   }
  }
 }catch{loadNotice='No se pudo recuperar la configuración guardada. Puedes importar tu respaldo en configuración.';}
+let quickAdjust=false,helpOpen=false;
 let config=false,category=null,index=0,targets=[],message='',selected=null,timer=null,pauseUntil=0,lastInput=-Infinity,lastButton=-1,voices=[],speaking=false,speechToken=0,spokenTimer=null,progressStart=0,currentTab='general';
 let activeWindow=!document.hidden;
 function notify(text){$('toast').textContent=text;$('toast').hidden=false;clearTimeout(notify.timer);notify.timer=setTimeout(()=>$('toast').hidden=true,4500);}
@@ -250,7 +264,7 @@ function tile(item,action,extra=''){
 function phraseList(){return [...BASIC,...db.phrases[db.settings.profile].filter(w=>!['si','no'].includes(norm(w.text)))];}
 function wordsFor(cat){return db.words.filter(w=>cat==='favoritos'?w.favorite:w.category===cat);}
 function stopScan(){clearTimeout(timer);timer=null;}
-function canScan(){return !config&&db.settings.stage!==1&&activeWindow&&!document.hidden&&!speaking;}
+function canScan(){return !config&&!quickAdjust&&!helpOpen&&db.settings.stage!==1&&activeWindow&&!document.hidden&&!speaking;}
 function scheduleScan(delay=db.settings.speed){
  stopScan();if(!canScan())return;
  const actual=Math.max(delay,pauseUntil-Date.now());progressStart=Date.now();
@@ -342,27 +356,65 @@ function speak(text){
 function shortcutLabel(){return 'Ctrl + Alt + '+db.settings.shortcut.slice(-1);}
 const CONFIG_IDLE_MS=30000;
 let configLastActivity=0,configWatchdog=null;
-function resetConfigIdle(){if(config)configLastActivity=Date.now();}
+function resetConfigIdle(){if(config||quickAdjust||helpOpen)configLastActivity=Date.now();}
 function checkConfigIdle(){
- if(!config)return;
+ if(!config&&!quickAdjust&&!helpOpen)return;
  const remaining=Math.max(0,CONFIG_IDLE_MS-(Date.now()-configLastActivity));
  $('configCountdown').textContent=`Regreso automático a comunicación en ${Math.ceil(remaining/1000)} s sin actividad. Usar el teclado o los controles reinicia el tiempo.`;
- if(remaining===0)toggleConfig();
+ $('quickCountdown').textContent=` · Regreso en ${Math.ceil(remaining/1000)} s sin actividad`;
+ $('helpCountdown').textContent=`Regreso automático a comunicación en ${Math.ceil(remaining/1000)} s sin actividad.`;
+ if(remaining===0)returnToCommunication();
 }
 for(const eventName of ['pointerdown','keydown','input','change','wheel']){
  document.addEventListener(eventName,e=>{if(e.isTrusted)resetConfigIdle();},{capture:true,passive:true});
 }
 document.addEventListener('visibilitychange',checkConfigIdle);
 window.addEventListener('focus',checkConfigIdle);
+function restartCompanionIdle(){
+ clearInterval(configWatchdog);configWatchdog=null;
+ if(config||quickAdjust||helpOpen){configLastActivity=Date.now();checkConfigIdle();configWatchdog=setInterval(checkConfigIdle,250);}
+}
+function updateCompanionCursor(){document.body.classList.toggle('companion-mode',quickAdjust||helpOpen);}
+function setQuickAdjust(value){
+ if(helpOpen)closeShortcuts(false);
+ if(value&&config)toggleConfig();
+ quickAdjust=value;stopScan();cancelSpeech();lastInput=-Infinity;lastButton=-1;
+ document.body.classList.toggle('quick-adjust',value);$('quickBar').hidden=!value;updateCompanionCursor();
+ window.dispatchEvent(new Event('ghost-mode-change'));renderCommunication();restartCompanionIdle();
+ if(value)$('dockLowerRange')?.focus();else document.activeElement?.blur();
+}
+function closeShortcuts(resume=true){
+ if(!helpOpen)return;helpOpen=false;$('shortcutsDialog').close();updateCompanionCursor();
+ window.dispatchEvent(new Event('ghost-mode-change'));
+ if(resume){restartCompanionIdle();if(!config&&!quickAdjust){document.activeElement?.blur();highlight();scheduleScan();}}
+}
+function toggleShortcuts(){
+ if(helpOpen){closeShortcuts();return;}
+ helpOpen=true;stopScan();cancelSpeech();updateCompanionCursor();
+ $('helpConfigShortcut').textContent=shortcutLabel();
+ $('helpShortcutNote').textContent=`Atajo de configuración activo: ${shortcutLabel()}. Puedes elegir Ctrl + Alt + M, G o Y en Uso y apariencia; solo funciona el elegido.`;
+ window.dispatchEvent(new Event('ghost-mode-change'));$('shortcutsDialog').showModal();restartCompanionIdle();
+}
+function returnToCommunication(){
+ closeShortcuts(false);
+ if(quickAdjust)setQuickAdjust(false);
+ if(config)toggleConfig();
+ restartCompanionIdle();
+}
+$('endQuickAdjust').addEventListener('click',()=>setQuickAdjust(false));
+$('closeShortcuts').addEventListener('click',()=>closeShortcuts());
+$('shortcutsDialog').addEventListener('cancel',e=>{e.preventDefault();closeShortcuts();});
 function toggleConfig(){
+ if(helpOpen)closeShortcuts(false);
+ if(quickAdjust)setQuickAdjust(false);
  if(config)document.activeElement?.blur(); // Commit a pending field change before automatic return.
  config=!config;window.dispatchEvent(new Event('ghost-mode-change'));clearInterval(configWatchdog);configWatchdog=null;stopScan();cancelSpeech();lastInput=-Infinity;lastButton=-1;
  document.body.classList.toggle('communicating',!config);$('communication').hidden=config;$('settings').hidden=!config;
- if(config){$('header').hidden=false;$('modeLabel').textContent='Configuración · comunicación en pausa';syncSettings();showTab(currentTab);$('settingsTitle').focus();configLastActivity=Date.now();checkConfigIdle();configWatchdog=setInterval(checkConfigIdle,250);}
+ if(config){$('header').hidden=false;$('modeLabel').textContent='Configuración · comunicación en pausa';syncSettings();showTab(currentTab);$('settingsTitle').focus();restartCompanionIdle();}
  else{document.activeElement?.blur();pauseUntil=0;window.scrollTo(0,0);renderCommunication();}
 }
 function activateGhostInput(button, source='stm32'){
- if(config || document.hidden || ![0,2].includes(button))return false;
+ if(config || quickAdjust || helpOpen || document.hidden || ![0,2].includes(button))return false;
  if(source==='stm32' && (!activeWindow || speaking))return false;
  if(!activeWindow){activeWindow=true;highlight();scheduleScan();}
  if(db.settings.stage===1){basicSay(button===0?0:1);return true;}
@@ -370,12 +422,12 @@ function activateGhostInput(button, source='stm32'){
  if(speaking)return false;
  targets[index]?.action();return true;
 }
-window.GhostBridge=Object.freeze({activate:activateGhostInput,available:()=>!config&&!document.hidden&&activeWindow&&!speaking,configuration:()=>config,refresh:()=>{if(!config)renderCommunication();}});
+window.GhostBridge=Object.freeze({activate:activateGhostInput,available:()=>!config&&!quickAdjust&&!helpOpen&&!document.hidden&&activeWindow&&!speaking,configuration:()=>config,adjustable:()=>!helpOpen&&(config||quickAdjust),quickAdjust:()=>quickAdjust,helpOpen:()=>helpOpen,refresh:()=>{if(!config)renderCommunication();}});
 
 // Capture before any target handlers: a switch click never depends on pointer location.
 for(const name of ['mousedown','mouseup','click','dblclick','auxclick','contextmenu']){
  window.addEventListener(name,e=>{
-  if(config)return;
+  if(config||quickAdjust||helpOpen)return;
   e.preventDefault();e.stopImmediatePropagation();
   if(name!=='mousedown'||![0,2].includes(e.button))return;
   const now=performance.now();if(e.button===lastButton&&now-lastInput<db.settings.debounce)return;
@@ -384,16 +436,22 @@ for(const name of ['mousedown','mouseup','click','dblclick','auxclick','contextm
  },{capture:true});
 }
 function switchStage(stage){
+ if(helpOpen)closeShortcuts(false);
+ if(quickAdjust)setQuickAdjust(false);
+ restartCompanionIdle();
  window.dispatchEvent(new Event('ghost-mode-change'));
  if(config)document.activeElement?.blur();
  cancelSpeech();stopScan();db.settings.stage=stage;category=null;screenPage=0;pauseUntil=0;lastInput=-Infinity;lastButton=-1;save();
  if(config)toggleConfig();else renderCommunication();
 }
 window.addEventListener('keydown',e=>{
+ if(e.ctrlKey&&!e.altKey&&!e.shiftKey&&e.code==='F1'){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)toggleShortcuts();return;}
+ if(e.ctrlKey&&e.altKey&&!e.shiftKey&&e.code==='KeyU'){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)setQuickAdjust(!quickAdjust);return;}
+ if(e.key==='Escape'&&(helpOpen||quickAdjust)){e.preventDefault();e.stopImmediatePropagation();if(helpOpen)closeShortcuts();else setQuickAdjust(false);return;}
  const stageMatch=/^(?:Digit|Numpad)([123])$/.exec(e.code);
  if(e.ctrlKey&&e.altKey&&!e.shiftKey&&stageMatch){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)switchStage(Number(stageMatch[1]));return;}
  if(e.ctrlKey&&e.altKey&&!e.shiftKey&&e.code===db.settings.shortcut){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)toggleConfig();return;}
- if(!config&&['Tab','Enter',' ','ContextMenu'].includes(e.key)){e.preventDefault();e.stopImmediatePropagation();}
+ if(!config&&!quickAdjust&&!helpOpen&&['Tab','Enter',' ','ContextMenu'].includes(e.key)){e.preventDefault();e.stopImmediatePropagation();}
 },{capture:true});
 window.addEventListener('blur',()=>{activeWindow=false;stopScan();highlight();});
 window.addEventListener('focus',()=>{activeWindow=true;highlight();scheduleScan();});
@@ -407,7 +465,7 @@ function populateVoices(){
 const configFields={cfgStage:['stage',Number],cfgProfile:['profile',String],cfgSpeed:['speed',v=>Number(v)*1000],cfgPause:['pause',v=>Number(v)*1000],cfgDebounce:['debounce',Number],cfgShortcut:['shortcut',String],cfgCols:['cols',Number],cfgScale:['scale',Number],cfgVisual:['visual',String],cfgContrast:['contrast',Boolean],cfgClear:['clearAfter',Boolean],cfgVoice:['voice',String],cfgRate:['rate',Number],cfgPitch:['pitch',Number],cfgVolume:['volume',Number]};
 function syncSettings(){
  for(const [id,[key]] of Object.entries(configFields)){const el=$(id);if(el.type==='checkbox')el.checked=db.settings[key];else el.value=['speed','pause'].includes(key)?db.settings[key]/1000:db.settings[key];}
- $('shortcutHelp').textContent=`${shortcutLabel()} alterna entre comunicación y configuración. Ctrl + Alt + 1: Sí/No; Ctrl + Alt + 2: frases útiles; Ctrl + Alt + 3: construir mensajes. Estos atajos abren directamente la comunicación y guardan la etapa elegida. El cursor desaparece en comunicación y vuelve aquí. Los clics se reciben dentro de esta página; mantén la ventana activa. En Sí/No: izquierdo = sí y derecho = no. En las otras etapas: izquierdo = seleccionar y derecho = hablar.`;
+ $('shortcutHelp').textContent=`${shortcutLabel()} alterna entre comunicación y configuración. Ctrl + Alt + 1: Sí/No; Ctrl + Alt + 2: frases útiles; Ctrl + Alt + 3: construir mensajes. Ctrl + Alt + U: ajuste rápido del monitor; Ctrl + F1: ayuda de atajos. Estos atajos de etapa abren directamente la comunicación y guardan la etapa elegida. El cursor desaparece en comunicación y vuelve aquí. Los clics se reciben dentro de esta página; mantén la ventana activa. En Sí/No: izquierdo = sí y derecho = no. En las otras etapas: izquierdo = seleccionar y derecho = hablar.`;
  populateVoices();
 }
 for(const [id,[key,convert]] of Object.entries(configFields))$(id).addEventListener('change',e=>{
