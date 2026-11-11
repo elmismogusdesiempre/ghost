@@ -40,3 +40,13 @@ Se comprobó en Chromium: clics globales en posiciones ajenas a los botones, Sí
 La configuración regresa al modo de comunicación después de 30 segundos sin usar el teclado, pulsar un control, editar o desplazar la configuración. Un contador muestra el tiempo restante. Mover el puntero no reinicia el contador. Los cambios del campo activo se guardan antes de salir. Al volver de una pestaña suspendida se comprueba el tiempo transcurrido.
 
 Las tres etapas ocupan el ancho y alto disponibles sin scroll. Las casillas se adaptan al tamaño y orientación de la ventana. Si hay demasiadas opciones para mantenerlas legibles, se dividen en páginas; «Página anterior» y «Página siguiente» se eligen mediante el mismo barrido y clic izquierdo. No se necesita apuntar ni desplazar. El mensaje largo conserva todo su contenido para la voz y muestra automáticamente su parte más reciente.
+
+## Atajos de etapa
+
+- Ctrl + Alt + 1: Sí / No.
+- Ctrl + Alt + 2: Frases útiles.
+- Ctrl + Alt + 3: Construir mensajes.
+
+Funcionan con los números superiores y el teclado numérico, desde comunicación o configuración. En configuración guardan el campo activo y regresan directamente a comunicación. La etapa elegida queda guardada, se detiene cualquier voz en curso y el barrido comienza desde el inicio. Se conserva el mensaje construido para poder retomarlo al regresar a la etapa 3.
+
+Las letras, números y signos del teclado de comunicación ocupan casi toda la tecla, con márgenes y tamaño adaptable al ancho y alto disponibles. Las teclas de acciones mantienen sus etiquetas normales.

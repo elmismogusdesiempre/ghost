@@ -39,6 +39,8 @@ body.communicating .basic .caption{font-size:clamp(10px,2vh,16px)}
 @media(max-height:430px){body.communicating #header,body.communicating .intro,body.communicating .legend{display:none}body.communicating .message{flex-basis:48px}body.communicating .message .eyebrow{font-size:9px}}
 @media(max-width:500px){body.communicating .legend .key{display:none}body.communicating .message .eyebrow{font-size:9px}body.communicating .mode-label{font-size:10px}}
 
+body.communicating .grid .tile.letter-key .emoji{display:none}
+body.communicating .grid .tile.letter-key .label{font-size:min(78cqw,78cqh);line-height:1;font-weight:600;display:block;flex:0 0 auto;-webkit-line-clamp:unset;overflow:visible}
 </style>
 </head>
 <body class="communicating">
@@ -305,7 +307,7 @@ function renderCommunication(){
  }else{
   grid.append(tile({text:'Volver a categorías',emoji:'↩'},()=>{category=null;renderCommunication();},'action'));
   if(category==='keyboard'){
-   for(const char of 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZÁÉÍÓÚÜ0123456789.,¿?¡!') grid.append(tile({text:char,emoji:''},()=>{message+=char.toLocaleLowerCase('es');updateMessage();pauseAfter();}));
+   for(const char of 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZÁÉÍÓÚÜ0123456789.,¿?¡!') grid.append(tile({text:char,emoji:''},()=>{message+=char.toLocaleLowerCase('es');updateMessage();pauseAfter();},'letter-key'));
    grid.append(tile({text:'Espacio',emoji:'␣'},()=>{message+=' ';updateMessage();pauseAfter();}));
   }else wordsFor(category).forEach(w=>grid.append(tile(w,()=>{message+=(message&&!message.endsWith(' ')?' ':'')+w.speech;updateMessage();pauseAfter();})));
   addMessageActions(grid);
@@ -371,7 +373,14 @@ for(const name of ['mousedown','mouseup','click','dblclick','auxclick','contextm
   targets[index]?.action();
  },{capture:true});
 }
+function switchStage(stage){
+ if(config)document.activeElement?.blur();
+ cancelSpeech();stopScan();db.settings.stage=stage;category=null;screenPage=0;pauseUntil=0;lastInput=-Infinity;lastButton=-1;save();
+ if(config)toggleConfig();else renderCommunication();
+}
 window.addEventListener('keydown',e=>{
+ const stageMatch=/^(?:Digit|Numpad)([123])$/.exec(e.code);
+ if(e.ctrlKey&&e.altKey&&!e.shiftKey&&stageMatch){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)switchStage(Number(stageMatch[1]));return;}
  if(e.ctrlKey&&e.altKey&&!e.shiftKey&&e.code===db.settings.shortcut){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)toggleConfig();return;}
  if(!config&&['Tab','Enter',' ','ContextMenu'].includes(e.key)){e.preventDefault();e.stopImmediatePropagation();}
 },{capture:true});
@@ -387,7 +396,7 @@ function populateVoices(){
 const configFields={cfgStage:['stage',Number],cfgProfile:['profile',String],cfgSpeed:['speed',v=>Number(v)*1000],cfgPause:['pause',v=>Number(v)*1000],cfgDebounce:['debounce',Number],cfgShortcut:['shortcut',String],cfgCols:['cols',Number],cfgScale:['scale',Number],cfgVisual:['visual',String],cfgContrast:['contrast',Boolean],cfgClear:['clearAfter',Boolean],cfgVoice:['voice',String],cfgRate:['rate',Number],cfgPitch:['pitch',Number],cfgVolume:['volume',Number]};
 function syncSettings(){
  for(const [id,[key]] of Object.entries(configFields)){const el=$(id);if(el.type==='checkbox')el.checked=db.settings[key];else el.value=['speed','pause'].includes(key)?db.settings[key]/1000:db.settings[key];}
- $('shortcutHelp').textContent=`${shortcutLabel()} alterna entre comunicación y configuración. El cursor desaparece en comunicación y vuelve aquí. Los clics se reciben dentro de esta página; mantén la ventana activa. En Sí/No: izquierdo = sí y derecho = no. En las otras etapas: izquierdo = seleccionar y derecho = hablar.`;
+ $('shortcutHelp').textContent=`${shortcutLabel()} alterna entre comunicación y configuración. Ctrl + Alt + 1: Sí/No; Ctrl + Alt + 2: frases útiles; Ctrl + Alt + 3: construir mensajes. Estos atajos abren directamente la comunicación y guardan la etapa elegida. El cursor desaparece en comunicación y vuelve aquí. Los clics se reciben dentro de esta página; mantén la ventana activa. En Sí/No: izquierdo = sí y derecho = no. En las otras etapas: izquierdo = seleccionar y derecho = hablar.`;
  populateVoices();
 }
 for(const [id,[key,convert]] of Object.entries(configFields))$(id).addEventListener('change',e=>{
