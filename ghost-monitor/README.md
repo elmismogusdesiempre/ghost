@@ -19,7 +19,7 @@ Se conservan las tres etapas, perfiles adulto/infantil, editores, importaciones 
 - Puerto a **115200 baudios, 8 bits, sin paridad, 1 bit de parada, sin control de flujo**. La tasa USB CDC real la determina también el firmware.
 - Paquetes binarios de **50 bytes**, con **25 muestras**. No se interpreta texto ASCII, delimitadores de líneas ni muestras binarias de 16 bits.
 - Orden asumido según la descripción: **byte alto seguido de byte bajo**.
-- `ADC = alto * 100 + bajo`, con `bajo` entre 0 y 99 y resultado entre 0 y 4095.
+- `ADC = alto * 100 + bajo`, tratando ambos bytes como enteros sin signo y validando que el resultado esté entre 0 y 4095. No se impone una restricción adicional al byte bajo que no esté especificada por el firmware.
 - Las lecturas de Web Serial son un flujo: pueden partir un paquete, una muestra o contener varios paquetes. El decodificador acumula exactamente 50 bytes y valida las 25 muestras antes de entregarlas. Mantiene el fragmento restante entre lecturas.
 - No se escriben comandos en el puerto, no se activa DTR/RTS explícitamente y no se cambia el firmware. Si el firmware requiere una orden de arranque o una señal de control no descrita, habrá que incorporarla después de confirmar ese requisito.
 

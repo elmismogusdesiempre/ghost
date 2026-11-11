@@ -12,7 +12,7 @@ export class PacketDecoder {
       let valid = true;
       for (let i = 0; i < 50; i += 2) {
         const hi = this.pending[i], lo = this.pending[i + 1], adc = hi * 100 + lo;
-        if (lo > 99 || adc > 4095) { valid = false; break; }
+        if (adc > 4095) { valid = false; break; }
         samples.push(adc);
       }
       if (valid) { this.packets++; onPacket(samples); }

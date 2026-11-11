@@ -17,8 +17,8 @@ test('partial packets wait and invalid packets never deliver partial samples',()
  const d=new PacketDecoder();let valid=0,invalid=0;const bytes=encode(Array(25).fill(2000));
  d.push(bytes.slice(0,49),()=>valid++,()=>invalid++);assert.equal(valid,0);
  d.push(bytes.slice(49),()=>valid++,()=>invalid++);assert.equal(valid,1);
- bytes[49]=100;d.push(bytes,()=>valid++,()=>invalid++);assert.equal(invalid,1);assert.equal(valid,1);
- bytes[48]=41;bytes[49]=0;d.push(bytes,()=>valid++,()=>invalid++);assert.equal(invalid,2);
+ bytes[48]=41;bytes[49]=0;d.push(bytes,()=>valid++,()=>invalid++);assert.equal(invalid,1);assert.equal(valid,1);
+ bytes[48]=40;bytes[49]=96;d.push(bytes,()=>valid++,()=>invalid++);assert.equal(invalid,2);
  d.reset();assert.equal(d.bytes,0);assert.equal(d.used,0);
 });
 test('inclusive rest boundaries and validation',()=>{
@@ -35,4 +35,9 @@ test('stable rest arms one activation, held states do not repeat, crossing witho
 test('short excursions are rejected and applying thresholds requires new rest',()=>{
  const d=new GestureDetector(settings);for(let i=0;i<25;i++)d.sample(2000);for(let i=0;i<14;i++)assert.equal(d.sample(3000),null);assert.equal(d.sample(2000),null);
  d.configure({...settings,lower:1200,upper:2800});for(let i=0;i<100;i++)assert.equal(d.sample(3000),null);
+});
+
+test('apply the specified formula without inventing a low-byte restriction',()=>{
+ const d=new PacketDecoder(),out=[];d.push(Uint8Array.from(Array(25).fill([20,150]).flat()),p=>out.push(...p),()=>assert.fail());
+ assert.deepEqual(out,Array(25).fill(2150));
 });
