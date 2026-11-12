@@ -15,7 +15,7 @@ Adaptación aislada del GHOST existente en el commit `21756cf`, dentro del mismo
 Un clic izquierdo estándar, o un toque sobre la superficie de comunicación, selecciona **la opción resaltada**, independientemente de dónde se encuentre el puntero. El clic derecho no ejecuta acciones. No hay doble clic, combinaciones ni acciones alternativas por mantener pulsado.
 
 - **Etapa 1:** las mismas opciones Sí y No y su síntesis original; ahora se alternan por barrido para hacerlas accesibles con un solo pulsador.
-- **Etapa 2:** mismas frases, Sí y No, personalización y orden. Seleccionar una frase la prepara, como en Desktop. Seleccionar **Hablar** en el barrido reproduce su pronunciación existente. No se añadieron categorías.
+- **Etapa 2:** mismas frases, Sí y No, personalización y orden. Seleccionar una frase reproduce automáticamente su pronunciación con esa misma pulsación, al soltar. No hay botón **Hablar** ni un segundo paso en esta etapa. No se añadieron categorías.
 - **Etapa 3:** mismas categorías, palabras, favoritos y teclado; misma acumulación, espacios, borrado, limpieza y reproducción. **Hablar**, borrar y limpiar permanecen en una franja de controles que también recorre el barrido. Las páginas anterior/siguiente conservan la navegación existente sin exigir scroll.
 
 El engranaje no forma parte de la lista de barrido. Se abre **tocándolo directamente con el dedo o un lápiz táctil**. Un clic HID de mouse sobre sus coordenadas sigue seleccionando la opción resaltada; así el puntero del pulsador no puede dejar al usuario en Settings por accidente. Con teclado se conservan Ctrl+Alt+M (o el atajo personalizado) y Ctrl+Alt+1/2/3.
@@ -74,3 +74,7 @@ Las selecciones mantienen la misma duración mínima, pero una acción de voz qu
 Se reprodujo en Chromium con toque emulado: antes, la primera llamada tenía `userActivation.isActive=false` y `hasBeenActive=false`; después ambas son `true`. Se comprobaron pulsaciones inmediatas y de 200 ms, cancelación sin reproducción, recorrido completo de las tres etapas y actualización del worker v1 a v2 conservando configuración. Estas pruebas no verifican el audio físico de un teléfono Android.
 
 Para recibir el arreglo en una instalación existente: abrir la ruta Mobile con internet, esperar unos segundos para descargar la actualización, cerrar **todas** las pestañas de esa ruta y la ventana instalada de GHOST Mobile, y volver a abrir. El worker nuevo se activa al cerrar la versión anterior. Se conservan configuración y vocabulario.
+
+## Frases útiles: caché v3
+
+La etapa 2 reproduce automáticamente la frase seleccionada (incluidos Sí y No), sin botón Hablar. Conserva el barrido, el orden y la pronunciación personalizada. El inicio de voz sigue ligado a soltar esa misma pulsación para mantener la activación de Chrome Android. La etapa 3 mantiene Hablar para reproducir el mensaje compuesto.
