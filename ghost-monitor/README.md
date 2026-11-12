@@ -93,3 +93,13 @@ Para mover los sliders del compacto, entra con **Ctrl + Alt + M**: el compacto p
 - **Ctrl + F1:** abre o cierra una ayuda modal con todos los atajos implementados. Incluye el atajo de configuración realmente seleccionado (M, G o Y), las tres etapas, el ajuste rápido y Esc. Se puede cerrar con su botón o Esc. Al cerrar normalmente vuelve al contexto anterior; tras 30 segundos sin actividad vuelve directamente a comunicación.
 
 La actividad en controles/teclado reinicia el contador. Cambiar de etapa desde la ayuda o el ajuste rápido regresa directamente a comunicación. La versión principal fuera de `/ghost-monitor/` no se modifica.
+
+## Disponibilidad y derechos
+
+GHOST es una plataforma de comunicación asistida de acceso gratuito. La privatización del repositorio está pendiente de autorización; el repositorio sigue público hasta que se complete ese cambio. Las condiciones de publicación y licencia podrán evaluarse posteriormente.
+
+© 2026 GHOST. Derechos reservados sobre los componentes originales del proyecto.
+
+Los componentes de terceros conservan sus licencias. Los aportes al hardware, al firmware y a la interfaz electrónica, incluidos los realizados en colaboración con estudiantes, conservan los derechos de sus respectivos titulares; este aviso no presume cesiones ni acuerdos.
+
+Las condiciones de terceros y permisos previos se respetan. Consulta `NOTICE.md` para el alcance del aviso. El uso gratuito de la aplicación desplegada no constituye por sí mismo una licencia de reutilización o comercialización del código.

@@ -50,3 +50,13 @@ Las tres etapas ocupan el ancho y alto disponibles sin scroll. Las casillas se a
 Funcionan con los números superiores y el teclado numérico, desde comunicación o configuración. En configuración guardan el campo activo y regresan directamente a comunicación. La etapa elegida queda guardada, se detiene cualquier voz en curso y el barrido comienza desde el inicio. Se conserva el mensaje construido para poder retomarlo al regresar a la etapa 3.
 
 Las letras, números y signos del teclado de comunicación ocupan casi toda la tecla, con márgenes y tamaño adaptable al ancho y alto disponibles. Las teclas de acciones mantienen sus etiquetas normales.
+
+## Disponibilidad y derechos
+
+GHOST es una plataforma de comunicación asistida de acceso gratuito. La privatización del repositorio está pendiente de autorización; el repositorio sigue público hasta que se complete ese cambio. Las condiciones de publicación y licencia podrán evaluarse posteriormente.
+
+© 2026 GHOST. Derechos reservados sobre los componentes originales del proyecto.
+
+Los componentes de terceros conservan sus licencias. Los aportes al hardware, al firmware y a la interfaz electrónica, incluidos los realizados en colaboración con estudiantes, conservan los derechos de sus respectivos titulares; este aviso no presume cesiones ni acuerdos.
+
+Las condiciones de terceros y permisos previos se respetan. Consulta `NOTICE.md` para el alcance del aviso. El uso gratuito de la aplicación desplegada no constituye por sí mismo una licencia de reutilización o comercialización del código.

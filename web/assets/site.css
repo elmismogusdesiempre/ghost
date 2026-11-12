@@ -11,3 +11,5 @@
 @media(max-width:700px){.page-hero h1{font-size:min(3.1rem,10.5vw)}.hero h1{font-size:min(4.6rem,12.2vw)}h2{font-size:min(2.8rem,9.5vw)}.stage-row h2{font-size:min(2.15rem,9.5vw)}.article-section h2{font-size:min(2.25rem,9.5vw)}}
 @media(max-width:700px){.text-wide{font-size:min(2.7rem,10vw)}}
 @media(max-width:700px){.cta h2{font-size:min(2.5rem,9.5vw)}}
+
+.footer-legal{padding-top:22px;padding-bottom:6px}.footer-legal p{max-width:none;font-size:.72rem;line-height:1.6;margin-top:8px;color:#bfc7b7}.footer-legal strong{color:#fff}

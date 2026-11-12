@@ -10,10 +10,18 @@ Sitio de presentación independiente, construido con HTML, CSS y JavaScript sin 
 - `/ingenieria/`: documentación técnica detallada, decodificador y acumulador interactivos.
 - `/laboratorio/`: señal irregular simulada, umbrales y estabilidad.
 - `/proyecto/`: propósito social, propuesta comercial y estado de validación.
-- `/implementacion/`: ficha local descargable y enlace opcional a una solicitud pública en GitHub.
+- `/implementacion/`: ficha local descargable y copiable, sin publicación ni envío automático.
 
 El formulario no envía datos a un servidor. No hay precios, testimonios ni resultados clínicos inventados. La web distingue claramente simulación y hardware. No se presenta seguimiento ocular como función implementada.
 
 Las ilustraciones y el símbolo de marca son SVG originales de esta web, en `assets/images`. La marca reutiliza la silueta de fantasma de la aplicación, en SVG monocromo, para mantener la misma identidad visual. Archivo se aloja localmente. La fuente de cuerpo es un subconjunto estático derivado de IBM Plex Sans, redistribuido como GHOST Text para respetar el nombre reservado del original. Se conservan ambas licencias OFL en `assets/fonts`.
 
 El laboratorio procesa una señal artificial a 500 muestras/s nominales. Sus contadores nunca activan las aplicaciones de comunicación. Incluye pausa, muestra fija de 2700 y perfiles de señal. Las preferencias de lectura se guardan únicamente bajo `ghost_product_reading_v1`.
+
+## Código y derechos
+
+GHOST es una plataforma de comunicación asistida de acceso gratuito. La privatización del repositorio está pendiente de autorización; el repositorio sigue público hasta que se complete ese cambio. Las condiciones de publicación y licencia podrán evaluarse posteriormente.
+
+© 2026 GHOST. Derechos reservados sobre los componentes originales del proyecto.
+
+Se conservan los avisos y licencias de terceros. Las pruebas y documentos internos se excluyen del despliegue mediante `.vercelignore`.

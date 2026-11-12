@@ -1,0 +1,8 @@
+README.md
+NOTICE.md
+ghost-monitor/README.md
+ghost-monitor/tests/
+web/README.md
+**/*.map
+.env
+.env.*
