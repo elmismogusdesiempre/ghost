@@ -52,11 +52,11 @@ try{
   }
  }
 }catch{loadNotice='No se pudo recuperar la configuración guardada. Puedes importar tu respaldo en configuración.';}
-let config=false,category=null,index=0,targets=[],message='',selected=null,timer=null,pauseUntil=0,lastInput=-Infinity,lastButton=-1,voices=[],speaking=false,speechToken=0,spokenTimer=null,progressStart=0,currentTab='general';
+let config=false,category=null,index=0,targets=[],message='',selected=null,timer=null,pauseUntil=0,lastInput=-Infinity,lastButton=-1,voices=[],speaking=false,speechToken=0,spokenTimer=null,activeUtterance=null,progressStart=0,currentTab='general';
 let activeWindow=!document.hidden;
 const mobilePress={down:false,id:null,fired:false,action:null,view:0};
-let selectionTimer=null,viewRevision=0;
-function cancelMobilePress(release=false){clearTimeout(selectionTimer);selectionTimer=null;mobilePress.action=null;if(release){mobilePress.down=false;mobilePress.id=null;}}
+let selectionTimer=null,viewRevision=0,pendingSpeech=null;
+function cancelMobilePress(release=false){clearTimeout(selectionTimer);selectionTimer=null;pendingSpeech=null;mobilePress.action=null;if(release){mobilePress.down=false;mobilePress.id=null;}}
 
 function notify(text){$('toast').textContent=text;$('toast').hidden=false;clearTimeout(notify.timer);notify.timer=setTimeout(()=>$('toast').hidden=true,4500);}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(db));}catch{notify('No se pudo guardar en este navegador. Descarga un respaldo antes de cerrar.');}}
@@ -152,17 +152,20 @@ function addMessageActions(grid){
 function pauseAfter(){pauseUntil=Date.now()+db.settings.pause;scheduleScan();}
 function basicSay(i){targets.forEach((t,j)=>t.el.classList.toggle('chosen',i===j));speak(BASIC[i].speech);}
 function speechStatus(text){const el=$('speechStatus');if(el)el.textContent=text;else $('announcement').textContent=text;}
-function finishSpeech(token){if(token!==speechToken)return;speaking=false;clearTimeout(spokenTimer);highlight();scheduleScan();}
-function cancelSpeech(){speechToken++;speaking=false;clearTimeout(spokenTimer);window.speechSynthesis?.cancel();}
+function finishSpeech(token){if(token!==speechToken)return;speaking=false;activeUtterance=null;clearTimeout(spokenTimer);highlight();scheduleScan();}
+function cancelSpeech(){const engine=window.speechSynthesis;const needsCancel=speaking||engine?.speaking||engine?.pending;speechToken++;speaking=false;activeUtterance=null;clearTimeout(spokenTimer);if(needsCancel)engine?.cancel();}
 function speak(text){
+ // Touch gains user activation on pointerup, not pointerdown. A timed hold
+ // also runs outside a gesture. Keep its one speech request for that release.
+ if(!config&&mobilePress.down){pendingSpeech=text;return;}
  if(!text.trim()){speechStatus('Primero selecciona una frase o construye un mensaje.');return;}
  cancelSpeech();speechStatus('');
  if(!('speechSynthesis' in window)){notify('La voz no está disponible. El mensaje permanece visible.');return;}
- const token=++speechToken;const u=new SpeechSynthesisUtterance(text);const s=db.settings;const voice=voices.find(v=>v.name===s.voice)||voices.find(v=>v.localService&&v.lang.toLowerCase().startsWith('es'))||voices.find(v=>v.lang.toLowerCase().startsWith('es'));
+ const token=++speechToken;const u=new SpeechSynthesisUtterance(text);const s=db.settings;voices=window.speechSynthesis.getVoices();const voice=voices.find(v=>v.name===s.voice)||voices.find(v=>v.localService&&v.lang.toLowerCase().startsWith('es'))||voices.find(v=>v.lang.toLowerCase().startsWith('es'));
  if(voice)u.voice=voice;u.lang=(voice?.lang||'es-ES').replace(/_/g,'-');u.rate=s.rate;u.pitch=s.pitch;u.volume=s.volume;speaking=true;stopScan();highlight();
  u.onend=()=>{if(token!==speechToken)return;if(!config&&s.stage===3&&s.clearAfter){message='';updateMessage();}speechStatus('Mensaje pronunciado.');finishSpeech(token);};
- u.onerror=e=>{if(token!==speechToken)return;speechStatus('No se pudo reproducir la voz. El mensaje permanece visible.');notify('No se pudo reproducir la voz. Revisa la voz del dispositivo en configuración.');finishSpeech(token);};
- try{window.speechSynthesis.speak(u);spokenTimer=setTimeout(()=>{if(token===speechToken){cancelSpeech();speechStatus('La voz no respondió. Prueba otra voz en configuración.');highlight();scheduleScan();}},Math.max(15000,text.length*400/s.rate));}catch{finishSpeech(token);notify('No se pudo iniciar la voz del dispositivo.');}
+ u.onerror=e=>{if(token!==speechToken)return;speechStatus('No se pudo reproducir la voz. El mensaje permanece visible.');notify(e.error==='not-allowed'?'Chrome bloqueó la voz. Revisa que el sonido esté permitido para este sitio.':e.error==='voice-unavailable'||e.error==='language-unavailable'?'La voz elegida no está disponible. Prueba la voz predeterminada en configuración.':'No se pudo reproducir la voz ('+(e.error||'error del motor')+'). Prueba otra voz en configuración.');finishSpeech(token);};
+ try{activeUtterance=u;window.speechSynthesis.speak(u);spokenTimer=setTimeout(()=>{if(token===speechToken){cancelSpeech();speechStatus('La voz no respondió. Prueba otra voz en configuración.');highlight();scheduleScan();}},Math.max(15000,text.length*400/s.rate));}catch{finishSpeech(token);notify('No se pudo iniciar la voz del dispositivo.');}
 }
 function shortcutLabel(){return 'Ctrl + Alt + '+db.settings.shortcut.slice(-1);}
 const CONFIG_IDLE_MS=30000;
@@ -208,7 +211,7 @@ function beginSelection(e){
 function endSelection(e){
  if(!mobilePress.down||mobilePress.id!==(e.pointerId??'mouse'))return;
  if(!config){e.preventDefault();e.stopImmediatePropagation();}
- cancelMobilePress(true);highlight();scheduleScan();
+ const text=pendingSpeech;cancelMobilePress(true);if(text!==null&&!config)speak(text);highlight();scheduleScan();
 }
 const pointerInput='PointerEvent' in window;
 window.addEventListener(pointerInput?'pointerdown':'mousedown',beginSelection,{capture:true,passive:false});

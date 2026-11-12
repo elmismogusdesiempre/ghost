@@ -64,3 +64,13 @@ Se usa la misma Web Speech API, conservando voz seleccionada, velocidad, tono, v
 - La voz se simuló para comprobar texto, idioma, parámetros y fin de reproducción. **No se probó audio físico en Android, modo avión real, instalación real desde Chrome Android, rendimiento en un teléfono económico ni USB/OTG físico.** La emulación no sustituye esas pruebas.
 
 Fuentes: [Pointer Events](https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events), [voz local](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisVoice/localService), [USB host en Android](https://developer.android.com/develop/connectivity/usb/host), [dispositivos HID y mouse del sistema](https://developer.chrome.com/docs/capabilities/hid).
+
+## Corrección de voz: actualización de caché v2
+
+En un primer toque de pantalla, Chrome todavía no otorga activación de usuario durante `pointerdown`; la otorga en `pointerup`. Mobile estaba llamando al sintetizador durante `pointerdown` (o desde el temporizador del umbral), lo que podía bloquear la voz aunque otras webs funcionaran.
+
+Las selecciones mantienen la misma duración mínima, pero una acción de voz queda pendiente hasta soltar **esa misma pulsación** y se inicia sincrónicamente en su `pointerup`. No requiere otro toque. Cancelar la pulsación o cambiar de pantalla descarta la voz pendiente. Se actualiza la lista de voces al hablar, se conserva una referencia a la locución hasta terminar y no se envía una cancelación al motor si no hay reproducción pendiente. Los errores de voz indican ahora el motivo que devuelve el navegador.
+
+Se reprodujo en Chromium con toque emulado: antes, la primera llamada tenía `userActivation.isActive=false` y `hasBeenActive=false`; después ambas son `true`. Se comprobaron pulsaciones inmediatas y de 200 ms, cancelación sin reproducción, recorrido completo de las tres etapas y actualización del worker v1 a v2 conservando configuración. Estas pruebas no verifican el audio físico de un teléfono Android.
+
+Para recibir el arreglo en una instalación existente: abrir la ruta Mobile con internet, esperar unos segundos para descargar la actualización, cerrar **todas** las pestañas de esa ruta y la ventana instalada de GHOST Mobile, y volver a abrir. El worker nuevo se activa al cerrar la versión anterior. Se conservan configuración y vocabulario.
