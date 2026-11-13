@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#173c38"><meta name="description" content="Comunicación a tu ritmo. Tres etapas, dos clics y una voz propia.">
+<title>GHOST Monitor · Modelos de ojo</title>
+<link rel="stylesheet" href="./monitor.css">
+<style>
+:root{--bg:#f4f3ee;--surface:#fff;--ink:#233c39;--muted:#5b706a;--accent:#174f47;--soft:#e6eee8;--scan:#f3ce6c;--negative:#84483e;--font:1;--cols:4;--line:#d9dfd7;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg);font-size:calc(16px * var(--font))}*{box-sizing:border-box;border-radius:0!important}body{margin:0;min-height:100dvh}body.communicating,body.communicating *{cursor:none!important;user-select:none}body.child{--bg:#f4f2fd;--ink:#343254;--muted:#666185;--accent:#514795;--soft:#e9e4fb;--scan:#ffd576;--negative:#a74666}body.contrast{--bg:#000;--surface:#111;--ink:#fff;--muted:#eee;--accent:#ffe066;--soft:#222;--scan:#ffe066;--negative:#ffb8a7}button,input,select,textarea{font:inherit}button{border:0;background:var(--soft);color:var(--ink);padding:.8rem 1rem;cursor:pointer;min-height:44px}button:hover{filter:brightness(.96)}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:3px}button:disabled{opacity:.35;cursor:default}button.primary{background:var(--accent);color:var(--bg)}.contrast button.primary{color:#000}input,select,textarea{width:100%;border:1px solid #94a69f;background:var(--surface);color:var(--ink);padding:.75rem}textarea{resize:vertical}input[type=checkbox]{width:auto;min-width:20px;min-height:20px}input[type=range]{padding:0}h1,h2,h3,p{margin:0}h1{font-weight:500;font-size:clamp(1.8rem,3vw,2.7rem);letter-spacing:-.04em}h2{font-size:1.4rem;letter-spacing:-.03em}h3{font-size:1.05rem}.eyebrow{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--muted)}.muted,.hint{color:var(--muted);font-size:.85rem;line-height:1.6}.brand{display:flex;align-items:center;gap:.65rem;font-size:1rem;font-weight:800;letter-spacing:.16em}.brand svg{width:29px;height:32px}header{display:flex;align-items:center;justify-content:space-between;padding:1.3rem 3rem;border-bottom:1px solid var(--line);gap:1rem}.mode-label{font-size:.75rem;color:var(--muted);display:flex;align-items:center;gap:.6rem}.dot{width:7px;height:7px;background:#2b8260;display:inline-block}.layout{max-width:1400px;padding:2.5rem 3rem;margin:auto}.intro{display:flex;justify-content:space-between;align-items:end;gap:1rem;margin-bottom:1.8rem}.intro h1{margin:.5rem 0}.stage-mark{color:var(--muted);font-size:.8rem}.stage-mark strong{font-size:2rem;font-weight:400;color:var(--ink)}.grid{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));gap:12px}.tile{background:var(--surface);min-height:155px;padding:1.2rem;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;text-align:left;position:relative;overflow-wrap:anywhere;gap:1rem;box-shadow:0 1px 0 #243a3510}.tile .emoji{font-size:2rem;line-height:1.3}.tile .label{font-size:1.15rem;font-weight:600;line-height:1.35}.tile.scanning{background:var(--scan);color:#26382e;box-shadow:inset 0 -6px 0 #7e5d16}.tile.chosen:after{content:'✓';position:absolute;top:12px;right:15px;font-size:1.2rem;font-weight:800}.tile.action{background:var(--soft);min-height:110px}.message{background:var(--surface);padding:1.2rem 1.5rem;margin-bottom:1.3rem;min-height:110px;box-shadow:inset 4px 0 0 var(--accent)}.message .eyebrow{margin-bottom:.65rem}.message-text{font-size:1.5rem;line-height:1.5;overflow-wrap:anywhere;white-space:pre-wrap}.message-text.empty{color:var(--muted);font-size:1rem}.trail{display:flex;justify-content:space-between;align-items:center;margin:1.2rem 0;color:var(--muted);font-size:.85rem;gap:1rem}.progress{height:3px;background:var(--line);margin-top:1.5rem}.progress span{display:block;height:100%;background:var(--accent);width:0}.legend{display:flex;justify-content:space-between;gap:1rem;padding-top:1.1rem;color:var(--muted);font-size:.8rem}.legend strong{color:var(--ink)}.key{font-size:.7rem;background:var(--soft);padding:.3rem .5rem;white-space:nowrap}.basic{height:100dvh;display:grid;grid-template-columns:1fr 1fr;padding:clamp(16px,4vw,56px);gap:clamp(16px,3vw,40px)}.basic .tile{align-items:center;justify-content:center;gap:1.4rem;background:#e1ece4;color:#214e3f}.basic .tile.no{background:#f0e4df;color:#78473e}.basic .label{font-size:clamp(4rem,12vw,11rem);letter-spacing:-.06em;font-weight:600}.basic .emoji{font-size:clamp(3rem,7vw,6rem)}.basic .caption{font-size:1rem}.basic .chosen{box-shadow:inset 0 -10px 0 currentColor}.child .basic .tile{background:#dceee9}.child .basic .no{background:#f9dfeb}.contrast .basic .tile{background:#111;color:#fff}.contrast .basic .chosen{background:#ffe066;color:#000}#settings{max-width:1100px;margin:auto;padding:2rem 2rem 5rem}#settings>h1{margin:.6rem 0}nav.tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin:1.8rem 0}nav.tabs button[aria-selected=true]{background:var(--accent);color:var(--bg)}.panel{background:var(--surface);padding:1.5rem;margin:1rem 0}.panel h2{margin-bottom:.6rem}.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.3rem;margin-top:1.3rem}label{display:flex;flex-direction:column;gap:.5rem;font-size:.9rem}label.check{flex-direction:row;align-items:center}.buttons{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem}.editor-list{display:grid;gap:.6rem;margin-top:1rem}.editor-row{display:grid;grid-template-columns:3.5rem minmax(80px,1fr) minmax(80px,1fr) auto;gap:.5rem;align-items:start;padding:.7rem;background:var(--bg)}.row-actions{display:flex;gap:.25rem}.row-actions button{padding:.6rem;min-width:40px}.editor-row small{grid-column:2/-1;color:var(--muted)}.notice{padding:.8rem 1rem;background:var(--soft);font-size:.85rem;line-height:1.6;margin-top:1rem}.settings-top{display:flex;justify-content:space-between;align-items:center;gap:1rem}#toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);max-width:90vw;padding:1rem 1.5rem;background:var(--ink);color:var(--bg);z-index:100;font-size:.9rem;pointer-events:none}#speechStatus{margin-top:.7rem;min-height:1.3em}.child .tile .emoji{font-size:2.5rem}.child .tile{min-height:170px}.hidden,[hidden]{display:none!important}.text-only .emoji{display:none}.symbols-only .tile .label{font-size:.85rem}.symbols-only .tile .emoji{font-size:3rem}a{color:var(--accent)}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}@media(max-width:750px){header{padding:1rem 1.2rem}.layout{padding:1.5rem 1.2rem}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.fields{grid-template-columns:1fr}.editor-row{grid-template-columns:3.5rem 1fr}.row-actions{grid-column:1/-1}.editor-row small{grid-column:1/-1}.intro{align-items:start}.legend{flex-wrap:wrap}.tile{min-height:145px}#settings{padding:1.5rem 1rem 4rem}.settings-top{align-items:start}.mode-label{max-width:55%;text-align:right}.basic .caption{font-size:.8rem}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+
+/* The communication surface always occupies exactly the available viewport. */
+body.communicating{height:100dvh;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+body.communicating #header{flex:0 0 44px;min-height:0;padding:6px 16px;overflow:hidden}
+body.communicating .brand svg{height:26px}
+body.communicating .layout{width:100%;max-width:none;margin:0;padding:clamp(6px,1.4vh,18px) clamp(8px,1.5vw,24px);flex:1;min-height:0;display:flex;flex-direction:column;gap:clamp(4px,.8vh,10px);overflow:hidden}
+body.communicating .intro{flex:0 0 auto;margin:0;align-items:center}
+body.communicating .intro h1{font-size:clamp(18px,2.8vh,32px);margin:0}
+body.communicating .intro .hint,body.communicating .intro .eyebrow{display:none}
+body.communicating .stage-mark strong{font-size:20px}
+body.communicating .message{flex:0 0 clamp(58px,12vh,110px);min-height:0;margin:0;padding:6px 12px;display:flex;flex-direction:column;overflow:hidden}
+body.communicating .message .eyebrow{font-size:10px;margin:0 0 3px;flex-shrink:0}
+body.communicating .message-text{font-size:clamp(14px,2.5vh,24px);line-height:1.3;min-height:0;overflow:hidden;overflow-wrap:anywhere}
+body.communicating .trail{flex:0 0 auto;margin:0;font-size:clamp(10px,1.6vh,14px);line-height:1.2}
+body.communicating .grid{flex:1;min-height:0;gap:clamp(4px,1vh,10px);grid-template-columns:repeat(var(--fit-cols),minmax(0,1fr));grid-template-rows:repeat(var(--fit-rows),minmax(0,1fr))}
+body.communicating .grid .tile{min-height:0;min-width:0;padding:clamp(4px,.9vh,12px);gap:3px;overflow:hidden;container-type:size;justify-content:center;align-items:center;text-align:center}
+body.communicating .grid .emoji{font-size:clamp(16px,min(24cqw,35cqh),42px);line-height:1.1;flex:0 0 auto}
+body.communicating .grid .label{font-size:clamp(11px,min(12cqw,20cqh),calc(19px * var(--font)));line-height:1.15;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:0 1 auto}
+body.communicating .grid .chosen:after{top:4px;right:6px;font-size:14px}
+body.communicating .progress{flex:0 0 3px;margin:0}
+body.communicating .legend{flex:0 0 auto;padding:0;gap:4px;font-size:clamp(9px,1.5vh,12px);flex-wrap:nowrap;align-items:center}
+body.communicating .key{font-size:clamp(9px,1.5vh,11px);padding:2px 4px}
+body.communicating #speechStatus{margin:0;min-height:0;font-size:11px;line-height:1.2;flex-shrink:0}
+body.communicating #speechStatus:empty{display:none}
+body.communicating .basic{flex:1;min-height:0;height:auto;width:100%;grid-template-rows:minmax(0,1fr)}
+body.communicating .basic .tile{min-height:0;overflow:hidden;gap:clamp(4px,2vh,24px);padding:8px}
+body.communicating .basic .emoji{font-size:clamp(24px,min(7vw,18vh),96px)}
+body.communicating .basic .label{font-size:clamp(40px,min(12vw,28vh),176px)}
+body.communicating .basic .caption{font-size:clamp(10px,2vh,16px)}
+#configCountdown{position:sticky;top:0;z-index:5;margin-bottom:12px;padding:10px 14px;background:var(--accent);color:var(--bg);font-size:.85rem}
+@media(max-height:430px){body.communicating #header,body.communicating .intro,body.communicating .legend{display:none}body.communicating .message{flex-basis:48px}body.communicating .message .eyebrow{font-size:9px}}
+@media(max-width:500px){body.communicating .legend .key{display:none}body.communicating .message .eyebrow{font-size:9px}body.communicating .mode-label{font-size:10px}}
+
+body.communicating .grid .tile.letter-key .emoji{display:none}
+body.communicating .grid .tile.letter-key .label{font-size:min(78cqw,78cqh);line-height:1;font-weight:600;display:block;flex:0 0 auto;-webkit-line-clamp:unset;overflow:visible}
+</style>
+</head>
+<body class="communicating">
+<header id="header" hidden><div class="brand"><svg viewBox="0 0 30 34" fill="none" aria-hidden="true"><path d="M4 29V14C4 7 8 3 15 3s11 4 11 11v15l-5-3-6 4-6-4-5 3Z" stroke="currentColor" stroke-width="2"/><path d="M11 14v4m8-4v4" stroke="currentColor" stroke-width="3"/></svg>GHOST</div><div class="mode-label" id="modeLabel"></div></header>
+<div id="quickBar" hidden><div><strong>Ajuste rápido del monitor</strong><span id="quickCountdown"></span></div><button id="endQuickAdjust">Volver a comunicar</button></div>
+<main id="communication" aria-label="Comunicación"></main>
+<aside id="monitorDock" aria-label="Monitor STM32 en vivo" hidden></aside>
+<main id="settings" hidden aria-label="Configuración para acompañante">
+<div id="configCountdown" role="timer" aria-live="off"></div>
+<div class="settings-top"><div><p class="eyebrow">Espacio del acompañante</p><h1 tabindex="-1" id="settingsTitle">Una voz propia.</h1></div><button id="resume" class="primary">Volver a comunicar →</button></div>
+<p class="hint">Barrido y clics de comunicación pausados. Aquí puedes usar el mouse y el teclado. Los cambios se guardan en este navegador.</p>
+<nav class="tabs" aria-label="Secciones de configuración" role="tablist"><button id="tab-general" role="tab" aria-selected="true" aria-controls="general" data-tab="general">Uso y apariencia</button><button id="tab-phrases" role="tab" aria-selected="false" aria-controls="phrases" data-tab="phrases">Frases útiles</button><button id="tab-vocabulary" role="tab" aria-selected="false" aria-controls="vocabulary" data-tab="vocabulary">Palabras y categorías</button><button id="tab-data" role="tab" aria-selected="false" aria-controls="data" data-tab="data">Cargar y respaldar</button><button id="tab-monitor" role="tab" aria-selected="false" aria-controls="monitor" data-tab="monitor">Monitor STM32</button></nav>
+<section id="general" role="tabpanel" aria-labelledby="tab-general">
+<div class="panel"><h2>La etapa adecuada</h2><p class="hint">Elige la etapa y el perfil visual por separado. No hay que completar una etapa para usar otra.</p><div class="fields">
+<label>Etapa de comunicación<select id="cfgStage"><option value="1">1 · Sí / No — sin barrido</option><option value="2">2 · Frases útiles — sin categorías</option><option value="3">3 · Construir mensajes — palabras y teclado</option></select></label>
+<label>Perfil<select id="cfgProfile"><option value="adult">Adulto · tranquilo</option><option value="child">Infantil · color y expresión</option></select></label>
+<label>Tiempo por opción (segundos)<input id="cfgSpeed" type="number" min="0.5" max="15" step="0.1"></label><label>Pausa después de seleccionar (segundos)<input id="cfgPause" type="number" min="0" max="10" step="0.1"></label>
+<label>Protección contra clics repetidos (milisegundos)<input id="cfgDebounce" type="number" min="0" max="1500" step="50"></label><label>Atajo del acompañante<select id="cfgShortcut"><option value="KeyM">Ctrl + Alt + M</option><option value="KeyG">Ctrl + Alt + G</option><option value="KeyY">Ctrl + Alt + Y</option></select></label>
+<label>Columnas en pantalla amplia<select id="cfgCols"><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></label><label>Tamaño del texto<select id="cfgScale"><option value="1">Normal</option><option value="1.2">Grande</option><option value="1.4">Muy grande</option></select></label>
+<label>Apoyo visual<select id="cfgVisual"><option value="both">Emojis y texto</option><option value="text">Priorizar texto</option><option value="symbols">Priorizar emojis</option></select></label>
+<label class="check"><input id="cfgContrast" type="checkbox">Alto contraste</label><label class="check"><input id="cfgClear" type="checkbox">Limpiar el mensaje después de hablar (etapa 3)</label></div>
+<div class="notice" id="shortcutHelp"></div><div class="buttons"><button id="fullscreen">Pantalla completa</button></div></div>
+<div class="panel"><h2>Voz del dispositivo</h2><div class="fields"><label>Voz<select id="cfgVoice"><option value="">Español · voz predeterminada</option></select></label><label>Velocidad de voz<input id="cfgRate" type="number" min="0.3" max="2" step="0.1"></label><label>Tono<input id="cfgPitch" type="number" min="0.5" max="2" step="0.1"></label><label>Volumen<input id="cfgVolume" type="number" min="0" max="1" step="0.1"></label></div><div class="buttons"><button id="testVoice">Escuchar voz</button></div><p class="hint" id="voiceHelp">La disponibilidad de las voces depende del navegador y del sistema operativo.</p></div>
+</section>
+<section id="phrases" role="tabpanel" aria-labelledby="tab-phrases" hidden><div class="panel"><h2>Sus frases, en su orden</h2><p class="hint">En la etapa 2, el barrido sigue esta lista. Sí y No están siempre presentes al principio. Usa las flechas para colocar después las frases más utilizadas. Cada perfil conserva su propia lista.</p><div class="editor-list" id="phraseEditor"></div><form id="addPhrase" class="fields"><label>Emoji<input name="emoji" value="💬" maxlength="20"></label><label>Nueva frase<input name="text" required maxlength="500" placeholder="Quiero cambiar de posición"></label><button class="primary" type="submit">Añadir frase</button></form><div class="buttons"><button id="restorePhrases">Restaurar frases de este perfil</button></div></div></section>
+<section id="vocabulary" role="tabpanel" aria-labelledby="tab-vocabulary" hidden><div class="panel"><h2>Vocabulario para construir mensajes</h2><p class="hint">Edita palabras, su pronunciación y sus categorías. El teclado siempre estará disponible en la etapa 3.</p><div class="fields"><label>Filtrar categoría<select id="vocabFilter"></select></label><label>Buscar palabra<input id="vocabSearch" type="search" placeholder="Escribe para buscar"></label></div><div id="vocabEditor" class="editor-list"></div><form id="addWord" class="fields"><label>Palabra o frase<input name="text" required maxlength="500"></label><label>Emoji<input name="emoji" value="🔹" maxlength="20"></label><label>Categoría<select name="category" id="newWordCategory"></select></label><button class="primary" type="submit">Añadir al vocabulario</button></form></div></section>
+<section id="data" role="tabpanel" aria-labelledby="tab-data" hidden><div class="panel"><h2>Carga rápida</h2><p class="hint">Escribe o pega una palabra o frase por línea.</p><form id="quickLoad"><label>Texto para cargar<textarea id="loadText" rows="6" maxlength="100000" placeholder="Quiero agua&#10;Necesito ayuda&#10;Quiero descansar"></textarea></label><div class="fields"><label>Destino<select id="loadTarget"><option value="phrases">Frases útiles del perfil actual</option><option value="vocab">Vocabulario avanzado · clasificación automática</option></select></label></div><div class="buttons"><button class="primary" type="submit">Cargar texto</button></div></form></div><div class="panel"><h2>Importar y exportar</h2><p class="hint">Acepta los archivos JSON de vocabulario de la versión original y los respaldos completos de esta versión. Un vocabulario se añade a las palabras existentes; un respaldo completo reemplaza la configuración y las listas.</p><div class="buttons"><button id="import">Importar JSON</button><button id="export">Descargar respaldo completo</button><button id="exportWords">Exportar vocabulario JSON</button></div><input id="file" type="file" accept=".json,application/json" hidden><p class="notice">El vocabulario personal se guarda localmente. Exporta un respaldo para trasladarlo a otro equipo o navegador. La versión anterior está conservada en <a href="../ghost-original.html" target="_blank" rel="noopener">ghost-original.html</a>.</p></div><div class="panel" id="legalNotice"><h2>Información y derechos</h2><p class="hint">GHOST es una plataforma de comunicación asistida de acceso gratuito. La privatización del repositorio está pendiente de autorización; el repositorio sigue público hasta que se complete ese cambio. Las condiciones de publicación y licencia podrán evaluarse posteriormente.</p><p class="hint">© 2026 GHOST. Derechos reservados sobre los componentes originales del proyecto.</p><p class="hint">Los componentes de terceros conservan sus licencias. Los aportes al hardware, al firmware y a la interfaz electrónica, incluidos los realizados en colaboración con estudiantes, conservan los derechos de sus respectivos titulares; este aviso no presume cesiones ni acuerdos.</p><p class="hint"><a href="/ghost-monitor/informacion.html" target="_blank" rel="noopener">Información pública de GHOST</a></p></div></section>
+<section id="monitor" role="tabpanel" aria-labelledby="tab-monitor" hidden><div class="panel"><h2>Monitor STM32</h2><p id="monitorLoadStatus" role="status">Cargando el panel de monitoreo…</p><p class="hint">No necesitas conectar el STM32 para ver el panel. Si no termina de cargar, recarga la página y comprueba la conexión a Internet.</p></div></section>
+</main>
+<dialog id="shortcutsDialog" aria-labelledby="shortcutsTitle">
+<div class="help-heading"><h2 id="shortcutsTitle">Atajos de GHOST Monitor</h2><button id="closeShortcuts" autofocus aria-label="Cerrar ayuda">Cerrar ✕</button></div>
+<p class="hint">Mientras esta ayuda está abierta, la comunicación está pausada y el cursor está visible. La señal y la gráfica continúan.</p>
+<table class="shortcut-table"><thead><tr><th>Atajo</th><th>Acción</th></tr></thead><tbody>
+<tr><td>Ctrl + Alt + 1</td><td>Etapa 1 · Sí / No</td></tr><tr><td>Ctrl + Alt + 2</td><td>Etapa 2 · Frases útiles</td></tr><tr><td>Ctrl + Alt + 3</td><td>Etapa 3 · Construir mensajes</td></tr>
+<tr><td id="helpConfigShortcut">Ctrl + Alt + M</td><td>Entrar o salir de configuración</td></tr>
+<tr><td>Ctrl + Alt + U</td><td>Ajuste rápido: cursor y sliders, conservando visible la pantalla de comunicación</td></tr>
+<tr><td>Ctrl + F1</td><td>Abrir o cerrar esta ayuda</td></tr><tr><td>Esc</td><td>Cerrar ayuda o salir del ajuste rápido</td></tr>
+</tbody></table>
+<p id="helpShortcutNote" class="hint"></p><p class="hint">Los números superiores y el teclado numérico permiten cambiar de etapa. En Sí/No: izquierdo = sí, derecho = no. En las etapas 2 y 3: izquierdo = seleccionar, derecho = hablar. Los sliders se aplican al instante.</p>
+<p id="helpCountdown" role="timer" aria-live="off"></p>
+</dialog>
+<div id="toast" role="status" hidden></div><div id="announcement" class="sr-only" aria-live="polite"></div>
+<script>
+'use strict';
+const CORE_VOCAB = [
+  // Necesidades
+  {text:"Agua", emoji:"💧", category:"necesidades", type:"noun", speech:"Agua", priority:10, favorite:true},
+  {text:"Comida", emoji:"🍽", category:"necesidades", type:"noun", speech:"Comida", priority:9, favorite:true},
+  {text:"Baño", emoji:"🚽", category:"necesidades", type:"noun", speech:"Baño", priority:9, favorite:true},
+  {text:"Dormir", emoji:"😴", category:"necesidades", type:"verb", speech:"Dormir", priority:6},
+  {text:"Descansar", emoji:"🛏", category:"necesidades", type:"verb", speech:"Descansar", priority:6},
+  {text:"Ayuda", emoji:"❤️", category:"necesidades", type:"noun", speech:"Ayuda", priority:10, favorite:true},
+  {text:"Frío", emoji:"🥶", category:"necesidades", type:"adj", speech:"Frío", priority:6},
+  {text:"Calor", emoji:"🥵", category:"necesidades", type:"adj", speech:"Calor", priority:6},
+  {text:"Aire", emoji:"💨", category:"necesidades", type:"noun", speech:"Aire", priority:5},
+  {text:"Ropa", emoji:"👕", category:"necesidades", type:"noun", speech:"Ropa", priority:4},
+  {text:"Dinero", emoji:"💵", category:"necesidades", type:"noun", speech:"Dinero", priority:3},
+  {text:"Transporte", emoji:"🚌", category:"necesidades", type:"noun", speech:"Transporte", priority:3},
+  {text:"Teléfono", emoji:"📞", category:"necesidades", type:"noun", speech:"Teléfono", priority:4},
+
+  // Personas
+  {text:"Mamá", emoji:"👩", category:"personas", type:"noun", speech:"Mamá", priority:9, favorite:true},
+  {text:"Papá", emoji:"👨", category:"personas", type:"noun", speech:"Papá", priority:9, favorite:true},
+  {text:"Familia", emoji:"👪", category:"personas", type:"noun", speech:"Familia", priority:9, favorite:true},
+  {text:"Médico", emoji:"🩺", category:"personas", type:"noun", speech:"Médico", priority:8},
+  {text:"Enfermera", emoji:"👩‍⚕️", category:"personas", type:"noun", speech:"Enfermera", priority:7},
+  {text:"Amigo", emoji:"🧑‍🤝‍🧑", category:"personas", type:"noun", speech:"Amigo", priority:5},
+
+  // Acciones
+  {text:"Quiero", emoji:"🙋", category:"acciones", type:"verb", speech:"Quiero", priority:10, favorite:true},
+  {text:"Necesito", emoji:"❗", category:"acciones", type:"verb", speech:"Necesito", priority:10, favorite:true},
+  {text:"Puedo", emoji:"👍", category:"acciones", type:"verb", speech:"Puedo", priority:6},
+  {text:"No puedo", emoji:"🚫", category:"acciones", type:"verb", speech:"No puedo", priority:6},
+  {text:"Comer", emoji:"🍴", category:"acciones", type:"verb", speech:"Comer", priority:7},
+  {text:"Beber", emoji:"🥤", category:"acciones", type:"verb", speech:"Beber", priority:7},
+  {text:"Ir", emoji:"➡️", category:"acciones", type:"verb", speech:"Ir", priority:6},
+  {text:"Venir", emoji:"⬅️", category:"acciones", type:"verb", speech:"Venir", priority:5},
+  {text:"Hablar", emoji:"💬", category:"acciones", type:"verb", speech:"Hablar", priority:6},
+  {text:"Esperar", emoji:"⏳", category:"acciones", type:"verb", speech:"Esperar", priority:5},
+  {text:"Repetir", emoji:"🔁", category:"acciones", type:"verb", speech:"Repetir", priority:5},
+
+  // Salud
+  {text:"Dolor", emoji:"🤕", category:"salud", type:"noun", speech:"Dolor", priority:10, favorite:true},
+  {text:"Medicamento", emoji:"💊", category:"salud", type:"noun", speech:"Medicamento", priority:7},
+  {text:"Respirar", emoji:"🫁", category:"salud", type:"verb", speech:"Respirar", priority:6},
+  {text:"Posición", emoji:"🔄", category:"salud", type:"noun", speech:"Cambiar de posición", priority:5},
+
+  // Lugares
+  {text:"Casa", emoji:"🏠", category:"lugares", type:"noun", speech:"Casa", priority:6},
+  {text:"Hospital", emoji:"🏥", category:"lugares", type:"noun", speech:"Hospital", priority:5},
+  {text:"Trabajo", emoji:"💼", category:"lugares", type:"noun", speech:"Trabajo", priority:4},
+  {text:"Colegio", emoji:"🏫", category:"lugares", type:"noun", speech:"Colegio", priority:4},
+
+  // Comida
+  {text:"Pan", emoji:"🍞", category:"comida", type:"noun", speech:"Pan", priority:5},
+  {text:"Fruta", emoji:"🍎", category:"comida", type:"noun", speech:"Fruta", priority:5},
+  {text:"Leche", emoji:"🥛", category:"comida", type:"noun", speech:"Leche", priority:5},
+  {text:"Sopa", emoji:"🍲", category:"comida", type:"noun", speech:"Sopa", priority:4},
+
+  // Emociones
+  {text:"Feliz", emoji:"😀", category:"emociones", type:"adj", speech:"Feliz", priority:5},
+  {text:"Triste", emoji:"😢", category:"emociones", type:"adj", speech:"Triste", priority:5},
+  {text:"Enojado", emoji:"😠", category:"emociones", type:"adj", speech:"Enojado", priority:4},
+  {text:"Cansado", emoji:"😩", category:"emociones", type:"adj", speech:"Cansado", priority:5},
+  {text:"Asustado", emoji:"😨", category:"emociones", type:"adj", speech:"Asustado", priority:4},
+
+  // Tiempo
+  {text:"Ahora", emoji:"⏰", category:"tiempo", type:"adv", speech:"Ahora", priority:6},
+  {text:"Después", emoji:"⏭", category:"tiempo", type:"adv", speech:"Después", priority:5},
+  {text:"Antes", emoji:"⏮", category:"tiempo", type:"adv", speech:"Antes", priority:4},
+  {text:"Hoy", emoji:"📅", category:"tiempo", type:"adv", speech:"Hoy", priority:4},
+  {text:"Mañana", emoji:"🌅", category:"tiempo", type:"adv", speech:"Mañana", priority:4},
+
+  // Preguntas
+  {text:"Qué", emoji:"❓", category:"preguntas", type:"pron", speech:"Qué", priority:6},
+  {text:"Quién", emoji:"❓", category:"preguntas", type:"pron", speech:"Quién", priority:5},
+  {text:"Dónde", emoji:"❓", category:"preguntas", type:"pron", speech:"Dónde", priority:5},
+  {text:"Cuándo", emoji:"❓", category:"preguntas", type:"pron", speech:"Cuándo", priority:5},
+  {text:"Cómo", emoji:"❓", category:"preguntas", type:"pron", speech:"Cómo", priority:5},
+  {text:"Por qué", emoji:"❓", category:"preguntas", type:"pron", speech:"Por qué", priority:5},
+
+  // Comunicación básica (viven en Frases útiles / favoritos)
+  {text:"Sí", emoji:"✅", category:"frases", type:"word", speech:"Sí", priority:10, favorite:true},
+  {text:"No", emoji:"❌", category:"frases", type:"word", speech:"No", priority:10, favorite:true},
+  {text:"Gracias", emoji:"🙏", category:"frases", type:"word", speech:"Gracias", priority:7},
+  {text:"Por favor", emoji:"🙏", category:"frases", type:"word", speech:"Por favor", priority:7},
+  {text:"No entiendo", emoji:"❔", category:"frases", type:"phrase", speech:"No entiendo", priority:6},
+  {text:"Repita", emoji:"🔁", category:"frases", type:"word", speech:"Repita", priority:6},
+  {text:"Espere", emoji:"✋", category:"frases", type:"word", speech:"Espere", priority:6},
+];
+const PHRASES = [
+  "Necesito ayuda.", "No puedo hablar.", "No entiendo.", "Repita, por favor.",
+  "Espere, por favor.", "Quiero agua.", "Quiero ir al baño.", "Tengo dolor.",
+  "Quiero hablar con mi familia.", "Necesito ayuda médica."
+].map((t,i)=>({text:t, emoji:"💬", category:"frases", type:"phrase", speech:t, priority:8-i*0.1, favorite:false, isPhrase:true}));
+const CATEGORIES = [
+  {id:"necesidades", label:"Necesidades", emoji:"💧"},
+  {id:"personas",    label:"Personas",    emoji:"👪"},
+  {id:"acciones",    label:"Acciones",    emoji:"🙋"},
+  {id:"salud",       label:"Salud",       emoji:"🩺"},
+  {id:"lugares",     label:"Lugares",     emoji:"🏠"},
+  {id:"comida",      label:"Comida",      emoji:"🍽"},
+  {id:"emociones",   label:"Emociones",   emoji:"😀"},
+  {id:"tiempo",      label:"Tiempo",      emoji:"⏰"},
+  {id:"preguntas",   label:"Preguntas",   emoji:"❓"},
+  {id:"frases",      label:"Frases útiles", emoji:"💬"},
+  {id:"favoritos",   label:"Favoritos",   emoji:"⭐"},
+  {id:"otros",       label:"Más / Otros", emoji:"⋯"},
+];
+const KEY = 'ghost_monitor_models_caa_v2';
+const $ = id => document.getElementById(id);
+const norm = s => String(s || '').trim().toLocaleLowerCase('es').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+const defaults = {stage:1,profile:'adult',speed:1800,pause:1600,debounce:250,shortcut:'KeyM',cols:4,scale:1,visual:'both',contrast:false,clearAfter:false,voice:'',rate:1,pitch:1,volume:1};
+const BASIC = [{text:'Sí',speech:'Sí',emoji:'✅'},{text:'No',speech:'No',emoji:'❌'}];
+const phraseDefaults = {
+ adult:[['Necesito ayuda','🙋'],['Quiero agua','💧'],['Quiero ir al baño','🚽'],['Tengo dolor','🤕'],['Quiero cambiar de posición','🛏️'],['Espere, por favor','✋'],['No entiendo','❔'],['Gracias','🙏'],['Quiero hablar con mi familia','👪'],['Necesito ayuda médica','🩺']],
+ child:[['Quiero agua','💧'],['Tengo hambre','🍎'],['Quiero ir al baño','🚽'],['Me duele','🤕'],['Quiero jugar','🧸'],['Quiero a mi familia','👪'],['Necesito ayuda','🙋'],['Estoy cansado','😴'],['Otra vez, por favor','🔁'],['Gracias','💛']]
+};
+const clone = x => JSON.parse(JSON.stringify(x));
+const categoryIds = new Set(CATEGORIES.map(c=>c.id));
+function validEntry(w){
+ if(!w || typeof w.text!=='string' || !w.text.trim()) return null;
+ return {text:w.text.trim().slice(0,500),speech:typeof w.speech==='string'&&w.speech.trim()?w.speech.trim().slice(0,500):w.text.trim().slice(0,500),emoji:typeof w.emoji==='string'?w.emoji.slice(0,20):'💬',category:categoryIds.has(w.category)?w.category:'otros',favorite:!!w.favorite,custom:!!w.custom};
+}
+const baseWords = [...CORE_VOCAB,...PHRASES].map(validEntry);
+function defaultPhrases(profile){return phraseDefaults[profile].map(([text,emoji])=>validEntry({text,emoji,category:'frases'}));}
+function sanitizeSettings(raw={}){
+ const s={...defaults};
+ for(const key of ['stage','speed','pause','debounce','cols','scale','rate','pitch','volume']){
+  const bounds={stage:[1,3],speed:[500,15000],pause:[0,10000],debounce:[0,1500],cols:[2,6],scale:[1,1.4],rate:[.3,2],pitch:[.5,2],volume:[0,1]}[key];
+  if(typeof raw[key]==='number'&&Number.isFinite(raw[key])) s[key]=Math.max(bounds[0],Math.min(bounds[1],raw[key]));
+ }
+ s.stage=Math.round(s.stage);s.cols=Math.round(s.cols);
+ for(const key of ['contrast','clearAfter']) if(typeof raw[key]==='boolean') s[key]=raw[key];
+ if(['adult','child'].includes(raw.profile)) s.profile=raw.profile;
+ if(['both','text','symbols'].includes(raw.visual)) s.visual=raw.visual;
+ if(['KeyM','KeyG','KeyY'].includes(raw.shortcut)) s.shortcut=raw.shortcut;
+ if(typeof raw.voice==='string') s.voice=raw.voice.slice(0,300);
+ return s;
+}
+function cleanList(list){if(!Array.isArray(list)||list.length>5000) throw Error('Lista inválida o demasiado extensa (máximo 5000 elementos).');return list.map(validEntry).filter(Boolean);}
+function parseBackup(data){
+ if(!data || data.version!==2 || !data.settings || !data.phrases) throw Error('El respaldo no tiene un formato compatible.');
+ return {version:2,settings:sanitizeSettings(data.settings),phrases:{adult:cleanList(data.phrases.adult),child:cleanList(data.phrases.child)},words:cleanList(data.words)};
+}
+let db={version:2,settings:{...defaults},phrases:{adult:defaultPhrases('adult'),child:defaultPhrases('child')},words:clone(baseWords)};
+let loadNotice='';
+try{
+ const saved=localStorage.getItem(KEY)||localStorage.getItem('ghost_monitor_caa_v2')||localStorage.getItem('ghost_caa_v2');
+ if(saved) db=parseBackup(JSON.parse(saved));
+ else{
+  const legacy=JSON.parse(localStorage.getItem('ghost_caa_v1')||'null');
+  if(legacy){
+   if(Array.isArray(legacy.custom)) db.words.push(...cleanList(legacy.custom));
+   if(legacy.favOverrides) db.words.forEach(w=>{if(typeof legacy.favOverrides[norm(w.text)]==='boolean')w.favorite=legacy.favOverrides[norm(w.text)];});
+   const old=legacy.settings||{};
+   db.settings=sanitizeSettings({...defaults,speed:old.scanSpeed,voice:old.voiceName,rate:old.rate,pitch:old.pitch,volume:old.volume,cols:old.cols,scale:old.fontScale,contrast:old.contrast,visual:old.visualMode});
+   const imported=db.words.filter(w=>w.custom&&(w.category==='frases'||w.text.split(/\s+/).length>2));
+   for(const p of ['adult','child']) db.phrases[p].push(...imported.map(clone));
+   loadNotice='Se conservó el vocabulario de la versión anterior.';
+  }
+ }
+}catch{loadNotice='No se pudo recuperar la configuración guardada. Puedes importar tu respaldo en configuración.';}
+let quickAdjust=false,helpOpen=false;
+let config=false,category=null,index=0,targets=[],message='',selected=null,timer=null,pauseUntil=0,lastInput=-Infinity,lastButton=-1,voices=[],speaking=false,speechToken=0,spokenTimer=null,progressStart=0,currentTab='general';
+let activeWindow=!document.hidden;
+function notify(text){$('toast').textContent=text;$('toast').hidden=false;clearTimeout(notify.timer);notify.timer=setTimeout(()=>$('toast').hidden=true,4500);}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(db));}catch{notify('No se pudo guardar en este navegador. Descarga un respaldo antes de cerrar.');}}
+function applyAppearance(){
+ const s=db.settings;
+ document.body.classList.toggle('child',s.profile==='child');document.body.classList.toggle('contrast',s.contrast);
+ document.body.classList.toggle('text-only',s.visual==='text');document.body.classList.toggle('symbols-only',s.visual==='symbols');
+ document.documentElement.style.setProperty('--cols',s.cols);document.documentElement.style.setProperty('--font',s.scale);
+}
+function element(tag,className,text){const el=document.createElement(tag);if(className)el.className=className;if(text!==undefined)el.textContent=text;return el;}
+function tile(item,action,extra=''){
+ const b=element('button','tile '+extra);b.type='button';b.append(element('span','emoji',item.emoji),element('span','label',item.text));b.setAttribute('aria-label',item.text);
+ targets.push({el:b,action,item});return b;
+}
+function phraseList(){return [...BASIC,...db.phrases[db.settings.profile].filter(w=>!['si','no'].includes(norm(w.text)))];}
+function wordsFor(cat){return db.words.filter(w=>cat==='favoritos'?w.favorite:w.category===cat);}
+function stopScan(){clearTimeout(timer);timer=null;}
+function canScan(){return !config&&!quickAdjust&&!helpOpen&&db.settings.stage!==1&&activeWindow&&!document.hidden&&!speaking;}
+function scheduleScan(delay=db.settings.speed){
+ stopScan();if(!canScan())return;
+ const actual=Math.max(delay,pauseUntil-Date.now());progressStart=Date.now();
+ timer=setTimeout(()=>{if(!canScan())return;index=(index+1)%targets.length;highlight();scheduleScan();},actual);
+ const fill=$('scanProgress');if(fill){fill.style.transition='none';fill.style.width='0%';requestAnimationFrame(()=>{if(fill.isConnected){fill.style.transition=`width ${actual}ms linear`;fill.style.width='100%';}});}
+}
+function highlight(){
+ targets.forEach((t,i)=>{t.el.classList.toggle('scanning',i===index&&db.settings.stage!==1);if(i===index)t.el.setAttribute('aria-current','true');else t.el.removeAttribute('aria-current');});
+ const status=$('scanStatus');if(status) status.textContent=!activeWindow?'Barrido en pausa · vuelve a esta ventana':speaking?'Hablando…':`Barrido automático · ${index+1} / ${targets.length}`;
+
+}
+function updateMessage(){const m=$('messageText');if(m){m.textContent=db.settings.stage===2?(selected?.text||'Selecciona una frase'):message||'Tu mensaje aparecerá aquí';m.classList.toggle('empty',db.settings.stage===2?!selected:!message);m.scrollTop=m.scrollHeight;}targets.forEach(t=>t.el.classList.toggle('chosen',db.settings.stage===2&&t.item===selected));}
+let screenPage=0,screenKey='',resizeTimer;
+function fitCommunicationGrid(){
+ const grid=$('grid');if(!grid)return;
+ const all=targets.slice();const key=[db.settings.stage,db.settings.profile,category].join(':');
+ if(key!==screenKey){screenPage=0;screenKey=key;}
+ const rect=grid.getBoundingClientRect();
+ const maxCols=Math.max(2,Math.floor(rect.width/(110*db.settings.scale)));
+ const maxRows=Math.max(2,Math.floor(rect.height/(84*db.settings.scale)));
+ let cols=Math.min(maxCols,Math.max(db.settings.cols,Math.ceil(Math.sqrt(all.length*rect.width/Math.max(1,rect.height)))));
+ cols=Math.max(2,cols);
+ const capacity=Math.max(4,cols*maxRows);
+ const paged=all.length>capacity;
+ const perPage=paged?capacity-2:capacity;
+ const pageCount=Math.max(1,Math.ceil(all.length/perPage));
+ screenPage=Math.min(screenPage,pageCount-1);
+ const visible=all.slice(screenPage*perPage,(screenPage+1)*perPage);
+ grid.replaceChildren();targets=visible;
+ visible.forEach(t=>grid.append(t.el));
+ if(paged){
+  grid.append(tile({text:'Página anterior',emoji:'←'},()=>{screenPage=(screenPage+pageCount-1)%pageCount;renderCommunication();},'action'));
+  grid.append(tile({text:'Página siguiente',emoji:'→'},()=>{screenPage=(screenPage+1)%pageCount;renderCommunication();},'action'));
+  const label=$('scanStatus').previousElementSibling;label.textContent+=` · Página ${screenPage+1} de ${pageCount}`;
+ }
+ cols=Math.min(cols,targets.length);
+ grid.style.setProperty('--fit-cols',cols);grid.style.setProperty('--fit-rows',Math.ceil(targets.length/cols));
+}
+window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{if(!config)renderCommunication();},120);});
+window.visualViewport?.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{if(!config)renderCommunication();},120);});
+function renderCommunication(){
+ stopScan();applyAppearance();targets=[];index=0;
+ const root=$('communication');root.replaceChildren();const s=db.settings;
+ $('header').hidden=s.stage===1;
+ if(s.stage===1){
+  root.className='basic';BASIC.forEach((w,i)=>{const b=tile(w,()=>basicSay(i),i?'no':'yes');b.append(element('span','caption',i?'Clic derecho':'Clic izquierdo'));root.append(b);});return;
+ }
+ root.className='layout';$('modeLabel').replaceChildren(element('span','dot'),document.createTextNode('Modo de comunicación'));
+ const intro=element('div','intro');const title=element('div');title.append(element('p','eyebrow','TU VOZ, A TU RITMO'),element('h1','',s.stage===2?'Lo que quiero decir.':'Cada palabra cuenta.'),element('p','hint',s.stage===2?'Elige una frase. Hazla escuchar.':'Construye tu mensaje, palabra a palabra.'));const mark=element('div','stage-mark');mark.append(element('strong','',`0${s.stage}`),document.createTextNode(' / 03'));intro.append(title,mark);root.append(intro);
+ const box=element('section','message');box.setAttribute('aria-label',s.stage===2?'Frase seleccionada':'Mensaje');box.append(element('p','eyebrow',s.stage===2?'FRASE PREPARADA · CLIC DERECHO PARA HABLAR':'MI MENSAJE · CLIC DERECHO PARA HABLAR'),element('p','message-text',''));box.lastChild.id='messageText';root.append(box);
+ const trail=element('div','trail');trail.append(element('span','',s.stage===2?'Tus frases útiles':category?category==='keyboard'?'Teclado':CATEGORIES.find(c=>c.id===category)?.label||category:'Elige una categoría'),element('span','',''));trail.lastChild.id='scanStatus';root.append(trail);
+ const grid=element('div','grid');grid.id='grid';root.append(grid);
+ if(s.stage===2){phraseList().forEach(w=>grid.append(tile(w,()=>{selected=w;updateMessage();pauseAfter();})));}
+ else if(!category){
+  for(const c of CATEGORIES){if(wordsFor(c.id).length)grid.append(tile({text:c.label,emoji:c.emoji},()=>{category=c.id;renderCommunication();}));}
+  grid.append(tile({text:'Escribir con letras',emoji:'⌨️'},()=>{category='keyboard';renderCommunication();}));addMessageActions(grid);
+ }else{
+  grid.append(tile({text:'Volver a categorías',emoji:'↩'},()=>{category=null;renderCommunication();},'action'));
+  if(category==='keyboard'){
+   for(const char of 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZÁÉÍÓÚÜ0123456789.,¿?¡!') grid.append(tile({text:char,emoji:''},()=>{message+=char.toLocaleLowerCase('es');updateMessage();pauseAfter();},'letter-key'));
+   grid.append(tile({text:'Espacio',emoji:'␣'},()=>{message+=' ';updateMessage();pauseAfter();}));
+  }else wordsFor(category).forEach(w=>grid.append(tile(w,()=>{message+=(message&&!message.endsWith(' ')?' ':'')+w.speech;updateMessage();pauseAfter();})));
+  addMessageActions(grid);
+ }
+ const progress=element('div','progress');progress.setAttribute('aria-hidden','true');const fill=element('span');fill.id='scanProgress';progress.append(fill);root.append(progress);
+ const legend=element('footer','legend');for(const [key,text] of [['Clic izquierdo','Seleccionar'],['Clic derecho','Hablar']]){const p=element('span');p.append(element('strong','',key),document.createTextNode(' · '+text));legend.append(p);}legend.append(element('span','key',shortcutLabel()+' · Configurar'));root.append(legend);
+ const status=element('p','hint');status.id='speechStatus';status.setAttribute('role','status');root.append(status);
+ fitCommunicationGrid();updateMessage();highlight();scheduleScan();
+}
+function addMessageActions(grid){
+ grid.append(tile({text:category==='keyboard'?'Borrar letra':'Borrar última palabra',emoji:'⌫'},()=>{message=category==='keyboard'?message.slice(0,-1):message.trimEnd().replace(/\S+\s*$/,'').trimEnd();updateMessage();pauseAfter();},'action'));
+ grid.append(tile({text:'Limpiar mensaje',emoji:'✕'},()=>{message='';updateMessage();pauseAfter();},'action'));
+}
+function pauseAfter(){pauseUntil=Date.now()+db.settings.pause;scheduleScan();}
+function basicSay(i){targets.forEach((t,j)=>t.el.classList.toggle('chosen',i===j));speak(BASIC[i].speech);}
+function speechStatus(text){const el=$('speechStatus');if(el)el.textContent=text;else $('announcement').textContent=text;}
+function finishSpeech(token){if(token!==speechToken)return;speaking=false;clearTimeout(spokenTimer);highlight();scheduleScan();}
+function cancelSpeech(){speechToken++;speaking=false;clearTimeout(spokenTimer);window.speechSynthesis?.cancel();}
+function speak(text){
+ if(!text.trim()){speechStatus('Primero selecciona una frase o construye un mensaje.');return;}
+ cancelSpeech();speechStatus('');
+ if(!('speechSynthesis' in window)){notify('La voz no está disponible. El mensaje permanece visible.');return;}
+ const token=++speechToken;const u=new SpeechSynthesisUtterance(text);const s=db.settings;const voice=voices.find(v=>v.name===s.voice)||voices.find(v=>v.lang.toLowerCase().startsWith('es'));
+ if(voice)u.voice=voice;u.lang=voice?.lang||'es-ES';u.rate=s.rate;u.pitch=s.pitch;u.volume=s.volume;speaking=true;stopScan();highlight();
+ u.onend=()=>{if(token!==speechToken)return;if(!config&&s.stage===3&&s.clearAfter){message='';updateMessage();}speechStatus('Mensaje pronunciado.');finishSpeech(token);};
+ u.onerror=e=>{if(token!==speechToken)return;speechStatus('No se pudo reproducir la voz. El mensaje permanece visible.');notify('No se pudo reproducir la voz. Revisa la voz del dispositivo en configuración.');finishSpeech(token);};
+ try{window.speechSynthesis.speak(u);spokenTimer=setTimeout(()=>{if(token===speechToken){cancelSpeech();speechStatus('La voz no respondió. Prueba otra voz en configuración.');highlight();scheduleScan();}},Math.max(15000,text.length*400/s.rate));}catch{finishSpeech(token);notify('No se pudo iniciar la voz del dispositivo.');}
+}
+function shortcutLabel(){return 'Ctrl + Alt + '+db.settings.shortcut.slice(-1);}
+const CONFIG_IDLE_MS=30000;
+let configLastActivity=0,configWatchdog=null;
+function resetConfigIdle(){if(config||quickAdjust||helpOpen)configLastActivity=Date.now();}
+function checkConfigIdle(){
+ if(!config&&!quickAdjust&&!helpOpen)return;
+ const remaining=Math.max(0,CONFIG_IDLE_MS-(Date.now()-configLastActivity));
+ $('configCountdown').textContent=`Regreso automático a comunicación en ${Math.ceil(remaining/1000)} s sin actividad. Usar el teclado o los controles reinicia el tiempo.`;
+ $('quickCountdown').textContent=` · Regreso en ${Math.ceil(remaining/1000)} s sin actividad`;
+ $('helpCountdown').textContent=`Regreso automático a comunicación en ${Math.ceil(remaining/1000)} s sin actividad.`;
+ if(remaining===0)returnToCommunication();
+}
+for(const eventName of ['pointerdown','keydown','input','change','wheel']){
+ document.addEventListener(eventName,e=>{if(e.isTrusted)resetConfigIdle();},{capture:true,passive:true});
+}
+document.addEventListener('visibilitychange',checkConfigIdle);
+window.addEventListener('focus',checkConfigIdle);
+function restartCompanionIdle(){
+ clearInterval(configWatchdog);configWatchdog=null;
+ if(config||quickAdjust||helpOpen){configLastActivity=Date.now();checkConfigIdle();configWatchdog=setInterval(checkConfigIdle,250);}
+}
+function updateCompanionCursor(){document.body.classList.toggle('companion-mode',quickAdjust||helpOpen);}
+function setQuickAdjust(value){
+ if(helpOpen)closeShortcuts(false);
+ if(value&&config)toggleConfig();
+ quickAdjust=value;stopScan();cancelSpeech();lastInput=-Infinity;lastButton=-1;
+ document.body.classList.toggle('quick-adjust',value);$('quickBar').hidden=!value;updateCompanionCursor();
+ window.dispatchEvent(new Event('ghost-mode-change'));renderCommunication();restartCompanionIdle();
+ if(value)$('dockLowerRange')?.focus();else document.activeElement?.blur();
+}
+function closeShortcuts(resume=true){
+ if(!helpOpen)return;helpOpen=false;$('shortcutsDialog').close();updateCompanionCursor();
+ window.dispatchEvent(new Event('ghost-mode-change'));
+ if(resume){restartCompanionIdle();if(!config&&!quickAdjust){document.activeElement?.blur();highlight();scheduleScan();}}
+}
+function toggleShortcuts(){
+ if(helpOpen){closeShortcuts();return;}
+ helpOpen=true;stopScan();cancelSpeech();updateCompanionCursor();
+ $('helpConfigShortcut').textContent=shortcutLabel();
+ $('helpShortcutNote').textContent=`Atajo de configuración activo: ${shortcutLabel()}. Puedes elegir Ctrl + Alt + M, G o Y en Uso y apariencia; solo funciona el elegido.`;
+ window.dispatchEvent(new Event('ghost-mode-change'));$('shortcutsDialog').showModal();restartCompanionIdle();
+}
+function returnToCommunication(){
+ closeShortcuts(false);
+ if(quickAdjust)setQuickAdjust(false);
+ if(config)toggleConfig();
+ restartCompanionIdle();
+}
+$('endQuickAdjust').addEventListener('click',()=>setQuickAdjust(false));
+$('closeShortcuts').addEventListener('click',()=>closeShortcuts());
+$('shortcutsDialog').addEventListener('cancel',e=>{e.preventDefault();closeShortcuts();});
+function toggleConfig(){
+ if(helpOpen)closeShortcuts(false);
+ if(quickAdjust)setQuickAdjust(false);
+ if(config)document.activeElement?.blur(); // Commit a pending field change before automatic return.
+ config=!config;window.dispatchEvent(new Event('ghost-mode-change'));clearInterval(configWatchdog);configWatchdog=null;stopScan();cancelSpeech();lastInput=-Infinity;lastButton=-1;
+ document.body.classList.toggle('communicating',!config);$('communication').hidden=config;$('settings').hidden=!config;
+ if(config){$('header').hidden=false;$('modeLabel').textContent='Configuración · comunicación en pausa';syncSettings();showTab(currentTab);$('settingsTitle').focus();restartCompanionIdle();}
+ else{document.activeElement?.blur();pauseUntil=0;window.scrollTo(0,0);renderCommunication();}
+}
+function activateGhostInput(button, source='stm32'){
+ if(config || quickAdjust || helpOpen || document.hidden || ![0,2].includes(button))return false;
+ if(source==='stm32' && (!activeWindow || speaking))return false;
+ if(!activeWindow){activeWindow=true;highlight();scheduleScan();}
+ if(db.settings.stage===1){basicSay(button===0?0:1);return true;}
+ if(button===2){speak(db.settings.stage===2?selected?.speech||'':message);return true;}
+ if(speaking)return false;
+ targets[index]?.action();return true;
+}
+window.GhostBridge=Object.freeze({activate:activateGhostInput,available:()=>!config&&!quickAdjust&&!helpOpen&&!document.hidden&&activeWindow&&!speaking,configuration:()=>config,adjustable:()=>!helpOpen&&(config||quickAdjust),quickAdjust:()=>quickAdjust,helpOpen:()=>helpOpen,refresh:()=>{if(!config)renderCommunication();}});
+
+// Capture before any target handlers: a switch click never depends on pointer location.
+for(const name of ['mousedown','mouseup','click','dblclick','auxclick','contextmenu']){
+ window.addEventListener(name,e=>{
+  if(config||quickAdjust||helpOpen)return;
+  e.preventDefault();e.stopImmediatePropagation();
+  if(name!=='mousedown'||![0,2].includes(e.button))return;
+  const now=performance.now();if(e.button===lastButton&&now-lastInput<db.settings.debounce)return;
+  lastInput=now;lastButton=e.button;
+  activateGhostInput(e.button, 'mouse');
+ },{capture:true});
+}
+function switchStage(stage){
+ if(helpOpen)closeShortcuts(false);
+ if(quickAdjust)setQuickAdjust(false);
+ restartCompanionIdle();
+ window.dispatchEvent(new Event('ghost-mode-change'));
+ if(config)document.activeElement?.blur();
+ cancelSpeech();stopScan();db.settings.stage=stage;category=null;screenPage=0;pauseUntil=0;lastInput=-Infinity;lastButton=-1;save();
+ if(config)toggleConfig();else renderCommunication();
+}
+window.addEventListener('keydown',e=>{
+ if(e.ctrlKey&&!e.altKey&&!e.shiftKey&&e.code==='F1'){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)toggleShortcuts();return;}
+ if(e.ctrlKey&&e.altKey&&!e.shiftKey&&e.code==='KeyU'){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)setQuickAdjust(!quickAdjust);return;}
+ if(e.key==='Escape'&&(helpOpen||quickAdjust)){e.preventDefault();e.stopImmediatePropagation();if(helpOpen)closeShortcuts();else setQuickAdjust(false);return;}
+ const stageMatch=/^(?:Digit|Numpad)([123])$/.exec(e.code);
+ if(e.ctrlKey&&e.altKey&&!e.shiftKey&&stageMatch){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)switchStage(Number(stageMatch[1]));return;}
+ if(e.ctrlKey&&e.altKey&&!e.shiftKey&&e.code===db.settings.shortcut){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)toggleConfig();return;}
+ if(!config&&!quickAdjust&&!helpOpen&&['Tab','Enter',' ','ContextMenu'].includes(e.key)){e.preventDefault();e.stopImmediatePropagation();}
+},{capture:true});
+window.addEventListener('blur',()=>{activeWindow=false;stopScan();highlight();});
+window.addEventListener('focus',()=>{activeWindow=true;highlight();scheduleScan();});
+document.addEventListener('visibilitychange',()=>{activeWindow=!document.hidden;if(!activeWindow)stopScan();else scheduleScan();highlight();});
+function populateVoices(){
+ voices=window.speechSynthesis?.getVoices()||[];const sel=$('cfgVoice');sel.replaceChildren(new Option('Español · voz predeterminada',''));
+ for(const v of voices)sel.add(new Option(`${v.name} (${v.lang})`,v.name));
+ if(db.settings.voice&&!voices.some(v=>v.name===db.settings.voice))sel.add(new Option(db.settings.voice+' · no disponible',db.settings.voice));
+ sel.value=db.settings.voice;
+}
+const configFields={cfgStage:['stage',Number],cfgProfile:['profile',String],cfgSpeed:['speed',v=>Number(v)*1000],cfgPause:['pause',v=>Number(v)*1000],cfgDebounce:['debounce',Number],cfgShortcut:['shortcut',String],cfgCols:['cols',Number],cfgScale:['scale',Number],cfgVisual:['visual',String],cfgContrast:['contrast',Boolean],cfgClear:['clearAfter',Boolean],cfgVoice:['voice',String],cfgRate:['rate',Number],cfgPitch:['pitch',Number],cfgVolume:['volume',Number]};
+function syncSettings(){
+ for(const [id,[key]] of Object.entries(configFields)){const el=$(id);if(el.type==='checkbox')el.checked=db.settings[key];else el.value=['speed','pause'].includes(key)?db.settings[key]/1000:db.settings[key];}
+ $('shortcutHelp').textContent=`${shortcutLabel()} alterna entre comunicación y configuración. Ctrl + Alt + 1: Sí/No; Ctrl + Alt + 2: frases útiles; Ctrl + Alt + 3: construir mensajes. Ctrl + Alt + U: ajuste rápido del monitor; Ctrl + F1: ayuda de atajos. Estos atajos de etapa abren directamente la comunicación y guardan la etapa elegida. El cursor desaparece en comunicación y vuelve aquí. Los clics se reciben dentro de esta página; mantén la ventana activa. En Sí/No: izquierdo = sí y derecho = no. En las otras etapas: izquierdo = seleccionar y derecho = hablar.`;
+ populateVoices();
+}
+for(const [id,[key,convert]] of Object.entries(configFields))$(id).addEventListener('change',e=>{
+ if(!config)return;const el=e.target;if(!el.checkValidity()){el.reportValidity();syncSettings();return;}
+ db.settings=sanitizeSettings({...db.settings,[key]:convert(el.type==='checkbox'?el.checked:el.value)});save();applyAppearance();syncSettings();
+ if(key==='stage'){category=null;selected=null;}if(key==='profile'){selected=null;renderPhraseEditor();}
+});
+function showTab(name){
+ currentTab=name;document.querySelectorAll('[data-tab]').forEach(b=>{const active=b.dataset.tab===name;b.setAttribute('aria-selected',active);$(b.dataset.tab).hidden=!active;});
+ if(name==='phrases')renderPhraseEditor();if(name==='vocabulary')renderVocabEditor();
+}
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+$('resume').addEventListener('click',toggleConfig);
+$('fullscreen').addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{notify('No se pudo activar pantalla completa.');}});
+$('testVoice').addEventListener('click',()=>speak('Esta es mi voz. Estoy listo para comunicarme.'));
+function editorInput(value,label,onChange){const input=element('input');input.value=value;input.setAttribute('aria-label',label);input.maxLength=label.startsWith('Emoji')?20:500;input.addEventListener('change',()=>onChange(input.value));return input;}
+function rowButton(label,text,fn,disabled=false){const b=element('button','',text);b.type='button';b.setAttribute('aria-label',label);b.disabled=disabled;b.addEventListener('click',fn);return b;}
+function renderPhraseEditor(){
+ const box=$('phraseEditor');box.replaceChildren();
+ const fixed=element('p','notice','✅ Sí    ·    ❌ No — siempre disponibles');box.append(fixed);
+ const list=db.phrases[db.settings.profile];list.forEach((w,i)=>{
+  const row=element('div','editor-row');row.append(editorInput(w.emoji,`Emoji de frase ${i+1}`,v=>{w.emoji=v;save();}),editorInput(w.text,`Frase ${i+1}`,v=>{if(v.trim()){if(w.speech===w.text)w.speech=v.trim();w.text=v.trim();save();}else renderPhraseEditor();}),editorInput(w.speech,`Pronunciación de frase ${i+1}`,v=>{w.speech=v.trim()||w.text;save();}));
+  const actions=element('div','row-actions');actions.append(rowButton('Subir frase '+(i+1),'↑',()=>{[list[i-1],list[i]]=[list[i],list[i-1]];save();renderPhraseEditor();},i===0),rowButton('Bajar frase '+(i+1),'↓',()=>{[list[i+1],list[i]]=[list[i],list[i+1]];save();renderPhraseEditor();},i===list.length-1),rowButton('Eliminar frase '+(i+1),'×',()=>{list.splice(i,1);save();renderPhraseEditor();}));row.append(actions,element('small','',`Frase ${i+1} · Texto y pronunciación`));box.append(row);
+ });
+}
+$('addPhrase').addEventListener('submit',e=>{e.preventDefault();const form=e.target;const w=validEntry({text:form.elements.text.value,emoji:form.elements.emoji.value,category:'frases'});if(!w)return;if(['si','no'].includes(norm(w.text))){notify('Sí y No ya están siempre presentes.');return;}db.phrases[db.settings.profile].push(w);save();form.elements.text.value='';renderPhraseEditor();notify('Frase añadida.');});
+$('restorePhrases').addEventListener('click',()=>{if(confirm('¿Restaurar las frases predeterminadas de este perfil? Exporta antes un respaldo para conservar las actuales.')){db.phrases[db.settings.profile]=defaultPhrases(db.settings.profile);save();renderPhraseEditor();}});
+function categorySelect(selected){const sel=element('select');for(const c of CATEGORIES.filter(c=>c.id!=='favoritos'))sel.add(new Option(c.label,c.id));sel.value=selected;return sel;}
+for(const id of ['vocabFilter','newWordCategory']){const sel=$(id);if(id==='vocabFilter')sel.add(new Option('Todas las categorías',''));for(const c of CATEGORIES)if(c.id!=='favoritos')sel.add(new Option(c.label,c.id));}
+$('vocabFilter').addEventListener('change',renderVocabEditor);$('vocabSearch').addEventListener('input',renderVocabEditor);
+function renderVocabEditor(){
+ const box=$('vocabEditor');box.replaceChildren();const cat=$('vocabFilter').value,query=norm($('vocabSearch').value);
+ const filtered=db.words.map((w,i)=>({w,i})).filter(({w})=>(!cat||w.category===cat)&&(!query||norm(w.text).includes(query)));
+ box.append(element('p','hint',`${filtered.length} elemento${filtered.length===1?'':'s'}`));
+ for(const {w,i} of filtered){
+  const row=element('div','editor-row');row.append(editorInput(w.emoji,'Emoji de '+w.text,v=>{w.emoji=v;save();}),editorInput(w.text,'Texto de '+w.text,v=>{if(v.trim()){if(w.speech===w.text)w.speech=v.trim();w.text=v.trim();save();}else renderVocabEditor();}),editorInput(w.speech,'Pronunciación de '+w.text,v=>{w.speech=v.trim()||w.text;save();}));
+  const actions=element('div','row-actions');actions.append(rowButton('Favorito: '+w.text,w.favorite?'★':'☆',()=>{w.favorite=!w.favorite;save();renderVocabEditor();}),rowButton('Eliminar palabra: '+w.text,'×',()=>{db.words.splice(i,1);save();renderVocabEditor();}));row.append(actions);
+  const label=element('label','', 'Categoría');const sel=categorySelect(w.category);sel.setAttribute('aria-label','Categoría de '+w.text);sel.addEventListener('change',()=>{w.category=sel.value;save();});label.append(sel);row.append(label);box.append(row);
+ }
+}
+$('addWord').addEventListener('submit',e=>{e.preventDefault();const f=e.target;const w=validEntry({text:f.elements.text.value,emoji:f.elements.emoji.value,category:f.elements.category.value,custom:true});if(!w)return;db.words.push(w);save();f.elements.text.value='';renderVocabEditor();notify('Palabra añadida.');});
+function classify(text){const n=norm(text);const exact=CORE_VOCAB.find(w=>norm(w.text)===n);if(exact)return exact.category;if(text.trim().split(/\s+/).length>2)return 'frases';return 'otros';}
+$('quickLoad').addEventListener('submit',e=>{
+ e.preventDefault();const lines=$('loadText').value.split('\n').map(t=>t.trim()).filter(Boolean);if(!lines.length){notify('Escribe al menos una palabra o frase.');return;}
+ if(lines.length>5000){notify('Carga un máximo de 5000 líneas a la vez.');return;}
+ const toPhrases=$('loadTarget').value==='phrases';const dest=toPhrases?db.phrases[db.settings.profile]:db.words;let count=0;
+ for(const text of lines){if(toPhrases&&['si','no'].includes(norm(text)))continue;dest.push(validEntry({text,category:toPhrases?'frases':classify(text),emoji:'💬',custom:true}));count++;}
+ save();$('loadText').value='';notify(`${count} elementos cargados.`);
+});
+function download(data,name){const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=element('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+$('export').addEventListener('click',()=>download(db,'ghost-respaldo.json'));$('exportWords').addEventListener('click',()=>download(db.words,'ghost-vocabulario.json'));
+$('import').addEventListener('click',()=>$('file').click());
+$('file').addEventListener('change',async e=>{
+ const file=e.target.files[0];e.target.value='';if(!file)return;
+ if(file.size>5*1024*1024){notify('El archivo supera el límite de 5 MB.');return;}
+ try{
+  const data=JSON.parse(await file.text());
+  if(Array.isArray(data)){const words=cleanList(data);if(!words.length)throw Error('No hay palabras válidas en el archivo.');db.words.push(...words);save();notify(`${words.length} elementos añadidos al vocabulario avanzado.`);}
+  else{const next=parseBackup(data);if(!confirm('¿Reemplazar las listas y la configuración con este respaldo?'))return;db=next;selected=null;category=null;save();applyAppearance();syncSettings();notify('Respaldo restaurado.');}
+ }catch(err){notify('No se pudo importar: '+err.message);}
+});
+save();applyAppearance();populateVoices();if(window.speechSynthesis)window.speechSynthesis.addEventListener('voiceschanged',populateVoices);renderCommunication();
+if(loadNotice)notify(loadNotice);
+</script>
+<script type="module" src="./monitor.mjs" onerror="const status=document.getElementById('monitorLoadStatus');if(status)status.textContent='No se pudo cargar el monitor. Recarga la página para volver a intentarlo.';"></script>
+</body></html>

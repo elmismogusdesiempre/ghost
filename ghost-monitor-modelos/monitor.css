@@ -1,0 +1,58 @@
+.monitor-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.monitor-head h2{margin:0}.monitor-pill{display:inline-flex;gap:8px;align-items:center;font-size:.8rem;padding:6px 9px;background:var(--soft)}.monitor-led{width:8px;height:8px;background:#8b9690;display:inline-block}.monitor-led.connected{background:#33846b}.monitor-led.error{background:#a44838}.monitor-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:18px 0}.monitor-stat{padding:12px;background:var(--bg);min-width:0}.monitor-stat small{display:block;color:var(--muted);font-size:.72rem}.monitor-stat strong{font-size:clamp(1rem,2.3vw,1.8rem);font-weight:600;overflow-wrap:anywhere}.monitor-chart{height:260px;position:relative;background:var(--bg);margin:14px 0}.monitor-chart canvas{width:100%;height:100%;display:block}.monitor-bands{display:flex;gap:14px;flex-wrap:wrap;font-size:.76rem;color:var(--muted)}.monitor-bands span:before{content:'';display:inline-block;width:10px;height:10px;margin-right:6px;background:#d7e8df}.monitor-bands .band-rest:before{background:#eceee8}.monitor-bands .band-right:before{background:#f0d9d1}#monitorError{color:#934434;font-size:.85rem;line-height:1.5;margin-top:12px}#monitorInfo{font-size:.8rem;color:var(--muted);line-height:1.6;margin-top:10px}#monitor .fields{margin-bottom:12px}.monitor-integration{padding:12px;background:var(--soft);margin-top:14px}#monitorGate{font-size:.8rem;margin-top:6px;line-height:1.4}#monitorDock{background:var(--surface);border-top:1px solid var(--line);order:2;flex:0 0 clamp(115px,24dvh,190px);min-height:0;padding:6px 16px;overflow:hidden;display:flex;gap:16px}body:not(.communicating) #monitorDock{display:none!important}#monitorDock .dock-summary{flex:0 0 clamp(150px,22vw,260px);font-size:12px;line-height:1.4;display:flex;flex-direction:column;justify-content:center;gap:3px;min-width:0}#monitorDock .dock-value{font-size:clamp(19px,3.5vh,30px);font-weight:600}#monitorDock .monitor-chart{flex:1;min-width:0;height:auto;margin:0}#monitorDock .dock-counters{font-size:11px}#monitorDock .monitor-pill{padding:0;background:none;font-size:11px}#monitorDock .dock-hint{font-size:10px;color:var(--muted)}body.communicating.monitor-visible #communication.basic{height:auto}body.communicating.monitor-visible #communication{order:1}body.communicating.monitor-visible #header{order:0}@media(max-width:600px){.monitor-stats{grid-template-columns:repeat(2,minmax(0,1fr))}#monitorDock{padding:5px 8px;gap:8px}#monitorDock .dock-summary{flex-basis:135px;font-size:11px}.monitor-chart{height:210px}}@media(max-height:430px){#monitorDock{flex-basis:90px}#monitorDock .dock-hint{display:none}#monitorDock .dock-value{font-size:18px}}
+
+.monitor-led.demo{background:#bd8416}#monitorDock[data-demo="true"]{border-top:3px solid #bd8416}
+
+/* Live thresholds stay readable in both the full and compact monitors. */
+#monitor input[type=range],#monitorDock input[type=range]{accent-color:var(--accent);width:100%;height:22px;min-height:22px;border:0;background:transparent;cursor:pointer;margin:0}
+#monitorDock .dock-controls{flex:0 0 clamp(150px,18vw,240px);display:flex;flex-direction:column;justify-content:center;gap:8px;min-width:0}
+#monitorDock .dock-controls label{font-size:11px;gap:2px;display:block;line-height:1.3}
+#monitorDock .dock-controls output{font-weight:700;font-variant-numeric:tabular-nums}
+#dockSliderHint{font-size:10px;line-height:1.2;color:var(--muted)}
+#monitorDock input:disabled{opacity:.7}
+body:not(.communicating).monitor-visible #monitorDock{display:flex!important;position:fixed;bottom:0;left:0;right:0;height:clamp(150px,26dvh,210px);z-index:20;box-shadow:0 -4px 18px #0001}
+body:not(.communicating).monitor-visible #settings{padding-bottom:calc(26dvh + 6rem)}
+@media(max-width:650px){
+ #monitorDock,body:not(.communicating).monitor-visible #monitorDock{display:grid;grid-template-columns:120px minmax(0,1fr);grid-template-rows:minmax(0,1fr) 64px;gap:4px 8px;flex-basis:clamp(200px,32dvh,270px);height:clamp(200px,32dvh,270px)}
+ #monitorDock .dock-summary{font-size:10px;gap:1px}
+ #monitorDock .dock-controls{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr auto;gap:0 12px}
+ #dockSliderHint{grid-column:1/-1}
+ #monitorDock .dock-value{font-size:20px}
+ body:not(.communicating).monitor-visible #settings{padding-bottom:calc(32dvh + 6rem)}
+}
+@media(max-height:430px){
+ #monitorDock,body:not(.communicating).monitor-visible #monitorDock{display:flex;height:120px;flex-basis:120px;gap:8px;padding:4px 8px}
+ #monitorDock .dock-summary{flex-basis:110px;gap:1px}
+ #monitorDock .dock-counters,#monitorDock #dockGate{display:none}
+ #monitorDock .dock-controls{display:flex;flex-basis:140px;gap:2px}
+ #monitorDock .dock-controls label{font-size:10px}
+ #dockSliderHint{font-size:9px}
+ body:not(.communicating).monitor-visible #settings{padding-bottom:180px}
+}
+
+body.communicating.companion-mode,body.communicating.companion-mode *{cursor:auto!important;user-select:auto}
+body.communicating.companion-mode button,body.communicating.companion-mode input[type=range]{cursor:pointer!important}
+#quickBar{order:0;flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--accent);color:var(--bg);padding:5px 12px;font-size:12px;line-height:1.3}
+#quickBar button{font-size:12px;min-height:32px;padding:5px 10px;flex-shrink:0}
+#quickCountdown{display:block;font-size:10px}
+#shortcutsDialog{border:0;padding:24px;width:min(720px,94vw);max-height:88dvh;overflow:auto;background:var(--surface);color:var(--ink);box-shadow:0 12px 80px #0005}
+#shortcutsDialog::backdrop{background:#142c2670}
+.help-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.shortcut-table{width:100%;border-collapse:collapse;margin:16px 0;text-align:left;font-size:.9rem}
+.shortcut-table th,.shortcut-table td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.shortcut-table td:first-child{font-weight:700;white-space:nowrap}
+#helpCountdown{padding:10px;background:var(--soft);font-size:.8rem;margin-top:12px}
+@media(max-width:500px){#shortcutsDialog{padding:14px}.shortcut-table{font-size:.76rem}.shortcut-table td,.shortcut-table th{padding:8px 4px}#quickBar{padding:4px 8px;font-size:10px}#quickBar button{font-size:10px}}
+
+/* The eye has its own transparent area: graph, thresholds and input stay usable. */
+.monitor-visuals{display:flex;gap:16px;align-items:stretch;min-width:0}
+.monitor-visuals>.monitor-chart{flex:1;min-width:0}
+.dock-visuals{display:flex;flex:1;min-width:0;gap:10px;align-items:stretch}
+#monitorDock .dock-visuals>.monitor-chart{flex:1;min-width:0}
+.signal-eye{flex:0 0 clamp(110px,16vw,190px);display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;background:transparent;pointer-events:none!important;user-select:none;overflow:hidden}
+.signal-eye *{pointer-events:none!important}
+.signal-eye svg{display:block;width:100%;height:auto;overflow:visible}
+.signal-eye-caption{font-size:11px;line-height:1.3;color:var(--muted);text-align:center;margin-top:8px}
+#monitorDock .signal-eye{flex-basis:clamp(80px,11vw,150px)}
+#monitorDock .signal-eye-caption{font-size:10px;margin-top:4px}
+@media(max-width:850px){#monitorDock .signal-eye{flex-basis:76px}.monitor-visuals .signal-eye{flex-basis:110px}.dock-visuals{gap:5px}}
+@media(max-width:650px){#monitorDock .signal-eye{flex-basis:64px}#monitorDock .signal-eye-caption{font-size:9px}.monitor-visuals{gap:8px}}
