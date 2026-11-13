@@ -22,7 +22,14 @@ export class FaceGestureGate {
     if(!allowed||!Number.isFinite(angle)||!Number.isFinite(time)){this.reset();return null}
     if(this.last!==null&&(time<=this.last||time-this.last>500))this.reset();
     this.last=time;
-    const s=this.settings,state=Math.abs(angle)<=s.neutral?'center':angle<=-s.turn?'left':angle>=s.turn?'right':'between';
+    const s=this.settings;
+    // Enter at the configured threshold; tolerate small tracking fluctuations
+    // while confirming the same gesture. Never rearm without a centered head.
+    const margin=Math.min(2,(s.turn-s.neutral)/2);
+    let state=Math.abs(angle)<=s.neutral?'center':angle<=-s.turn?'left':angle>=s.turn?'right':'between';
+    if(this.candidate==='left'&&angle<=-(s.turn-margin))state='left';
+    else if(this.candidate==='right'&&angle>=s.turn-margin)state='right';
+    else if(this.candidate==='center'&&Math.abs(angle)<=s.neutral+margin)state='center';
     if(state!==this.candidate){this.candidate=state;this.since=time;this.frames=1}else this.frames++;
     if(state==='center'&&time-this.since>=s.rest&&this.frames>=3)this.ready=true;
     if((state==='left'||state==='right')&&this.ready&&time-this.since>=s.hold&&this.frames>=3){this.ready=false;return state}

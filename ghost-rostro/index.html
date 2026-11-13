@@ -427,6 +427,8 @@ window.GhostBridge=Object.freeze({activate:activateGhostInput,available:()=>!con
 
 window.GhostFaceBridge=Object.freeze({
  ...window.GhostBridge,
+ mode:()=>config?'settings':quickAdjust?'adjustment':helpOpen?'help':speaking?'speaking':!activeWindow?'unfocused':'communication',
+ startCommunication:()=>{returnToCommunication();activeWindow=!document.hidden;highlight();scheduleScan();},
  setTracking(active,ready){if(active===faceInputActive&&ready===faceInputReady)return;faceInputActive=active;faceInputReady=ready;stopScan();highlight();scheduleScan();}
 });
 // Capture before any target handlers: a switch click never depends on pointer location.

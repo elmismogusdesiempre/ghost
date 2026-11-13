@@ -8,11 +8,11 @@ const gate=new FaceGestureGate(settings);
 let workerTimer=null;
 let stream=null,worker=null,source=null,epoch=0,active=false,starting=false,ready=false,busy=false;
 let center=null,calibration=null,calibrationTimer=null,latest=null,filtered=null,lastPoseTime=null,lastResult=0,lastCapture=0,lastUI=0,lastVideoTime=-1;
-let faceCount=0,status='Cámara apagada',problem='',direction='Sin rostro',leftCount=0,rightCount=0,frames=0;
+let faceCount=0,status='Cámara apagada',problem='',direction='Sin rostro',leftCount=0,rightCount=0,frames=0,lastAction='',lastActionAt=0;
 const ring=[];const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 $('monitor').innerHTML=`<div class="panel"><div class="monitor-head"><div><p class="eyebrow">GHOST · Versión facial independiente</p><h2>Control con el rostro</h2></div><span class="monitor-pill" id="faceCameraStatus" role="status">Cámara apagada</span></div>
 <p class="hint">Gira hacia tu izquierda para seleccionar la opción resaltada y hacia tu derecha para hablar. Vuelve al centro entre acciones. El video se procesa en este navegador; no se graba ni se sube.</p>
-<div class="buttons"><button id="startCamera" class="primary">Activar cámara</button><button id="stopCamera" disabled>Detener cámara</button><button id="calibrateFace" disabled>Calibrar centro</button></div>
+<div class="buttons"><button id="startCamera" class="primary">Activar cámara</button><button id="stopCamera" disabled>Detener cámara</button><button id="calibrateFace" disabled>Calibrar centro</button><button id="startFaceCommunication" class="primary" disabled>Iniciar comunicación →</button></div>
 <p id="faceProblem" role="alert"></p><p id="faceCalibration" class="notice">Activa la cámara. Después, mira al centro en una posición cómoda y pulsa Calibrar centro. Mantente quieto unos 1,5 segundos.</p>
 <div class="fields"><label class="check"><input id="showFaceMonitor" type="checkbox">Mostrar monitor y video</label><label class="check"><input id="showFaceEye" type="checkbox">Mostrar ojo de la señal</label><label>Modelo del ojo<select id="faceEyeStyle">${eyeModelNames.map(key=>`<option value="${key}">${eyeModels[key].label}</option>`).join('')}</select></label></div>
 <p class="hint">Al ocultar el monitor, la cámara y la detección continúan mientras esta página esté visible y activa. Para apagar ambas, usa Detener cámara. Las pestañas en segundo plano o la pantalla bloqueada pueden ser suspendidas por el navegador.</p>
@@ -26,6 +26,7 @@ $('monitor').innerHTML=`<div class="panel"><div class="monitor-head"><div><p cla
 <p class="notice">Antes de comunicar, comprueba los sentidos desde Settings, donde los giros no ejecutan acciones. La detección requiere un solo rostro, cámara estable y buena luz. Perder el rostro, inclinarlo demasiado o dejar de recibir fotogramas pausa las acciones; se exige volver al centro.</p><p id="faceGateStatus" class="hint"></p></div>`;
 $('monitorDock').innerHTML=`<div class="dock-summary"><span class="monitor-pill" id="faceDockStatus">Cámara apagada</span><strong class="dock-value" id="faceAngleDock">—</strong><span id="faceDirectionDock">Sin rostro</span><small id="faceCountsDock">Selecciones 0 · Hablar 0</small><small id="faceReadyDock">Calibra desde Settings</small></div><div class="face-video-box"><canvas id="faceVideoDock" role="img" aria-label="Video en directo de la webcam, en espejo"></canvas></div><div class="monitor-chart"><canvas id="faceChartDock" role="img" aria-label="Giro horizontal del rostro en grados"></canvas></div><div class="dock-side"><div id="faceEyeDock" hidden></div><div class="dock-controls"><label>Giro ≥ <output id="faceTurnOut"></output>°<input id="faceTurnRange" type="range" min="6" max="35" step="1" aria-label="Giro mínimo para una acción"></label><label>Duración <output id="faceHoldOut"></output> ms<input id="faceHoldRange" type="range" min="150" max="2000" step="50" aria-label="Duración mínima del giro"></label><p class="hint">Ctrl + Alt + M: configurar cámara</p></div></div>`;
 source=document.createElement('video');source.id='faceCameraSource';source.className='face-camera-source';source.muted=true;source.autoplay=true;source.playsInline=true;source.setAttribute('aria-hidden','true');source.tabIndex=-1;document.body.append(source);
+const liveStatus=document.createElement('div');liveStatus.id='faceControlStatus';liveStatus.setAttribute('role','status');liveStatus.setAttribute('aria-live','polite');$('communication').before(liveStatus);
 const eyes=[new SignalEye($('faceEyeFull'),'face-full'),new SignalEye($('faceEyeDock'),'face-dock')];
 function text(id,value){if($(id).textContent!==value)$(id).textContent=value}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(settings))}catch{problem='No se pudo guardar la configuración en este navegador.'}}
@@ -46,11 +47,16 @@ $('faceEyeStyle').addEventListener('change',e=>configure('eyeStyle',e.target.val
 function updateUI(){
  text('faceCameraStatus',status);text('faceDockStatus',status);text('faceProblem',problem);
  $('startCamera').disabled=active||starting;$('stopCamera').disabled=!active&&!starting;
+ $('startFaceCommunication').disabled=!center||!latest||!!calibration;
  $('calibrateFace').disabled=!ready||!latest||!!calibration||performance.now()-lastResult>600;
  const angle=filtered===null?'—':filtered.toFixed(1)+'°';for(const id of ['faceAngleFull','faceAngleDock'])text(id,angle);
  for(const id of ['faceDirectionFull','faceDirectionDock'])text(id,direction);
  text('faceLeftFull',String(leftCount));text('faceRightFull',String(rightCount));text('faceCountsDock',`Selecciones ${leftCount} · Hablar ${rightCount}`);
- const hint=calibration?'Mantente quieto: calibrando…':!center?'Calibra el centro en Settings':!latest?'Centra un solo rostro':!bridge.available()?'Acciones en pausa':gate.ready?'Listo para un giro':'Vuelve al centro para otra acción';
+ const mode=bridge.mode();
+ const progress=(duration)=>Math.min(100,Math.round((performance.now()-gate.since)/duration*100));
+ let hint=!active?'Activa la cámara en configuración (Ctrl + Alt + M)':!ready?'Cargando detector…':calibration?'Mantente quieto: calibrando…':!center?'Calibra el centro en configuración':!latest?'Centra un solo rostro':mode==='settings'?'Prueba de dirección · pulsa Iniciar comunicación para seleccionar y hablar':mode==='adjustment'||mode==='help'?'Acciones pausadas · cierra el ajuste o la ayuda':mode==='speaking'?'Hablando…':mode==='unfocused'?'Activa esta ventana para comunicar':gate.ready?(gate.candidate==='left'||gate.candidate==='right'?`Mantén el giro · ${progress(settings.hold)}%`:'Listo · izquierda selecciona / derecha habla'):gate.candidate==='center'?`Mantén el centro · ${progress(settings.rest)}%`:'Vuelve al centro para habilitar la siguiente acción';
+ if(lastAction&&performance.now()-lastActionAt<2200&&mode==='communication')hint=lastAction+' · '+hint;
+ liveStatus.textContent===hint||(liveStatus.textContent=hint);liveStatus.hidden=mode==='settings';
  text('faceReadyDock',hint);text('faceGateStatus',hint);
  for(const id of ['faceTurnRange','faceHoldRange'])$(id).disabled=!bridge.adjustable();
 }
@@ -112,9 +118,10 @@ function consumePose(data){
  direction=Math.abs(filtered)<=settings.neutral?'Centro':filtered<=-settings.turn?'Izquierda':filtered>=settings.turn?'Derecha':'En transición';status='Cámara activa · rostro detectado';
  bridge.setTracking(true,!document.hidden);const gesture=gate.sample(filtered,now,bridge.available());
  ring.push(filtered);if(ring.length>150)ring.shift();
- if(gesture&&bridge.activate(gesture==='left'?0:2,'face')){if(gesture==='left')leftCount++;else rightCount++}
+ if(gesture&&bridge.activate(gesture==='left'?0:2,'face')){if(gesture==='left')leftCount++;else rightCount++;lastAction=gesture==='left'?'Selección recibida':'Orden de hablar recibida';lastActionAt=now}
  updateUI();
 }
+$('startFaceCommunication').addEventListener('click',()=>{gate.reset();bridge.startCommunication();updateUI()});
 $('startCamera').addEventListener('click',startCamera);$('stopCamera').addEventListener('click',()=>stopCamera());$('calibrateFace').addEventListener('click',beginCalibration);
 window.addEventListener('ghost-mode-change',()=>{gate.reset();sync()});
 window.addEventListener('blur',()=>gate.reset());document.addEventListener('visibilitychange',()=>{gate.reset();if(document.hidden)bridge.setTracking(active,false)});
