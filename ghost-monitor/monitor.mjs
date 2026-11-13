@@ -1,5 +1,6 @@
 import { PacketDecoder, GestureDetector, stateOf, validateSettings } from './protocol.mjs';
 import { SignalEye } from './signal-eye.mjs';
+import { demoADC } from './demo-signal.mjs';
 const $ = id => document.getElementById(id);
 const SETTINGS_KEY = 'ghost_monitor_stm32_v1';
 let settings = { lower: 1500, upper: 2500, hold: 30, showDock: true, showEye: false };
@@ -22,7 +23,7 @@ $('monitor').innerHTML = `
  <div class="monitor-head"><div><p class="eyebrow">GHOST · Segunda versión</p><h2>Monitor STM32</h2></div><span class="monitor-pill"><span id="usbLED" class="monitor-led"></span><span id="usbStatus" role="status">USB desconectado</span></span></div>
  <p class="hint">PA0 · ADC de 12 bits · USB CDC · 115200 baudios · aproximadamente 500 muestras/s.</p>
  <div class="buttons"><button id="connectSTM" class="primary">Conectar STM32</button><button id="disconnectSTM" disabled>Desconectar</button><button id="resetCounts">Reiniciar contadores</button><button id="toggleDemo" aria-pressed="false">Activar modo demo</button></div>
- <p class="hint">El modo demo permite revisar la gráfica y el monitor compacto sin STM32. Sus datos y contadores son simulados y no activan acciones de comunicación.</p>
+ <p class="hint">El modo demo permite revisar la gráfica y el monitor compacto sin STM32. Incluye reposo con ruido fino, activaciones irregulares y picos breves. Sus datos y contadores son simulados y no activan acciones de comunicación.</p>
  <p id="monitorError" role="alert"></p><p id="monitorInfo"></p>
  <div class="monitor-stats">
   <div class="monitor-stat"><small>ADC actual</small><strong id="adcValue">—</strong></div>
@@ -222,10 +223,7 @@ function tickDemo(now) {
   if (now - demoTick > 250) demoTick = now - 50;
   while (now - demoTick >= 50) {
     demoTick += 50;
-    const samples = Array.from({ length: 25 }, () => {
-      const t = demoSample++ / 500;
-      return Math.round(2048 + 1850 * Math.sin(2 * Math.PI * t / 6) + 60 * Math.sin(2 * Math.PI * t * 7));
-    });
+    const samples = Array.from({ length: 25 }, () => demoADC(demoSample++));
     demoPackets++; packet(samples, false);
   }
 }

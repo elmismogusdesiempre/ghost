@@ -188,6 +188,7 @@ function toggleConfig(){
  document.body.classList.toggle('communicating',!config);$('communication').hidden=config;$('settings').hidden=!config;
  if(config){$('header').hidden=false;$('modeLabel').textContent='Configuración · comunicación en pausa';syncSettings();showTab(currentTab);$('settingsTitle').focus();configLastActivity=Date.now();checkConfigIdle();configWatchdog=setInterval(checkConfigIdle,250);}
  else{document.activeElement?.blur();pauseUntil=0;window.scrollTo(0,0);renderCommunication();}
+ window.dispatchEvent(new Event('ghost-mode-change'));
 }
 // One standard left-button press selects the currently scanned option, anywhere
 // on the communication surface. Compatibility mouse/click events never select.
@@ -311,6 +312,14 @@ $('file').addEventListener('change',async e=>{
 });
 applyAppearance();populateVoices();if(window.speechSynthesis)window.speechSynthesis.addEventListener('voiceschanged',populateVoices);renderCommunication();
 if(loadNotice)notify(loadNotice);
+
+// The monitor observes samples without owning the one-switch input model.
+window.GhostMobileMonitorBridge=Object.freeze({
+ available:()=>!config&&!document.hidden&&activeWindow&&!speaking,
+ configuration:()=>config, adjustable:()=>config, quickAdjust:()=>false, helpOpen:()=>false,
+ refresh:()=>{if(!config)renderCommunication();}
+});
+window.dispatchEvent(new Event('ghost-mobile-ready'));
 
 // The worker is deliberately scoped to /mobile/: it cannot control Desktop.
 let installPrompt=null;

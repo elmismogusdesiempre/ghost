@@ -1,6 +1,6 @@
 # GHOST Mobile
 
-Adaptación aislada del GHOST existente en el commit `21756cf`, dentro del mismo repositorio y proyecto Vercel. No modifica Desktop, su almacenamiento, la versión original archivada, el monitor académico ni la web de producto.
+Adaptación aislada del GHOST existente en el commit `21756cf`, dentro del mismo repositorio y proyecto Vercel. Conserva archivos y almacenamiento propios, dentro del mismo repositorio y despliegue. La actualización del monitor móvil añade observación USB y demo; por solicitud posterior, la demo de Desktop también utiliza una señal sintética más natural.
 
 ## Uso e instalación en Android
 
@@ -34,19 +34,35 @@ Un dispositivo que emita pulsos de botón muy breves deberá usarse con duració
 
 Se conserva el formato de respaldo v2 y la importación del vocabulario original, el editor de frases por perfil, palabras, pronunciaciones y carga por líneas. Los datos, vocabulario y categorías predeterminados se copiaron literalmente a `vocabulary.js`. El resto de funciones se derivó del script existente, cambiando únicamente entrada, barrido necesario para un pulsador, presentación móvil y preparación offline.
 
-`ghost.css` es una copia local del estilo original; `mobile.css` contiene la adaptación. No hay dependencias de scripts o CSS mutables de Desktop. El service worker se limita a `/mobile/` y a sus diez archivos públicos. No controla `/`, `/ghost-monitor/` ni la web de producto. Ningún recurso externo es necesario para comunicar; los enlaces informativos del acompañante necesitan internet.
+`ghost.css` es una copia local del estilo original; `mobile.css` contiene la adaptación. No hay dependencias de scripts o CSS mutables de Desktop. El service worker se limita a `/mobile/` y a sus recursos locales, incluido el monitor. No controla `/`, `/ghost-monitor/` ni la web de producto. Ningún recurso externo es necesario para comunicar; los enlaces informativos del acompañante necesitan internet.
 
 Las actualizaciones esperan al cierre de todas las ventanas de GHOST Mobile y no recargan una sesión de comunicación en curso. Al modificar archivos para una nueva publicación se debe incrementar la versión de caché en `sw.js`; una instalación de la nueva caché debe completarse antes de activar la versión.
 
 ## USB, HID y STM32
 
-No se incluye monitor, Web Serial, WebHID, WebUSB, lectura ADC, gráficas ni controles académicos. La vía de entrada es el sistema de eventos estándar de Chrome: Android debe reconocer el dispositivo como mouse USB HID y entregar su botón izquierdo a la página. No se usa WebHID para leer reportes de un mouse; es una entrada del sistema operativo.
+Mobile incluye ahora un monitor de observación en **⚙️ → Monitor STM32**. El modo demo funciona sin hardware y el ojo se muestra u oculta mediante su casilla, que se guarda inmediatamente. El compacto comparte la altura disponible con la comunicación; las opciones siguen paginándose sin scroll. Los umbrales se ajustan desde Settings, donde también están habilitados los sliders del compacto. En comunicación los controles técnicos quedan deshabilitados para conservar el pulsador global.
 
-El teléfono debe admitir USB host/OTG, el adaptador debe ser de datos y el periférico debe recibir alimentación suficiente. Algunos teléfonos requieren habilitar OTG o no permiten cargar mientras se utiliza el adaptador.
+### Conectar el STM32 por USB
 
-**Un STM32 que solo se identifica como USB CDC/puerto serie no equivale a un mouse HID.** La versión anterior del laboratorio usaba CDC; no se presupone que ese mismo firmware genere clics en Android. Se necesita un dispositivo que ya entregue clic izquierdo HID o una interfaz compatible existente. No se cambió firmware ni se añadió una conversión serie→mouse.
+1. Utilizar Chrome actualizado, HTTPS y un teléfono con USB host/OTG. Conectar mediante un adaptador OTG y cable de **datos**, con alimentación suficiente. Cerrar MATLAB y otras apps que usen el dispositivo.
+2. Abrir el engranaje y la pestaña Monitor STM32. Elegir **Puerto serie nativo** si Chrome muestra el STM32. Chrome Android reciente dispone de USB mediante Web Serial; su presencia por sí sola no garantiza que una versión antigua soporte puertos USB (algunas solo admiten Bluetooth).
+3. Si no aparece el puerto, elegir **USB compatible · CDC-ACM (WebUSB)**. Esta opción inspecciona los descriptores y acepta un único par de interfaces CDC-ACM de control y datos bulk. No supone VID/PID ni números de interfaz o endpoint fijos.
+4. Pulsar Conectar STM32 y autorizar la selección del navegador y de Android. El puerto se configura a 115200, 8N1. WebUSB usa solamente las solicitudes estándar CDC SET_LINE_CODING y SET_CONTROL_LINE_STATE (DTR/RTS), sin programar firmware ni enviar comandos de adquisición.
+5. Verificar las muestras y el ojo. Desconectar desde el botón antes de retirar el cable. No hay reconexión automática ni solicitud de permisos al cargar.
 
-No había teléfono, adaptador OTG ni STM32 conectados al entorno de trabajo. La compatibilidad física debe verificarse conectando primero un mouse USB normal al teléfono, abriendo la ruta Mobile y comprobando que un clic selecciona el resaltado. Repetir luego con el dispositivo de apoyo; si Android no lo reconoce como mouse, el problema está fuera del alcance de esta adaptación web.
+El monitor reconstruye las mismas muestras `alto × 100 + bajo`, en paquetes de 50 bytes y 25 muestras, aproximadamente 500 Hz. Los umbrales y la estabilidad se aplican a estados/contadores de observación. La demo está identificada como simulada y nunca selecciona frases. El monitor móvil **no convierte la señal ADC en selecciones**: se conserva la comunicación actual con un solo clic HID o toque; esta decisión mantiene separado el monitoreo de la entrada hasta definir esa integración.
+
+Un STM32 **CDC** puede transmitir muestras al monitor sin ser un mouse **HID**. Un mouse HID puede seleccionar opciones sin transmitir las muestras CDC del monitor. No se confunden ambos protocolos y no se modifica firmware. WebHID no se utiliza. Para comunicar con un pulsador USB, Android debe reconocerlo como mouse y enviar su clic izquierdo estándar a la página.
+
+El código de monitor, decodificador y ojo son copias locales de Desktop adaptadas a Mobile; no importan archivos mutables de `/ghost-monitor/`. Los ajustes técnicos se guardan en `ghost_mobile_monitor_stm32_v1`, separados de Desktop y del vocabulario Mobile. Si no hay APIs USB, se informa y se mantienen demo, ojo y comunicación. Las restricciones del teléfono, permisos, interfaces ocupadas o firmware no CDC pueden impedir el acceso; no se afirma compatibilidad universal.
+
+### Señal demo más natural
+
+Desktop y Mobile usan la misma fórmula, copiada en su propio `demo-signal.mjs`: reposo con deriva y ruido fino, mesetas altas y bajas con duración variable, transitorios y picos de 14–18 ms. Es una ilustración educativa, no una medición fisiológica validada. La gráfica y el ojo utilizan esas mismas muestras. No se altera ningún byte de los datos USB reales.
+
+Las pruebas con APIs simuladas cubren Web Serial y el ciclo WebUSB completo (descriptores, configuración CDC, lectura fragmentada, errores y cancelación). Se verificó demo y ojo offline y las tres etapas con monitor visible en cinco tamaños de pantalla. **No se dispone de un teléfono, adaptador OTG ni STM32 físico en el entorno; esa combinación debe probarse en el dispositivo real.** No se afirma que la emulación pruebe hardware.
+
+Fuentes: [Chrome 148, Web Serial en Android](https://developer.chrome.com/release-notes/148), [Web Serial y alternativa WebUSB](https://developer.chrome.com/docs/capabilities/serial/), [USB host Android](https://developer.android.com/develop/connectivity/usb/host).
 
 ## Voz y offline: límites de la comprobación
 
@@ -54,7 +70,7 @@ Se usa la misma Web Speech API, conservando voz seleccionada, velocidad, tono, v
 
 `localService` informa el tipo de servicio, pero no prueba que los datos estén instalados ni que el fabricante permita voz offline. Hay que escuchar el teléfono real en modo avión. La caché PWA solo conserva archivos de GHOST; no puede descargar ni garantizar los paquetes de voz de Android. Un gesto real del usuario puede ser necesario para habilitar audio. Mantener la pantalla encendida y la aplicación visible: Chrome/Android puede suspender tareas en segundo plano.
 
-## Pruebas de esta publicación
+## Pruebas de la adaptación inicial
 
 - Comparación Git: únicamente archivos nuevos en `mobile/`; todos los archivos preexistentes idénticos.
 - Chromium con tamaños emulados 320×568, 360×640, 390×844, 412×915, 480×800 y 640×360: tres etapas sin desplazamiento horizontal ni vertical en comunicación; casillas dentro de la pantalla y altura mínima de 44 px en los casos probados.
@@ -78,3 +94,7 @@ Para recibir el arreglo en una instalación existente: abrir la ruta Mobile con 
 ## Frases útiles: caché v3
 
 La etapa 2 reproduce automáticamente la frase seleccionada (incluidos Sí y No), sin botón Hablar. Conserva el barrido, el orden y la pronunciación personalizada. El inicio de voz sigue ligado a soltar esa misma pulsación para mantener la activación de Chrome Android. La etapa 3 mantiene Hablar para reproducir el mensaje compuesto.
+
+## Actualización del monitor: caché v4
+
+El service worker conserva también los módulos de monitor, transportes USB, demo y ojo. Para actualizar una instalación existente, abrir con internet, esperar unos segundos, cerrar todas las pestañas y la ventana instalada de Mobile y volver a abrir. Configuración y vocabulario se conservan. El monitor no afecta el inicio de voz al soltar ni la pronunciación automática de las frases útiles.

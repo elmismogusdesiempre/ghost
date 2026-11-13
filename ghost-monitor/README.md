@@ -113,3 +113,7 @@ La amplitud ADC se representa horizontalmente: 0 → izquierda, 2047,5 → centr
 Demo y USB utilizan la misma última muestra que la gráfica. Al desconectar, ante datos inválidos o tras un segundo sin muestras, el ojo vuelve suavemente al centro y señala que no hay datos recientes. Su animación aprovecha el bucle existente del monitor, sin otro lector USB ni un bucle adicional. Se respeta `prefers-reduced-motion` eliminando la interpolación.
 
 Pruebas: valores extremos/centro y entradas inválidas; activación inmediata y persistencia; demo; muestras USB CDC simuladas pasando por el decodificador real; retorno al centro; monitores sincronizados; sliders, ayuda y distribución adaptable. La compatibilidad con el dispositivo físico continúa dependiendo de las pruebas con el STM32 conectado; no se tuvo hardware físico durante esta comprobación. Mobile y todos los archivos fuera de `ghost-monitor/` permanecen intactos.
+
+## Demo con ruido y activaciones irregulares
+
+La demo usa `demo-signal.mjs`, inspirada en el laboratorio de la web de producto: reposo con deriva y ruido fino, mesetas altas y bajas variables, transitorios y picos de 14–18 ms. Sigue generando muestras sintéticas a 500 Hz y no activa comunicación. El ojo y la gráfica reciben las mismas muestras. El generador solo se usa en `tickDemo`; la ruta de lectura USB real no cambia. Es una ilustración educativa, no una señal fisiológica validada. Mobile tiene una copia local del mismo generador.
