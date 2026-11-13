@@ -6,10 +6,15 @@ import { usbModes, requestMonitorPort } from './usb-cdc.mjs';
 if (!window.GhostMobileMonitorBridge) await new Promise(resolve => window.addEventListener('ghost-mobile-ready', resolve, { once: true }));
 const $ = id => document.getElementById(id);
 const SETTINGS_KEY = 'ghost_mobile_monitor_stm32_v1';
-let settings = { lower: 1500, upper: 2500, hold: 30, showDock: true, showEye: false, eyeStyle: 'original' };
+let settings = { lower: 1500, upper: 2500, hold: 30, showDock: true, showEye: true, eyeStyle: 'photo', demoOnStart: true, presentationDefaults: 1 };
 try {
   const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || 'null');
-  if (saved) settings = { ...validateSettings(saved), showDock: saved.showDock !== false, showEye: saved.showEye === true, eyeStyle: validEyeModel(saved.eyeStyle) };
+  if (saved) {
+    const values = validateSettings(saved);
+    settings = saved.presentationDefaults === 1
+      ? { ...values, showDock: saved.showDock !== false, showEye: saved.showEye !== false, eyeStyle: validEyeModel(saved.eyeStyle || 'photo'), demoOnStart: saved.demoOnStart !== false, presentationDefaults: 1 }
+      : { ...settings, ...values }; // Apply the new presentation defaults once; keep thresholds.
+  }
 } catch { /* An invalid saved setting must never change detection thresholds. */ }
 const detector = new GestureDetector(settings), decoder = new PacketDecoder();
 const ring = new Float64Array(2500);
@@ -211,6 +216,7 @@ function toggleDemo() {
     const canvas = $(id); canvas.dataset.originalLabel ||= canvas.getAttribute('aria-label');
     canvas.setAttribute('aria-label', demo ? 'DEMO · señal ADC simulada con tres franjas de estados' : canvas.dataset.originalLabel);
   }
+  settings.demoOnStart = demo; saveSettings();
   syncDock(); updateUI();
 }
 function tickDemo(now) {
@@ -231,7 +237,7 @@ $('thresholdForm').addEventListener('submit', e => {
   e.preventDefault();
   try {
     const values = validateSettings({ lower: Number($('lowerADC').value), upper: Number($('upperADC').value), hold: Number($('holdADC').value) });
-    settings = { ...values, showDock: $('showMonitorDock').checked, showEye: $('showSignalEye').checked, eyeStyle: validEyeModel($('eyeStyle').value) };
+    settings = { ...settings, ...values, showDock: $('showMonitorDock').checked, showEye: $('showSignalEye').checked, eyeStyle: validEyeModel($('eyeStyle').value) };
     detector.configure(settings); saveSettings(); syncForm(); syncDock(); syncEyes();
     $('thresholdResult').textContent = 'Umbrales aplicados. Esperando reposo estable antes de otra acción.';
   } catch (error) { $('thresholdResult').textContent = error.message; }
@@ -281,6 +287,6 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 $('monitorInfo').textContent = supported ? 'Conexión USB disponible en este navegador · HTTPS · permiso requerido. El monitor observa sin generar selecciones. La compatibilidad física depende del teléfono y del STM32.' : 'Este navegador no ofrece Web Serial ni WebUSB. Puedes usar la demo, el ojo y la comunicación habitual. Prueba Chrome actualizado con HTTPS para conectar USB.';
-syncForm();syncDock();syncEyes();updateUI();requestAnimationFrame(frame);
+syncForm();syncEyes();if(settings.demoOnStart)toggleDemo();else{syncDock();updateUI();}saveSettings();requestAnimationFrame(frame);
 
 window.dispatchEvent(new Event('ghost-mobile-monitor-ready'));

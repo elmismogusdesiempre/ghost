@@ -105,4 +105,12 @@ En **⚙️ → Monitor STM32 → Modelo del ojo** se puede elegir Original, Kaw
 
 El ojo ocupa una columna más ancha a la derecha de la gráfica y los dos sliders compactos quedan debajo. La comunicación conserva sus páginas y no requiere scroll. Los archivos de modelos y las capas fotográficas son copias locales en Mobile y están incluidos en la caché offline. No se cambian el procesamiento USB/ADC, la selección de un solo clic, la voz ni el vocabulario.
 
-Para recibir esta actualización, abrir Mobile con internet, esperar unos segundos, cerrar todas las ventanas/pestañas de Mobile y volver a abrir. Se conservan las preferencias existentes; el primer modelo es Original si no había uno guardado.
+Para recibir esta actualización, abrir Mobile con internet, esperar unos segundos, cerrar todas las ventanas/pestañas de Mobile y volver a abrir. Se conservan las preferencias existentes; el modelo inicial es Foto real.
+
+## Inicio predeterminado: monitor, demo y ojo humano
+
+Al recibir esta actualización se aplican una vez los valores de presentación: monitor compacto visible, demo encendida y ojo Foto real visible. Se conservan los umbrales, la estabilidad, el vocabulario y la configuración de comunicación. Después se respetan los cambios del acompañante: detener o activar la demo se guarda, al igual que la visibilidad y el modelo de ojo. Aplicar opciones no borra estas preferencias.
+
+La demo sigue identificada como simulada y no activa comunicación ni solicita acceso USB. Para conectar el STM32, detener primero la demo desde Settings. La demo predeterminada también funciona sin API USB disponible.
+
+La caché Mobile se actualiza a v6. Abrir con internet, esperar unos segundos, cerrar todas las ventanas/pestañas Mobile y volver a abrir para recibir los nuevos valores.

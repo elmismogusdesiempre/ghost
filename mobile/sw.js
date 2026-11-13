@@ -1,5 +1,5 @@
 // /mobile/ only. Never cache or control Desktop, the monitor or the product site.
-const CACHE='ghost-mobile-shell-v5';
+const CACHE='ghost-mobile-shell-v6';
 const SHELL=['./','./index.html','./ghost.css','./mobile.css','./vocabulary.js','./app.js','./monitor.mjs','./monitor.css','./protocol.mjs','./signal-eye.mjs','./eye-models.mjs','./assets/eyes/open.jpg','./assets/eyes/closed.jpg','./assets/eyes/pupil.png','./assets/eyes/mask.png','./usb-cdc.mjs','./demo-signal.mjs','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png'].map(path=>new URL(path,self.registration.scope).href);
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL))));
 // Wait for the old Mobile windows to close before activating an update. A

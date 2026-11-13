@@ -31,3 +31,9 @@ No se dispuso de STM32 físico. La prueba USB simula la API del navegador y vali
 ## Ojo ampliado
 
 El ojo conserva su ubicación a la derecha de la gráfica, con una columna más ancha y los sliders compactos debajo. También se amplía en el monitor de Settings. Se ajusta el encuadre SVG para aprovechar márgenes vacíos, sin modificar las formas ni las imágenes originales. Se mantienen el movimiento, los límites de recorrido y las preferencias de cada modelo. La edición anterior `/ghost-monitor/` no se modifica.
+
+## Inicio predeterminado: monitor, demo y ojo humano
+
+Al recibir esta actualización se aplican una vez los valores de presentación: monitor compacto visible, demo encendida y ojo Foto real visible. Se conservan los umbrales, la estabilidad, el vocabulario y la configuración de comunicación. Después se respetan los cambios del acompañante: detener o activar la demo se guarda, al igual que la visibilidad y el modelo de ojo. Aplicar opciones no borra estas preferencias.
+
+La demo sigue identificada como simulada y no activa comunicación ni solicita acceso USB. Para conectar el STM32, detener primero la demo desde Settings. La demo predeterminada también funciona sin API USB disponible.
