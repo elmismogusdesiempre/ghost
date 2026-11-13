@@ -42,3 +42,17 @@ body.communicating.companion-mode button,body.communicating.companion-mode input
 .shortcut-table td:first-child{font-weight:700;white-space:nowrap}
 #helpCountdown{padding:10px;background:var(--soft);font-size:.8rem;margin-top:12px}
 @media(max-width:500px){#shortcutsDialog{padding:14px}.shortcut-table{font-size:.76rem}.shortcut-table td,.shortcut-table th{padding:8px 4px}#quickBar{padding:4px 8px;font-size:10px}#quickBar button{font-size:10px}}
+
+/* The eye has its own transparent area: graph, thresholds and input stay usable. */
+.monitor-visuals{display:flex;gap:16px;align-items:stretch;min-width:0}
+.monitor-visuals>.monitor-chart{flex:1;min-width:0}
+.dock-visuals{display:flex;flex:1;min-width:0;gap:10px;align-items:stretch}
+#monitorDock .dock-visuals>.monitor-chart{flex:1;min-width:0}
+.signal-eye{flex:0 0 clamp(110px,16vw,190px);display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;background:transparent;pointer-events:none!important;user-select:none;overflow:hidden}
+.signal-eye *{pointer-events:none!important}
+.signal-eye svg{display:block;width:100%;height:auto;overflow:visible}
+.signal-eye-caption{font-size:11px;line-height:1.3;color:var(--muted);text-align:center;margin-top:8px}
+#monitorDock .signal-eye{flex-basis:clamp(80px,11vw,150px)}
+#monitorDock .signal-eye-caption{font-size:10px;margin-top:4px}
+@media(max-width:850px){#monitorDock .signal-eye{flex-basis:76px}.monitor-visuals .signal-eye{flex-basis:110px}.dock-visuals{gap:5px}}
+@media(max-width:650px){#monitorDock .signal-eye{flex-basis:64px}#monitorDock .signal-eye-caption{font-size:9px}.monitor-visuals{gap:8px}}

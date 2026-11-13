@@ -103,3 +103,13 @@ GHOST es una plataforma de comunicación asistida de acceso gratuito. La privati
 Los componentes de terceros conservan sus licencias. Los aportes al hardware, al firmware y a la interfaz electrónica, incluidos los realizados en colaboración con estudiantes, conservan los derechos de sus respectivos titulares; este aviso no presume cesiones ni acuerdos.
 
 Las condiciones de terceros y permisos previos se respetan. Consulta `NOTICE.md` para el alcance del aviso. El uso gratuito de la aplicación desplegada no constituye por sí mismo una licencia de reutilización o comercialización del código.
+
+## Ojo de la señal
+
+En **Ctrl + Alt + M → Monitor STM32 → Umbrales y visualización**, activar **Mostrar ojo de la señal en los monitores**. La preferencia se aplica y guarda inmediatamente; inicialmente está desactivada. El ojo aparece en una zona transparente propia junto a la gráfica grande y a la del compacto. Su SVG deriva del ejemplo proporcionado, no captura clics y no tapa controles ni modifica el tamaño de las opciones de comunicación.
+
+La amplitud ADC se representa horizontalmente: 0 → izquierda, 2047,5 → centro, 4095 → derecha, con recorrido limitado de ±115 unidades SVG y suavizado independiente de la tasa de refresco. No se interpreta como medición real de la mirada. Los umbrales siguen determinando los clics según el protocolo existente; cambiar el ojo no cambia esa detección. No tiene movimiento vertical, seguimiento del puntero ni movimientos aleatorios que puedan confundirse con la señal.
+
+Demo y USB utilizan la misma última muestra que la gráfica. Al desconectar, ante datos inválidos o tras un segundo sin muestras, el ojo vuelve suavemente al centro y señala que no hay datos recientes. Su animación aprovecha el bucle existente del monitor, sin otro lector USB ni un bucle adicional. Se respeta `prefers-reduced-motion` eliminando la interpolación.
+
+Pruebas: valores extremos/centro y entradas inválidas; activación inmediata y persistencia; demo; muestras USB CDC simuladas pasando por el decodificador real; retorno al centro; monitores sincronizados; sliders, ayuda y distribución adaptable. La compatibilidad con el dispositivo físico continúa dependiendo de las pruebas con el STM32 conectado; no se tuvo hardware físico durante esta comprobación. Mobile y todos los archivos fuera de `ghost-monitor/` permanecen intactos.

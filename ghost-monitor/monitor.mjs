@@ -1,10 +1,11 @@
 import { PacketDecoder, GestureDetector, stateOf, validateSettings } from './protocol.mjs';
+import { SignalEye } from './signal-eye.mjs';
 const $ = id => document.getElementById(id);
 const SETTINGS_KEY = 'ghost_monitor_stm32_v1';
-let settings = { lower: 1500, upper: 2500, hold: 30, showDock: true };
+let settings = { lower: 1500, upper: 2500, hold: 30, showDock: true, showEye: false };
 try {
   const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || 'null');
-  if (saved) settings = { ...validateSettings(saved), showDock: saved.showDock !== false };
+  if (saved) settings = { ...validateSettings(saved), showDock: saved.showDock !== false, showEye: saved.showEye === true };
 } catch { /* An invalid saved setting must never change detection thresholds. */ }
 const detector = new GestureDetector(settings), forwardDetector = new GestureDetector(settings), decoder = new PacketDecoder();
 const ring = new Float64Array(2500);
@@ -29,7 +30,7 @@ $('monitor').innerHTML = `
   <div class="monitor-stat"><small>Izquierdos detectados</small><strong id="leftCount">0</strong></div>
   <div class="monitor-stat"><small>Derechos detectados</small><strong id="rightCount">0</strong></div>
  </div>
- <div class="monitor-chart"><canvas id="signalCanvas" role="img" aria-label="Señal ADC en tiempo real de 0 a 4095, con franjas de clic derecho, reposo y clic izquierdo"></canvas></div>
+ <div class="monitor-visuals"><div class="monitor-chart"><canvas id="signalCanvas" role="img" aria-label="Señal ADC en tiempo real de 0 a 4095, con franjas de clic derecho, reposo y clic izquierdo"></canvas></div><div id="monitorSignalEye" hidden></div></div>
  <div class="monitor-bands"><span id="bandLeft">Izquierdo</span><span class="band-rest" id="bandRest">Reposo</span><span class="band-right" id="bandRight">Derecho</span></div>
  <p class="hint" id="streamStats"></p>
  <div class="monitor-integration"><label class="check"><input type="checkbox" id="stmEnabled">Usar la señal STM32 para comunicar en GHOST</label><p id="monitorGate"></p></div>
@@ -41,14 +42,23 @@ $('monitor').innerHTML = `
   <label for="upperADC">Umbral superior · ADC mayor = clic izquierdo<input type="number" id="upperADC" min="1" max="4095" step="1" required><input type="range" id="upperRange" min="1" max="4095" step="1" aria-label="Umbral superior en vivo"><span class="hint">Activo: <output id="upperValue">2500</output></span></label>
   <label>Estabilidad de señal y de reposo (ms)<input type="number" id="holdADC" min="0" max="500" step="2" required></label>
   <label class="check"><input id="showMonitorDock" type="checkbox">Mostrar monitor compacto durante la comunicación</label>
+  <label class="check"><input id="showSignalEye" type="checkbox">Mostrar ojo de la señal en los monitores</label>
  </div><div class="buttons"><button type="submit" class="primary">Aplicar opciones</button></div><p id="thresholdResult" role="status" class="hint"></p></form>
+ <p class="hint">El ojo se activa y guarda al marcar su casilla. Usa las mismas muestras de la gráfica, tanto en demo como por USB: ADC bajo mira a la izquierda y ADC alto a la derecha. Sin señal reciente vuelve al centro. Es una representación de amplitud, no un seguimiento real de la mirada; no modifica umbrales ni genera clics.</p>
  <p class="hint">Los sliders y los valores numéricos de umbral se aplican y guardan al instante. El botón aplica las demás opciones. Para ajustar los sliders del compacto sin salir de la comunicación, usa Ctrl + Alt + U. También puedes entrar con Ctrl + Alt + M: el monitor permanece visible y las acciones de comunicación se pausan.</p>
  <p class="hint">Los límites exactos pertenecen al reposo. La estabilidad utiliza el tiempo de las muestras, suponiendo 500 Hz. Tras conectar, cambiar umbrales o volver a comunicación, primero debe detectarse reposo estable.</p>
  <p class="notice">El puerto debe estar libre: cierra la conexión de MATLAB antes de conectar aquí. Selecciona el puerto USB CDC del STM32 en el diálogo del navegador. Si no aparece, revisa el cable USB, el firmware CDC y el controlador del sistema.</p>
  <p class="hint">Formato esperado: 50 bytes, 25 muestras, byte alto primero; ADC = alto × 100 + bajo. No se envían comandos ni se modifica el firmware. El protocolo no incluye cabecera ni checksum: si se conecta a mitad de una muestra o se pierde un byte, no es posible garantizar la sincronización. Ante datos inválidos, la integración se pausa; reconecta y reinicia la transmisión desde un límite de paquete conocido.</p>
  <p class="hint"><a href="../">Abrir GHOST actual</a> · <a href="/ghost-monitor/informacion.html" target="_blank" rel="noopener">Guía técnica</a> · <a href="https://developer.chrome.com/docs/capabilities/serial" target="_blank" rel="noopener">Web Serial: documentación oficial</a></p>
 </div>`;
-$('monitorDock').innerHTML = `<div class="dock-summary"><div class="monitor-pill"><span id="dockLED" class="monitor-led"></span><span id="dockUSB">USB desconectado</span></div><div><strong class="dock-value" id="dockADC">—</strong> <span id="dockState">Sin datos</span></div><div class="dock-counters" id="dockCounters">Izq. 0 · Der. 0</div><div id="dockGate">Solo observación</div><div class="dock-hint">Ctrl + Alt + U: ajustar · Ctrl + F1: ayuda</div></div><div class="monitor-chart"><canvas id="dockCanvas" role="img" aria-label="Monitor compacto de señal ADC con tres franjas de estados"></canvas></div><div class="dock-controls"><label for="dockLowerRange">Derecho &lt; <output id="dockLowerValue">1500</output><input id="dockLowerRange" type="range" min="0" max="4094" step="1" aria-label="Umbral inferior del monitor compacto"></label><label for="dockUpperRange">Izquierdo &gt; <output id="dockUpperValue">2500</output><input id="dockUpperRange" type="range" min="1" max="4095" step="1" aria-label="Umbral superior del monitor compacto"></label><p id="dockSliderHint">Ctrl + Alt + M para ajustar</p></div>`;
+$('monitorDock').innerHTML = `<div class="dock-summary"><div class="monitor-pill"><span id="dockLED" class="monitor-led"></span><span id="dockUSB">USB desconectado</span></div><div><strong class="dock-value" id="dockADC">—</strong> <span id="dockState">Sin datos</span></div><div class="dock-counters" id="dockCounters">Izq. 0 · Der. 0</div><div id="dockGate">Solo observación</div><div class="dock-hint">Ctrl + Alt + U: ajustar · Ctrl + F1: ayuda</div></div><div class="dock-visuals"><div class="monitor-chart"><canvas id="dockCanvas" role="img" aria-label="Monitor compacto de señal ADC con tres franjas de estados"></canvas></div><div id="dockSignalEye" hidden></div></div><div class="dock-controls"><label for="dockLowerRange">Derecho &lt; <output id="dockLowerValue">1500</output><input id="dockLowerRange" type="range" min="0" max="4094" step="1" aria-label="Umbral inferior del monitor compacto"></label><label for="dockUpperRange">Izquierdo &gt; <output id="dockUpperValue">2500</output><input id="dockUpperRange" type="range" min="1" max="4095" step="1" aria-label="Umbral superior del monitor compacto"></label><p id="dockSliderHint">Ctrl + Alt + M para ajustar</p></div>`;
+const signalEyes = [new SignalEye($('monitorSignalEye'), 'monitor-eye'), new SignalEye($('dockSignalEye'), 'dock-eye')];
+const reducedEyeMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+function syncEyes() { for (const eye of signalEyes) eye.setVisible(settings.showEye); }
+$('showSignalEye').addEventListener('change', e => {
+  settings.showEye = e.target.checked;
+  saveSettings(); syncEyes();
+});
 function saveSettings() { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch { $('thresholdResult').textContent = 'No se pudo guardar en este navegador.'; } }
 function resetDetection() { detector.reset(); forwardDetector.reset(); wasAvailable = false; }
 function syncThresholdControls() {
@@ -78,7 +88,7 @@ for (const [id, key] of [['lowerRange','lower'],['upperRange','upper'],['dockLow
 }
 function syncForm() {
   syncThresholdControls();
-  $('holdADC').value = settings.hold; $('showMonitorDock').checked = settings.showDock;
+  $('holdADC').value = settings.hold; $('showMonitorDock').checked = settings.showDock; $('showSignalEye').checked = settings.showEye;
 }
 function syncDock() {
   const show = window.GhostBridge.quickAdjust() || demo || (connected && settings.showDock);
@@ -228,8 +238,8 @@ $('thresholdForm').addEventListener('submit', e => {
   e.preventDefault();
   try {
     const values = validateSettings({ lower: Number($('lowerADC').value), upper: Number($('upperADC').value), hold: Number($('holdADC').value) });
-    settings = { ...values, showDock: $('showMonitorDock').checked };
-    detector.configure(settings); forwardDetector.configure(settings); wasAvailable = false; saveSettings(); syncForm(); syncDock();
+    settings = { ...values, showDock: $('showMonitorDock').checked, showEye: $('showSignalEye').checked };
+    detector.configure(settings); forwardDetector.configure(settings); wasAvailable = false; saveSettings(); syncForm(); syncDock(); syncEyes();
     $('thresholdResult').textContent = 'Umbrales aplicados. Esperando reposo estable antes de otra acción.';
   } catch (error) { $('thresholdResult').textContent = error.message; }
   updateUI();
@@ -270,6 +280,8 @@ function draw(canvas) {
 }
 function frame(now) {
   tickDemo(now);
+  const freshEyeSignal = (demo || connected) && !fault && lastADC !== null && lastPacketAt > 0 && now - lastPacketAt <= 1000;
+  for (const eye of signalEyes) eye.render(lastADC, { fresh: freshEyeSignal, demo, now, reducedMotion: reducedEyeMotion.matches });
   if (now-lastUI > 66) {
     lastUI=now;
     if (!lastPacketAt || now-lastPacketAt>1000) { forwardDetector.reset(); wasAvailable=false; }
@@ -278,4 +290,4 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 $('monitorInfo').textContent = supported ? 'Chrome/Edge de escritorio · HTTPS · permiso de puerto requerido. La adquisición no necesita MATLAB. Las acciones están desactivadas hasta que las habilites.' : 'Web Serial no está disponible aquí. Abre esta URL HTTPS en Chrome o Edge de escritorio. GHOST sigue funcionando con los clics del mouse.';
-syncForm();syncDock();updateUI();requestAnimationFrame(frame);
+syncForm();syncDock();syncEyes();updateUI();requestAnimationFrame(frame);
