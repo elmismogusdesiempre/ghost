@@ -80,7 +80,7 @@ body.communicating .grid .tile.letter-key .label{font-size:min(78cqw,78cqh);line
 <tr><td>Ctrl + Alt + U</td><td>Ajuste rápido: cursor y sliders, conservando visible la pantalla de comunicación</td></tr>
 <tr><td>Ctrl + F1</td><td>Abrir o cerrar esta ayuda</td></tr><tr><td>Esc</td><td>Cerrar ayuda o salir del ajuste rápido</td></tr>
 </tbody></table>
-<p id="helpShortcutNote" class="hint"></p><p class="hint">Los números superiores y el teclado numérico permiten cambiar de etapa. En las tres etapas: giro izquierdo = seleccionar la opción resaltada; giro derecho = hablar. En Sí/No también se utiliza el barrido. Vuelve al centro entre acciones. Los sliders se aplican al instante.</p>
+<p id="helpShortcutNote" class="hint"></p><p class="hint">Los números superiores y el teclado numérico permiten cambiar de etapa. En las tres etapas: inclinación izquierda = seleccionar la opción resaltada; inclinación derecha = hablar. En Sí/No también se utiliza el barrido. Vuelve a la franja central entre acciones. Los sliders se aplican al instante.</p>
 <p id="helpCountdown" role="timer" aria-live="off"></p>
 </dialog>
 <div id="toast" role="status" hidden></div><div id="announcement" class="sr-only" aria-live="polite"></div>
@@ -315,7 +315,7 @@ function renderCommunication(){
  }
  root.className='layout';$('modeLabel').replaceChildren(element('span','dot'),document.createTextNode('Modo de comunicación'));
  const intro=element('div','intro');const title=element('div');title.append(element('p','eyebrow','TU VOZ, A TU RITMO'),element('h1','',s.stage===2?'Lo que quiero decir.':'Cada palabra cuenta.'),element('p','hint',s.stage===2?'Elige una frase. Hazla escuchar.':'Construye tu mensaje, palabra a palabra.'));const mark=element('div','stage-mark');mark.append(element('strong','',`0${s.stage}`),document.createTextNode(' / 03'));intro.append(title,mark);root.append(intro);
- const box=element('section','message');box.setAttribute('aria-label',s.stage===2?'Frase seleccionada':'Mensaje');box.append(element('p','eyebrow',s.stage===2?'FRASE PREPARADA · GIRO DERECHO PARA HABLAR':'MI MENSAJE · GIRO DERECHO PARA HABLAR'),element('p','message-text',''));box.lastChild.id='messageText';root.append(box);
+ const box=element('section','message');box.setAttribute('aria-label',s.stage===2?'Frase seleccionada':'Mensaje');box.append(element('p','eyebrow',s.stage===2?'FRASE PREPARADA · INCLINACIÓN DERECHA PARA HABLAR':'MI MENSAJE · INCLINACIÓN DERECHA PARA HABLAR'),element('p','message-text',''));box.lastChild.id='messageText';root.append(box);
  const trail=element('div','trail');trail.append(element('span','',s.stage===2?'Tus frases útiles':category?category==='keyboard'?'Teclado':CATEGORIES.find(c=>c.id===category)?.label||category:'Elige una categoría'),element('span','',''));trail.lastChild.id='scanStatus';root.append(trail);
  const grid=element('div','grid');grid.id='grid';root.append(grid);
  if(s.stage===2){phraseList().forEach(w=>grid.append(tile(w,()=>{selected=w;updateMessage();pauseAfter();})));}
@@ -331,7 +331,7 @@ function renderCommunication(){
   addMessageActions(grid);
  }
  const progress=element('div','progress');progress.setAttribute('aria-hidden','true');const fill=element('span');fill.id='scanProgress';progress.append(fill);root.append(progress);
- const legend=element('footer','legend');for(const [key,text] of [['Giro izquierdo','Seleccionar'],['Giro derecho','Hablar']]){const p=element('span');p.append(element('strong','',key),document.createTextNode(' · '+text));legend.append(p);}legend.append(element('span','key',shortcutLabel()+' · Configurar'));root.append(legend);
+ const legend=element('footer','legend');for(const [key,text] of [['Inclinación izquierda','Seleccionar'],['Inclinación derecha','Hablar']]){const p=element('span');p.append(element('strong','',key),document.createTextNode(' · '+text));legend.append(p);}legend.append(element('span','key',shortcutLabel()+' · Configurar'));root.append(legend);
  const status=element('p','hint');status.id='speechStatus';status.setAttribute('role','status');root.append(status);
  fitCommunicationGrid();updateMessage();highlight();scheduleScan();
 }
@@ -472,7 +472,7 @@ function populateVoices(){
 const configFields={cfgStage:['stage',Number],cfgProfile:['profile',String],cfgSpeed:['speed',v=>Number(v)*1000],cfgPause:['pause',v=>Number(v)*1000],cfgDebounce:['debounce',Number],cfgShortcut:['shortcut',String],cfgCols:['cols',Number],cfgScale:['scale',Number],cfgVisual:['visual',String],cfgContrast:['contrast',Boolean],cfgClear:['clearAfter',Boolean],cfgVoice:['voice',String],cfgRate:['rate',Number],cfgPitch:['pitch',Number],cfgVolume:['volume',Number]};
 function syncSettings(){
  for(const [id,[key]] of Object.entries(configFields)){const el=$(id);if(el.type==='checkbox')el.checked=db.settings[key];else el.value=['speed','pause'].includes(key)?db.settings[key]/1000:db.settings[key];}
- $('shortcutHelp').textContent=`${shortcutLabel()} alterna entre comunicación y configuración. Ctrl + Alt + 1: Sí/No; Ctrl + Alt + 2: frases útiles; Ctrl + Alt + 3: construir mensajes. Ctrl + Alt + U: ajuste rápido del monitor; Ctrl + F1: ayuda de atajos. Estos atajos de etapa abren directamente la comunicación y guardan la etapa elegida. El cursor desaparece en comunicación y vuelve aquí. Los clics se reciben dentro de esta página; mantén la ventana activa. En las tres etapas: giro izquierdo = seleccionar la opción resaltada y giro derecho = hablar. La cámara requiere permiso y calibración. Ocultar el monitor conserva la detección.`;
+ $('shortcutHelp').textContent=`${shortcutLabel()} alterna entre comunicación y configuración. Ctrl + Alt + 1: Sí/No; Ctrl + Alt + 2: frases útiles; Ctrl + Alt + 3: construir mensajes. Ctrl + Alt + U: ajuste rápido del monitor; Ctrl + F1: ayuda de atajos. Estos atajos de etapa abren directamente la comunicación y guardan la etapa elegida. El cursor desaparece en comunicación y vuelve aquí. Los clics se reciben dentro de esta página; mantén la ventana activa. En las tres etapas: inclinación izquierda = seleccionar la opción resaltada y inclinación derecha = hablar. La cámara requiere permiso y calibración. Ocultar el monitor conserva la detección.`;
  populateVoices();
 }
 for(const [id,[key,convert]] of Object.entries(configFields))$(id).addEventListener('change',e=>{

@@ -21,3 +21,4 @@
 @media(max-width:700px){#monitorDock,body:not(.communicating).monitor-visible #monitorDock{grid-template-columns:90px minmax(110px,1fr) 155px;height:200px;flex-basis:200px}#monitorDock>.monitor-chart{display:none}#monitorDock .dock-side{grid-column:3}#monitorDock .dock-summary{font-size:10px}#monitorDock .dock-value{font-size:20px}.face-full-visuals{grid-template-columns:1fr}.face-full-visuals>.signal-eye{grid-column:auto}}
 @media(max-height:500px){#monitorDock,body:not(.communicating).monitor-visible #monitorDock{height:140px;flex-basis:140px}#monitorDock .dock-summary{font-size:10px}#monitorDock .signal-eye-caption{display:none}}
 #faceControlStatus{order:0;flex:0 0 auto;background:var(--soft);color:var(--ink);padding:7px 16px;font-size:12px;line-height:1.4;font-weight:600}
+#monitorDock .dock-controls .face-center-slider{grid-column:1/-1}

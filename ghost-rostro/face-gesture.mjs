@@ -29,10 +29,16 @@ export class FaceGestureGate {
     let state=Math.abs(angle)<=s.neutral?'center':angle<=-s.turn?'left':angle>=s.turn?'right':'between';
     if(this.candidate==='left'&&angle<=-(s.turn-margin))state='left';
     else if(this.candidate==='right'&&angle>=s.turn-margin)state='right';
-    else if(this.candidate==='center'&&Math.abs(angle)<=s.neutral+margin)state='center';
     if(state!==this.candidate){this.candidate=state;this.since=time;this.frames=1}else this.frames++;
     if(state==='center'&&time-this.since>=s.rest&&this.frames>=3)this.ready=true;
     if((state==='left'||state==='right')&&this.ready&&time-this.since>=s.hold&&this.frames>=3){this.ready=false;return state}
     return null;
   }
+}
+
+// Roll is the lateral ear-to-shoulder tilt, relative to the calibrated posture.
+// Yaw (turning the face) never supplies the selection/speech signal.
+export function lateralTilt(pose,center,invert=false){
+  if(!pose||!center||!Number.isFinite(pose.roll)||!Number.isFinite(center.roll))return null;
+  return wrapAngle(pose.roll-center.roll)*(invert?-1:1);
 }

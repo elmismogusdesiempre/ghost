@@ -44,7 +44,7 @@ export class SignalEye {
     // The photo keeps the provided closed-eye layer. No random pupil movement:
     // gaze always represents the same ADC as the graph, horizontally only.
     if (this.closed) this.closed.style.opacity = !reducedMotion && fresh && now % 5200 < 45 ? '1' : '0';
-    const label = fresh ? demo ? 'DEMO · señal simulada' : 'Giro del rostro' : 'Sin rostro reciente';
+    const label = fresh ? demo ? 'DEMO · señal simulada' : 'Inclinación de la cabeza' : 'Sin rostro reciente';
     if (this.caption.textContent !== label) this.caption.textContent = label;
   }
 }
