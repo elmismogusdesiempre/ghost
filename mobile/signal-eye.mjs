@@ -1,32 +1,37 @@
-// Decorative signal visualization only. Never emits input or changes detection.
+import { eyeModels, eyeSVG, validEyeModel } from './eye-models.mjs';
+// This display never emits input or changes signal processing.
 export function horizontalOffset(adc) {
   if (!Number.isFinite(adc)) return 0;
   return (Math.max(0, Math.min(4095, adc)) / 4095 * 2 - 1) * 115;
 }
 export class SignalEye {
   constructor(host, id) {
-    this.host = host;
-    this.position = 0;
-    this.lastFrame = null;
-    host.classList.add('signal-eye');
-    host.setAttribute('aria-hidden', 'true');
-    host.innerHTML = `<svg viewBox="0 70 600 260" focusable="false" aria-hidden="true">
-      <defs><clipPath id="${id}-shape"><path d="M60 200C180 80 420 80 540 200C420 320 180 320 60 200Z"/></clipPath></defs>
-      <path d="M60 200C180 80 420 80 540 200C420 320 180 320 60 200Z" fill="#d7e0e6"/>
-      <g clip-path="url(#${id}-shape)"><g class="signal-eye-iris">
-        <circle cx="300" cy="200" r="85" fill="#9c6e55"/>
-        <circle cx="300" cy="200" r="40" fill="#1b1b1d"/>
-        <circle cx="340" cy="180" r="20" fill="#e3c1af"/>
-      </g></g>
-      <path d="M40 200C160 60 440 60 560 200" fill="none" stroke="#5f6062" stroke-width="25" stroke-linecap="round"/>
-      <path d="M70 200C180 320 420 320 530 200" fill="none" stroke="#9db2c1" stroke-width="12" stroke-linecap="round"/>
-    </svg><span class="signal-eye-caption">Sin señal reciente</span>`;
-    this.iris = host.querySelector('.signal-eye-iris');
-    this.caption = host.querySelector('.signal-eye-caption');
+    this.host = host; this.id = id; this.position = 0; this.lastFrame = null;
+    host.classList.add('signal-eye'); host.setAttribute('aria-hidden', 'true');
+    this.setStyle('original');
+  }
+  setStyle(style) {
+    style = validEyeModel(style);
+    if (this.style === style) return;
+    this.style = style;
+    this.host.dataset.eyeStyle = style;
+    this.host.innerHTML = eyeSVG(style, this.id) + '<span class="signal-eye-caption">Sin señal reciente</span>';
+    const svg = this.host.querySelector('svg');
+    svg.setAttribute('focusable', 'false');
+    // Remove unused margins from the supplied artwork without changing shapes.
+    svg.setAttribute('viewBox', style === 'cartoon' ? '125 25 350 350' : style === 'photo' ? '0 0 600 330' : '0 65 600 270');
+    this.iris = this.host.querySelector('[data-eye-iris]');
+    this.closed = this.host.querySelector('[data-eye-closed]');
+    this.caption = this.host.querySelector('.signal-eye-caption');
+    this.applyPosition();
+  }
+  applyPosition() {
+    const x = this.position / 115 * eyeModels[this.style].maxX;
+    this.iris.setAttribute('transform', `translate(${x.toFixed(3)} 0)`);
   }
   setVisible(visible) {
     this.host.hidden = !visible;
-    if (!visible) { this.lastFrame = null; this.position = 0; this.iris.setAttribute('transform', 'translate(0 0)'); }
+    if (!visible) { this.lastFrame = null; this.position = 0; this.applyPosition(); }
   }
   render(adc, { fresh, demo, now, reducedMotion = false }) {
     if (this.host.hidden) return;
@@ -35,7 +40,10 @@ export class SignalEye {
     this.lastFrame = now;
     this.position = reducedMotion ? target : this.position + (target - this.position) * (1 - Math.exp(-delta / 130));
     if (Math.abs(target - this.position) < 0.01) this.position = target;
-    this.iris.setAttribute('transform', `translate(${this.position.toFixed(3)} 0)`);
+    this.applyPosition();
+    // The photo keeps the provided closed-eye layer. No random pupil movement:
+    // gaze always represents the same ADC as the graph, horizontally only.
+    if (this.closed) this.closed.style.opacity = !reducedMotion && fresh && now % 5200 < 45 ? '1' : '0';
     const label = fresh ? demo ? 'DEMO · señal simulada' : 'Señal STM32' : 'Sin señal reciente';
     if (this.caption.textContent !== label) this.caption.textContent = label;
   }

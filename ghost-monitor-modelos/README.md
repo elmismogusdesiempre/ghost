@@ -27,3 +27,7 @@ Los enlaces de documentación apuntan a información pública existente; no se i
 Se probaron los seis modelos en Chromium: demo y muestras CDC simuladas por el decodificador existente; límites de recorrido de cada modelo; transformaciones horizontales; ausencia de IDs SVG duplicados; carga de las cuatro imágenes; selector, persistencia y aislamiento de preferencias; interruptor de visibilidad; sliders, ayuda y tamaños de ventana de 1366, 900 y 600 px. Se compararon todos los archivos preexistentes para comprobar que permanecen idénticos.
 
 No se dispuso de STM32 físico. La prueba USB simula la API del navegador y valida el flujo del software, no constituye una verificación del dispositivo físico.
+
+## Ojo ampliado
+
+El ojo conserva su ubicación a la derecha de la gráfica, con una columna más ancha y los sliders compactos debajo. También se amplía en el monitor de Settings. Se ajusta el encuadre SVG para aprovechar márgenes vacíos, sin modificar las formas ni las imágenes originales. Se mantienen el movimiento, los límites de recorrido y las preferencias de cada modelo. La edición anterior `/ghost-monitor/` no se modifica.

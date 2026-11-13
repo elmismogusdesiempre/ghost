@@ -98,3 +98,11 @@ La etapa 2 reproduce automáticamente la frase seleccionada (incluidos Sí y No)
 ## Actualización del monitor: caché v4
 
 El service worker conserva también los módulos de monitor, transportes USB, demo y ojo. Para actualizar una instalación existente, abrir con internet, esperar unos segundos, cerrar todas las pestañas y la ventana instalada de Mobile y volver a abrir. Configuración y vocabulario se conservan. El monitor no afecta el inicio de voz al soltar ni la pronunciación automática de las frases útiles.
+
+## Modelos de ojo y nueva distribución: caché v5
+
+En **⚙️ → Monitor STM32 → Modelo del ojo** se puede elegir Original, Kawaii, Caricatura, Ultra-realista, Cyberpunk o Foto real. El interruptor de visibilidad sigue siendo independiente. La selección se aplica y guarda inmediatamente en Mobile; no cambia el modelo ni los ajustes del escritorio.
+
+El ojo ocupa una columna más ancha a la derecha de la gráfica y los dos sliders compactos quedan debajo. La comunicación conserva sus páginas y no requiere scroll. Los archivos de modelos y las capas fotográficas son copias locales en Mobile y están incluidos en la caché offline. No se cambian el procesamiento USB/ADC, la selección de un solo clic, la voz ni el vocabulario.
+
+Para recibir esta actualización, abrir Mobile con internet, esperar unos segundos, cerrar todas las ventanas/pestañas de Mobile y volver a abrir. Se conservan las preferencias existentes; el primer modelo es Original si no había uno guardado.

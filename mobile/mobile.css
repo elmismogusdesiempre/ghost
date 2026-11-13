@@ -34,3 +34,20 @@ body.communicating.monitor-visible .trail{font-size:10px}
 body.communicating.monitor-visible .layout{gap:4px}
 @media(min-width:700px){#monitorDock,body:not(.communicating).monitor-visible #monitorDock{grid-template-columns:140px minmax(0,1fr);height:160px;flex-basis:160px}#monitorDock .signal-eye{flex-basis:110px}#monitor .monitor-visuals .signal-eye{flex-basis:150px}}
 @media(orientation:landscape) and (max-height:500px){#monitorDock,body:not(.communicating).monitor-visible #monitorDock{grid-template-columns:100px minmax(0,1fr) 140px;grid-template-rows:minmax(0,1fr);height:90px;flex-basis:90px;padding:4px 8px}#monitorDock .dock-controls{grid-column:auto;display:flex;gap:3px}#monitorDock .signal-eye{flex-basis:70px}body.communicating.monitor-visible .message{flex-basis:42px}body.communicating.monitor-visible .mobile-actions{flex-basis:46px}body:not(.communicating).monitor-visible #settings{padding-bottom:120px}}
+
+/* Keep a larger eye above shorter sliders, at the right of the graph. */
+#monitor .monitor-visuals>.signal-eye{flex-basis:clamp(120px,42vw,230px)}
+#monitorDock,body:not(.communicating).monitor-visible #monitorDock{grid-template-columns:70px minmax(0,1fr) clamp(120px,40vw,165px);grid-template-rows:minmax(0,1fr);height:160px;flex-basis:160px;gap:5px}
+#monitorDock .dock-visuals{grid-column:2;grid-row:1;min-height:0}
+#monitorDock .dock-side{grid-column:3;grid-row:1;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;min-height:0;min-width:0}
+#monitorDock .dock-side>.signal-eye{flex:1;min-height:0;width:100%}
+#monitorDock .signal-eye svg{width:100%;height:0;flex:1;min-height:0;overflow:hidden}
+#monitorDock .signal-eye-caption{font-size:8px;margin-top:2px;line-height:1.1}
+#monitorDock .dock-side>.dock-controls{display:grid;grid-column:auto;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:1px 5px;flex:0 0 auto;min-width:0}
+#monitorDock .dock-controls label{font-size:9px;line-height:1.1}
+#monitorDock .dock-controls input[type=range]{height:22px;min-height:22px}
+#monitorDock #dockSliderHint{font-size:8px;line-height:1.1;grid-column:1/-1}
+body:not(.communicating).monitor-visible #settings{padding-bottom:190px}
+@media(min-width:700px){#monitorDock,body:not(.communicating).monitor-visible #monitorDock{grid-template-columns:125px minmax(0,1fr) 250px;height:190px;flex-basis:190px}.monitor-visuals>.signal-eye{flex-basis:250px}}
+@media(orientation:landscape) and (max-height:500px){#monitorDock,body:not(.communicating).monitor-visible #monitorDock{grid-template-columns:85px minmax(0,1fr) 180px;height:120px;flex-basis:120px}#monitorDock .signal-eye-caption{display:none}body:not(.communicating).monitor-visible #settings{padding-bottom:150px}}
+#monitor .monitor-visuals>.signal-eye svg{max-height:190px}

@@ -16,7 +16,10 @@ export class SignalEye {
     this.style = style;
     this.host.dataset.eyeStyle = style;
     this.host.innerHTML = eyeSVG(style, this.id) + '<span class="signal-eye-caption">Sin señal reciente</span>';
-    this.host.querySelector('svg').setAttribute('focusable', 'false');
+    const svg = this.host.querySelector('svg');
+    svg.setAttribute('focusable', 'false');
+    // Remove unused margins from the supplied artwork without changing shapes.
+    svg.setAttribute('viewBox', style === 'cartoon' ? '125 25 350 350' : style === 'photo' ? '0 0 600 330' : '0 65 600 270');
     this.iris = this.host.querySelector('[data-eye-iris]');
     this.closed = this.host.querySelector('[data-eye-closed]');
     this.caption = this.host.querySelector('.signal-eye-caption');

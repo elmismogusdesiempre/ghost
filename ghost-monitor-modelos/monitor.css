@@ -56,3 +56,21 @@ body.communicating.companion-mode button,body.communicating.companion-mode input
 #monitorDock .signal-eye-caption{font-size:10px;margin-top:4px}
 @media(max-width:850px){#monitorDock .signal-eye{flex-basis:76px}.monitor-visuals .signal-eye{flex-basis:110px}.dock-visuals{gap:5px}}
 @media(max-width:650px){#monitorDock .signal-eye{flex-basis:64px}#monitorDock .signal-eye-caption{font-size:9px}.monitor-visuals{gap:8px}}
+
+/* Enlarged eye, in the same right-hand area; compact sliders sit underneath. */
+.monitor-visuals>.signal-eye{flex-basis:clamp(180px,30vw,380px)}
+#monitorDock,body:not(.communicating).monitor-visible #monitorDock{display:grid;grid-template-columns:clamp(130px,18vw,240px) minmax(0,1fr) clamp(220px,25vw,340px);grid-template-rows:minmax(0,1fr);height:220px;flex-basis:220px;gap:12px}
+#monitorDock .dock-visuals{grid-column:2;grid-row:1;min-height:0}
+#monitorDock .dock-side{grid-column:3;grid-row:1;display:flex;flex-direction:column;justify-content:flex-end;gap:4px;min-height:0;min-width:0}
+#monitorDock .dock-side>.signal-eye{flex:1;min-height:0;width:100%}
+#monitorDock .signal-eye svg{flex:1;min-height:0;width:100%;height:0;overflow:hidden}
+#monitorDock .signal-eye-caption{margin-top:2px;font-size:10px}
+#monitorDock .dock-side>.dock-controls{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:2px 12px;flex:0 0 auto;min-width:0}
+#monitorDock .dock-controls label{font-size:10px;line-height:1.2}
+#monitorDock .dock-controls input[type=range]{height:22px;min-height:22px}
+#monitorDock #dockSliderHint{grid-column:1/-1;font-size:9px;line-height:1.1}
+body:not(.communicating).monitor-visible #settings{padding-bottom:280px}
+@media(max-width:850px){#monitorDock,body:not(.communicating).monitor-visible #monitorDock{grid-template-columns:115px minmax(0,1fr) 200px;gap:7px}.monitor-visuals>.signal-eye{flex-basis:190px}#monitorDock .dock-controls label{font-size:9px}}
+@media(max-width:650px){#monitorDock,body:not(.communicating).monitor-visible #monitorDock{grid-template-columns:90px minmax(0,1fr) 170px;gap:5px}#monitorDock .dock-summary{font-size:9px}#monitorDock .dock-side>.dock-controls{gap:1px 6px}}
+@media(max-height:430px){#monitorDock,body:not(.communicating).monitor-visible #monitorDock{height:140px;flex-basis:140px}body:not(.communicating).monitor-visible #settings{padding-bottom:190px}#monitorDock .dock-hint{display:none}#monitorDock .signal-eye-caption{display:none}}
+.monitor-visuals>.signal-eye svg{max-height:240px}
