@@ -1,0 +1,22 @@
+/* Keep a playing capture source outside the UI, even when previews are hidden. */
+.face-camera-source{position:fixed;left:-10000px;top:0;width:2px;height:2px;opacity:.01;pointer-events:none}
+.face-video-box{position:relative;min-width:0;min-height:0;background:#172b28;overflow:hidden;aspect-ratio:4/3}
+.face-video-box canvas{display:block;width:100%;height:100%}
+.face-video-box span{position:absolute;bottom:6px;left:8px;color:white;background:#172b28cc;padding:3px 6px;font-size:11px}
+.face-full-visuals{display:grid;grid-template-columns:minmax(180px,1fr) minmax(220px,1.5fr) minmax(160px,1fr);gap:16px;align-items:stretch;margin-top:20px}
+.face-full-visuals .monitor-chart{height:auto;min-height:210px;margin:0}
+.face-full-visuals .signal-eye{width:100%}
+#faceProblem{color:#913b2b;font-weight:600;line-height:1.5}
+#faceCalibration{line-height:1.6}
+#monitorDock,body:not(.communicating).monitor-visible #monitorDock{display:grid;grid-template-columns:150px minmax(150px,1fr) minmax(180px,1.4fr) minmax(200px,1.1fr);gap:12px;height:230px;flex-basis:230px}
+#monitorDock .face-video-box{aspect-ratio:auto;height:100%}
+#monitorDock .dock-side{grid-column:4;grid-row:1}
+#monitorDock .monitor-chart{height:100%;min-height:0}
+#monitorDock .dock-controls .hint{grid-column:1/-1;font-size:10px;margin:0}
+#monitorDock .dock-summary{overflow-wrap:anywhere;font-size:12px}
+#monitorDock .dock-value{font-size:25px}
+#communication.basic .tile.scanning{background:var(--accent);color:var(--bg);box-shadow:inset 0 0 0 5px var(--ink)}
+#communication.basic .tile.chosen{box-shadow:inset 0 -8px 0 #b49142}
+@media(max-width:1000px){#monitorDock,body:not(.communicating).monitor-visible #monitorDock{grid-template-columns:110px minmax(130px,1fr) minmax(150px,1fr) 190px;gap:7px}.face-full-visuals{grid-template-columns:1fr 1fr}.face-full-visuals>.signal-eye{grid-column:1/-1;max-height:230px}}
+@media(max-width:700px){#monitorDock,body:not(.communicating).monitor-visible #monitorDock{grid-template-columns:90px minmax(110px,1fr) 155px;height:200px;flex-basis:200px}#monitorDock>.monitor-chart{display:none}#monitorDock .dock-side{grid-column:3}#monitorDock .dock-summary{font-size:10px}#monitorDock .dock-value{font-size:20px}.face-full-visuals{grid-template-columns:1fr}.face-full-visuals>.signal-eye{grid-column:auto}}
+@media(max-height:500px){#monitorDock,body:not(.communicating).monitor-visible #monitorDock{height:140px;flex-basis:140px}#monitorDock .dock-summary{font-size:10px}#monitorDock .signal-eye-caption{display:none}}

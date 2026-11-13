@@ -1,0 +1,7 @@
+MediaPipe Tasks Vision 1.2.3, Google LLC / MediaPipe authors.
+Source package: https://registry.npmjs.org/@mediapipe/tasks-vision/-/tasks-vision-1.2.3.tgz
+Package license: Apache-2.0; see LICENSE-APACHE-2.0.txt. Vendored JavaScript and WebAssembly are unmodified.
+Face Landmarker model (float16, version 1), distributed by Google:
+https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task
+Model documentation and model card: https://developers.google.com/edge/mediapipe/solutions/vision/face_landmarker
+These notices concern third-party components, not a new open-source license for GHOST's original code.
