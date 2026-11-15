@@ -62,18 +62,27 @@ $('monitor').innerHTML = `
  <p class="hint"><a href="../">Abrir GHOST actual</a> · <a href="/ghost-monitor/informacion.html" target="_blank" rel="noopener">Guía técnica</a> · <a href="https://developer.chrome.com/docs/capabilities/serial" target="_blank" rel="noopener">Web Serial: documentación oficial</a></p>
 </div>`;
 // Optional servo panel; no controls are added to the communication stages.
-$('monitor').insertAdjacentHTML('beforeend', `<div class="panel" id="servoPanel"><p class="eyebrow">Experimental · salida opcional independiente</p><h2>Servo SG90 · Arduino UNO</h2><p class="hint">Segundo USB · 115200 baudios. Izquierdo → L (45°), reposo → C (90°), derecho → R (135°). El Arduino necesita el programa receptor de estos comandos.</p><div class="buttons"><button id="connectServo" class="primary">Conectar servo</button><button id="disconnectServo" disabled>Desconectar servo</button></div><p id="servoStatus" class="notice">Servo desconectado</p><p id="servoState" class="hint"></p><p id="servoLastCommand" class="hint"></p><p class="hint">Selecciona el puerto del Arduino, nunca el del STM32. Al conectar se esperan 2 segundos por el reinicio del UNO y se envía el estado actual. El movimiento comienza al conectar y se detiene al desconectar, enviando C cuando sea posible.</p><p class="notice">Con demo activa, el servo sigue estados simulados aunque GHOST no genere clics. Sin datos recientes o ante un paquete inválido, no se envían posiciones nuevas: eso no equivale a reposo. El servo puede conservar la última posición.</p><p class="hint"><a href="./guia-servo.html" target="_blank" rel="noopener">Conexión, alimentación y pruebas</a> · <a href="./arduino/ghost_servo/ghost_servo.ino" download>Programa de referencia Arduino UNO</a></p></div>`);
+$('monitor').insertAdjacentHTML('beforeend', `<div class="panel" id="servoPanel"><p class="eyebrow">Experimental · salida opcional independiente</p><h2>Servo SG90 · Arduino UNO</h2><p class="hint">Segundo USB · 115200 baudios. El Arduino necesita el programa receptor de comandos L/C/R.</p><p id="servoMapping" class="hint"></p><div class="buttons"><button id="connectServo" class="primary">Conectar servo</button><button id="disconnectServo" disabled>Desconectar servo</button></div><p id="servoStatus" class="notice">Servo desconectado</p><p id="servoState" class="hint"></p><p id="servoLastCommand" class="hint"></p><p class="hint">Selecciona el puerto del Arduino, nunca el del STM32. Al conectar se esperan 2 segundos por el reinicio del UNO y se envía el estado actual. El movimiento comienza al conectar y se detiene al desconectar, enviando C cuando sea posible.</p><p class="notice">Con demo activa, el servo sigue estados simulados aunque GHOST no genere clics. Sin datos recientes o ante un paquete inválido, no se envían posiciones nuevas: eso no equivale a reposo. El servo puede conservar la última posición.</p><p class="hint"><a href="./guia-servo.html" target="_blank" rel="noopener">Conexión, alimentación y pruebas</a> · <a href="./arduino/ghost_servo/ghost_servo.ino" download>Programa de referencia Arduino UNO</a></p></div>`);
 const mainMonitorButtons=document.querySelector('#monitor .buttons');
 for(const id of ['connectServo','disconnectServo'])mainMonitorButtons.append($(id));
-mainMonitorButtons.insertAdjacentHTML('afterend','<p id="servoQuickStatus" role="status" class="hint"></p>');
-const servo = new ServoLink({serial:supported?navigator.serial:null,onChange:updateServoUI});
+mainMonitorButtons.insertAdjacentHTML('afterend','<label class="check"><input id="servoMirror" type="checkbox">Modo espejo del servo · intercambiar izquierda y derecha</label><p id="servoQuickStatus" role="status" class="hint"></p>');
+const SERVO_OPTIONS_KEY='ghost_servo_output_v1';
+let servoMirror=false;
+try{servoMirror=JSON.parse(localStorage.getItem(SERVO_OPTIONS_KEY)||'{}').mirror===true}catch{}
+const servo = new ServoLink({serial:supported?navigator.serial:null,onChange:updateServoUI,mirror:servoMirror});
+$('servoMirror').addEventListener('change',event=>{
+  servo.setMirror(event.target.checked);
+  try{localStorage.setItem(SERVO_OPTIONS_KEY,JSON.stringify({mirror:servo.mirror}))}catch{/* The current session still uses the selected orientation. */}
+});
 function updateServoUI() {
   const angles={L:45,C:90,R:135};
   $('connectServo').disabled=!supported||servo.busy;
   $('disconnectServo').disabled=!servo.connection||servo.phase==='closing';
   $('servoStatus').textContent=servo.message;
-  $('servoQuickStatus').textContent=servo.message;
-  $('servoState').textContent=`Fuente: ${servo.source} · ${servo.current ? 'Estado del monitor: '+({L:'izquierdo',C:'reposo',R:'derecho'}[servo.current])+' → '+servo.current+' ('+angles[servo.current]+'°)' : 'Sin estado válido · no se envían comandos nuevos'}`;
+  $('servoQuickStatus').textContent=servo.message+(servo.mirror?' · Modo espejo activo':'');
+  $('servoMirror').checked=servo.mirror;
+  $('servoMapping').textContent=servo.mirror?'Espejo: izquierdo → R (135°), reposo → C (90°), derecho → L (45°). Se aplica al instante.':'Normal: izquierdo → L (45°), reposo → C (90°), derecho → R (135°). El centro se mantiene en ambos modos.';
+  $('servoState').textContent=`Fuente: ${servo.source} · ${servo.current ? 'Estado del monitor: '+({left:'izquierdo',rest:'reposo',right:'derecho'}[servo.state])+' → '+servo.current+' ('+angles[servo.current]+'°)' : 'Sin estado válido · no se envían comandos nuevos'}`;
   $('servoLastCommand').textContent=servo.lastSent?'Último comando enviado: '+servo.lastSent+' ('+angles[servo.lastSent]+'°). Sin confirmación de posición física.':'Aún no se han enviado comandos al Arduino.';
 }
 $('connectServo').addEventListener('click',()=>{void servo.connect()});

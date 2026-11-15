@@ -1,13 +1,20 @@
 import {claimPort,releasePort,watchPorts} from './serial-ports.mjs';
 export const servoCommands = Object.freeze({left:'L',rest:'C',right:'R'});
+export function servoCommandFor(state,mirror=false){
+  if(!Object.hasOwn(servoCommands,state))return null;
+  if(mirror&&state==='left')return 'R';
+  if(mirror&&state==='right')return 'L';
+  return servoCommands[state];
+}
 function limit(promise, milliseconds, message) {
   let timer;
   return Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(message)),milliseconds)})]).finally(()=>clearTimeout(timer));
 }
 /** Independent, optional output. Accepts monitor states, never ADC or thresholds. */
 export class ServoLink {
-  constructor({serial,onChange=()=>{},bootMs=2000,writeMs=1500}={}) {
+  constructor({serial,onChange=()=>{},bootMs=2000,writeMs=1500,mirror=false}={}) {
     this.serial=serial;this.onChange=onChange;this.bootMs=bootMs;this.writeMs=writeMs;
+    this.mirror=mirror===true;this.state=null;this.mappingRevision=0;
     this.phase='disconnected';this.message='Servo desconectado';this.current=null;this.source='Sin datos';
     this.lastSent=null;this.connection=null;this.requestPending=false;this.generation=0;
     watchPorts(serial);
@@ -18,8 +25,17 @@ export class ServoLink {
   }
   get busy(){return this.requestPending||!['disconnected','error'].includes(this.phase)}
   notify(){try{this.onChange(this)}catch{/* UI failures must not propagate into acquisition. */}}
+  setMirror(value) {
+    const mirror=value===true;
+    if(mirror===this.mirror)return;
+    this.mirror=mirror;this.mappingRevision++;
+    // In-flight output finishes; discard unsent commands from the old orientation.
+    if(this.connection?.pending)this.connection.lastQueued=null;
+    this.observe(this.state,this.source);this.notify();
+  }
   observe(state,source='STM32') {
-    const command=servoCommands[state]||null;
+    this.state=Object.hasOwn(servoCommands,state)?state:null;
+    const command=servoCommandFor(this.state,this.mirror);
     const changed=command!==this.current||source!==this.source;
     this.current=command;this.source=source;
     if(this.phase==='connected'&&command)this.enqueue(command);
@@ -56,9 +72,9 @@ export class ServoLink {
     const c=this.connection;
     if(!c||c.closing||command===c.lastQueued)return;
     if(c.pending>=32){void this.fail(c,'La salida del servo no responde. Se detuvo únicamente la conexión del Arduino.');return}
-    c.lastQueued=command;c.pending++;
+    c.lastQueued=command;c.pending++;const revision=this.mappingRevision;
     c.tail=c.tail.then(async()=>{
-      if(c.closing||this.connection!==c)return;
+      if(c.closing||this.connection!==c||revision!==this.mappingRevision)return;
       await limit(c.writer.write(new Uint8Array([command.charCodeAt(0)])),this.writeMs,'Tiempo de escritura agotado');
       this.lastSent=command;this.notify();
     }).catch(error=>{if(!c.closing)void this.fail(c,'Error serial del servo: '+error.message+'. GHOST continúa funcionando.');}).finally(()=>{c.pending--});

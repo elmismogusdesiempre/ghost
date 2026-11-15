@@ -18,6 +18,18 @@ El programa de referencia recibe caracteres individuales, ignora otros bytes y n
 | Reposo | `C` | 90° |
 | Derecho / clic derecho | `R` | 135° |
 
+## Modo espejo
+
+En configuración → Monitor STM32, junto a los botones del servo, aparece **Modo espejo del servo**. Desmarcado conserva el comportamiento actual; marcado intercambia únicamente izquierda y derecha del motor:
+
+| Estado del monitor | Normal | Espejo |
+| --- | --- | --- |
+| Izquierdo | L · 45° | R · 135° |
+| Reposo | C · 90° | C · 90° |
+| Derecho | R · 135° | L · 45° |
+
+Se aplica al instante al estado vigente, tanto con demo como con STM32, sin reconectar ni cambiar el programa Arduino. No invierte los clics, los umbrales ni los nombres de estado del monitor. La selección se guarda en este navegador (`ghost_servo_output_v1`), inicialmente desactivada; restaurarla no conecta el Arduino automáticamente. Sin datos válidos no se inventa un movimiento. Al desconectar normalmente se sigue intentando enviar C. Los comandos pendientes de la orientación anterior se descartan; una escritura ya iniciada termina antes de aplicar la nueva orientación.
+
 ## Iniciar y detener
 
 - Chrome o Edge de escritorio, HTTPS, permiso Web Serial. Ctrl + Alt + M abre configuración; elegir **Monitor STM32**.

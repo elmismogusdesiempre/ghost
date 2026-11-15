@@ -12,7 +12,7 @@
 <tr><td>Reposo</td><td><code>C</code></td><td>90°</td></tr>
 <tr><td>Derecho / clic derecho</td><td><code>R</code></td><td>135°</td></tr>
 </table></div>
-<h2>Iniciar y detener</h2>
+<h2>Modo espejo</h2><p>Junto a los botones del servo, en configuración → Monitor STM32, marca <strong>Modo espejo del servo</strong> para invertir solo el motor.</p><div class="table"><table><tr><td>Estado del monitor</td><td>Normal</td><td>Espejo</td></tr><tr><td>Izquierdo</td><td>L · 45°</td><td>R · 135°</td></tr><tr><td>Reposo</td><td>C · 90°</td><td>C · 90°</td></tr><tr><td>Derecho</td><td>R · 135°</td><td>L · 45°</td></tr></table></div><p>Se aplica al instante al estado vigente, en demo o con STM32, sin reconectar ni cambiar el programa Arduino. Los clics y umbrales siguen iguales. La elección se guarda en este navegador y comienza desactivada; restaurarla no conecta el Arduino. Sin estado válido no se envía un movimiento. La desconexión normal sigue intentando enviar C. Las escrituras ya iniciadas terminan; se descartan las pendientes de la orientación anterior.</p><h2>Iniciar y detener</h2>
 <ul>
 <li>Chrome o Edge de escritorio, HTTPS, permiso Web Serial. Ctrl + Alt + M abre configuración; elegir <strong>Monitor STM32</strong>.</li>
 <li>Detener demo para usar señal real, <strong>Conectar STM32</strong>, y seleccionar su puerto CDC.</li>
