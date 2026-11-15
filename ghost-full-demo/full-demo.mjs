@@ -1,0 +1,141 @@
+const core=window.GhostFullDemoCore,signal=window.GhostFullDemoSignal;
+const TIMING={scan:550,hold:650,rest:600,settle:220};
+const bar=document.createElement('div');bar.id='fullDemoBar';bar.setAttribute('role','status');bar.setAttribute('aria-live','polite');document.getElementById('communication').before(bar);
+const style=document.createElement('style');style.textContent='#fullDemoBar{order:-1;flex:0 0 auto;background:var(--soft);color:var(--ink);padding:8px 16px;font-size:12px;line-height:1.45;min-height:34px}#fullDemoBar strong{letter-spacing:.08em}';document.head.append(style);
+function caption(role,text){bar.replaceChildren();const label=document.createElement('strong');label.textContent='FULL DEMO · '+role+' · ';bar.append(label,document.createTextNode(text));}
+caption('Presentación automática','Conecta y configura el servo. Ctrl + Alt + F inicia o detiene; Esc detiene.');
+export function chooseVoices(list,preferred=''){
+ const spanish=list.filter(v=>v.lang?.toLowerCase().startsWith('es'));
+ const pool=spanish.length?spanish:list;
+ const user=pool.find(v=>v.name===preferred)||pool[0]||null;
+ const presenter=pool.find(v=>v!==user&&(v.voiceURI||v.name)!==(user?.voiceURI||user?.name))||user;
+ return {presenter,user,fallback:presenter===user};
+}
+let run=null,speechId=0,lastSpeech=Promise.resolve(),voicePair=null;
+function abortError(){return new DOMException('Presentación detenida','AbortError')}
+function check(session){
+ if(session!==run||session.abort.signal.aborted)throw abortError();
+ if(document.hidden||!document.hasFocus())throw new Error('La presentación se detuvo al dejar la ventana. Vuelve a GHOST y pulsa Ctrl + Alt + F.');
+ if(session.withServo&&signal.status().servo!=='connected')throw new Error('El servo se desconectó. Revisa el Arduino y vuelve a iniciar Full Demo.');
+}
+function sleep(ms,session){return new Promise((resolve,reject)=>{
+ try{check(session)}catch(e){reject(e);return}
+ const onAbort=()=>{clearTimeout(timer);reject(abortError())};
+ const timer=setTimeout(()=>{session.abort.signal.removeEventListener('abort',onAbort);try{check(session);resolve()}catch(e){reject(e)}},ms);
+ session.abort.signal.addEventListener('abort',onAbort,{once:true});
+})}
+async function loadVoices(session){
+ let available=speechSynthesis.getVoices();
+ for(let i=0;!available.length&&i<12;i++){await sleep(100,session);available=speechSynthesis.getVoices()}
+ return chooseVoices(available,core.voice().name);
+}
+async function talk(text,role,session){
+ check(session);core.speaking(true);caption(role==='presenter'?'Presentador':'Voz de GHOST',text);
+ if(role==='user'){
+  // Packet → UI state → serial write → small mechanical settling time → speech.
+  await Promise.resolve();await signal.output();await sleep(TIMING.settle,session);
+ }
+ check(session);
+ const id=++speechId,u=new SpeechSynthesisUtterance(text),voice=voicePair[role];
+ if(voice)u.voice=voice;u.lang=voice?.lang||'es-ES';u.volume=core.voice().volume;
+ u.pitch=voicePair.fallback?(role==='presenter'?0.8:1.3):1;u.rate=role==='presenter'?1:0.95;
+ speechSynthesis.cancel();speechSynthesis.resume();
+ await new Promise((resolve,reject)=>{
+  let done=false;
+  const finish=error=>{if(done)return;done=true;clearTimeout(timer);session.abort.signal.removeEventListener('abort',onAbort);if(id===speechId)core.speaking(false);error?reject(error):resolve()};
+  const onAbort=()=>{speechSynthesis.cancel();finish(abortError())};
+  const timer=setTimeout(()=>{speechSynthesis.cancel();finish(new Error('La voz del sistema no respondió. Prueba la voz en configuración y reinicia la presentación.'))},Math.max(20000,text.length*250));
+  u.onend=()=>finish();u.onerror=e=>finish(new Error('No se pudo reproducir la voz del sistema ('+e.error+'). Revisa la voz y reinicia Full Demo.'));
+  session.abort.signal.addEventListener('abort',onAbort,{once:true});
+  try{speechSynthesis.speak(u)}catch(e){finish(e)}
+ });
+ check(session);
+}
+async function rest(session){signal.state('rest');await sleep(Math.max(TIMING.rest,signal.status().hold+100),session);await signal.output()}
+async function pulse(state,withSpeech,session){
+ check(session);await rest(session);
+ const event=new Promise((resolve,reject)=>{
+  const finish=(error)=>{clearTimeout(timer);window.removeEventListener('ghost-full-demo-action',listener);session.abort.signal.removeEventListener('abort',onAbort);error?reject(error):resolve()};
+  const listener=e=>{if(e.detail.state===state)finish()};
+  const onAbort=()=>finish(abortError());
+  const timer=setTimeout(()=>finish(new Error('La señal simulada no activó GHOST. Vuelve a iniciar la presentación con esta ventana activa.')),4000);
+  window.addEventListener('ghost-full-demo-action',listener);session.abort.signal.addEventListener('abort',onAbort,{once:true});
+ });
+ signal.state(state);await event;await sleep(Math.max(TIMING.hold,signal.status().hold+100),session);
+ if(withSpeech)await lastSpeech;
+ await rest(session);
+}
+async function select(text,session){
+ for(let page=0;page<20;page++){
+  check(session);const targets=core.targets(),goal=targets.includes(text)?text:'Página siguiente';
+  if(!targets.includes(goal))throw new Error('No se encontró la opción de presentación: '+text);
+  // Traverse the real visible targets in order, including pagination controls.
+  for(let step=0;step<=targets.length;step++){
+   caption('Barrido',`Buscando: ${text} · resaltado: ${core.current()}`);
+   await sleep(TIMING.scan,session);
+   if(core.current()===goal){await pulse('left',false,session);break}
+   core.advance();
+  }
+  if(goal===text)return;
+ }
+ throw new Error('No se pudo recorrer el vocabulario de la presentación.');
+}
+async function word(category,text,session){
+ if(core.state().category!==null)await select('Volver a categorías',session);
+ await select(category,session);await select(text,session);
+}
+function stop(message='Presentación detenida · Ctrl + Alt + F para reiniciar.'){
+ const session=run;if(!session)return;
+ run=null;session.abort.abort();speechId++;speechSynthesis.cancel();
+ signal.end();core.end();caption('Presentación automática',message);
+}
+async function start(){
+ if(run){stop();return}
+ if(!('speechSynthesis' in window)){caption('No disponible','Este navegador no dispone de voz sintetizada del sistema.');return}
+ try{signal.assertReady()}catch(e){caption('Preparación',e.message);return}
+ const session={abort:new AbortController(),withServo:signal.status().servo==='connected'};run=session;
+ try{
+  core.begin(text=>{
+   lastSpeech=talk(text,'user',session);
+   // The controller awaits this task after the detected right/yes/no action.
+   lastSpeech.catch(()=>{});
+  });
+  signal.begin();voicePair=await loadVoices(session);await rest(session);
+  await talk('GHOST ayuda a personas con movilidad reducida a comunicarse mediante movimientos mínimos.','presenter',session);
+  await talk('En la primera etapa, la persona solamente dice sí o no.','presenter',session);
+  core.stage(1);
+  for(const state of ['left','right','left','right'])await pulse(state,true,session);
+  core.stage(2);await rest(session);
+  await talk('En la segunda etapa, la persona se comunica con frases de uso frecuente que se pueden personalizar.','presenter',session);
+  for(const text of ['Necesito ayuda médica','Quiero agua','Quiero hablar con mi familia','Gracias']){
+   await select(text,session);if(core.state().selected!==text)throw new Error('La frase seleccionada no coincide con la presentación.');
+   await pulse('right',true,session);
+  }
+  core.stage(3);await rest(session);
+  await talk('En la tercera etapa, la persona combina palabras de distintas categorías para construir sus propios mensajes.','presenter',session);
+  const messages=[
+   [['Acciones','Quiero'],['Acciones','Hablar'],['Personas','Familia']],
+   [['Acciones','Necesito'],['Acciones','Beber'],['Necesidades','Agua']],
+   [['Tiempo','Hoy'],['Acciones','Necesito'],['Necesidades','Descansar']]
+  ];
+  for(const words of messages){
+   core.clear();
+   for(const [category,text]of words)await word(category,text,session);
+   const expected=words.map(w=>w[1]).join(' ');
+   if(core.state().message!==expected)throw new Error('El mensaje construido no coincide con el recorrido de palabras.');
+   await pulse('right',true,session);
+  }
+  await rest(session);await signal.output();check(session);
+  stop('Presentación finalizada · Ctrl + Alt + F para repetir.');
+ }catch(error){if(run===session)stop(error.name==='AbortError'?'Presentación detenida.':error.message)}
+}
+window.GhostFullDemoController=Object.freeze({start,stop,get active(){return !!run}});
+window.addEventListener('keydown',event=>{
+ if(event.ctrlKey&&event.altKey&&!event.shiftKey&&event.code==='KeyF'){event.preventDefault();event.stopImmediatePropagation();if(!event.repeat)void start()}
+ else if(event.key==='Escape'&&run){event.preventDefault();event.stopImmediatePropagation();stop()}
+},{capture:true});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&run)stop('Presentación detenida al ocultar la pestaña. Ctrl + Alt + F para reiniciar.')});
+window.addEventListener('blur',()=>{if(run)stop('Presentación detenida al salir de esta ventana. Ctrl + Alt + F para reiniciar.')});
+window.addEventListener('pagehide',()=>stop());
+// Stop promptly if an attached servo fails, including while the narrator is speaking.
+setInterval(()=>{if(run){try{check(run)}catch(error){stop(error.message)}}},150);
