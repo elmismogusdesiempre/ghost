@@ -1,5 +1,13 @@
+import {nextPresentation} from './presentation-plan.mjs';
 const core=window.GhostFullDemoCore,signal=window.GhostFullDemoSignal;
-const TIMING={scan:550,hold:650,rest:600,settle:220};
+const TIMING={scan:120,hold:350,rest:260,settle:220};
+const ROTATION_KEY='ghost_full_demo_rotation_v1';
+let rotation={};try{rotation=JSON.parse(localStorage.getItem(ROTATION_KEY)||'{}')}catch{}
+function nextPlan(){
+ const plan=nextPresentation(rotation);rotation=plan.next;
+ try{localStorage.setItem(ROTATION_KEY,JSON.stringify(rotation))}catch{/* Rotation still works for this page session. */}
+ return plan;
+}
 const bar=document.createElement('div');bar.id='fullDemoBar';bar.setAttribute('role','status');bar.setAttribute('aria-live','polite');document.getElementById('communication').before(bar);
 const style=document.createElement('style');style.textContent='#fullDemoBar{order:-1;flex:0 0 auto;background:var(--soft);color:var(--ink);padding:8px 16px;font-size:12px;line-height:1.45;min-height:34px}#fullDemoBar strong{letter-spacing:.08em}';document.head.append(style);
 function caption(role,text){bar.replaceChildren();const label=document.createElement('strong');label.textContent='FULL DEMO · '+role+' · ';bar.append(label,document.createTextNode(text));}
@@ -49,9 +57,15 @@ async function talk(text,role,session){
   session.abort.signal.addEventListener('abort',onAbort,{once:true});
   try{speechSynthesis.speak(u)}catch(e){finish(e)}
  });
+ session.restSince=null; // Speech pauses the detector; require fresh stable rest afterwards.
  check(session);
 }
-async function rest(session){signal.state('rest');await sleep(Math.max(TIMING.rest,signal.status().hold+100),session);await signal.output()}
+async function rest(session){
+ if(signal.status().state!=='rest'||session.restSince==null){signal.state('rest');session.restSince=performance.now()}
+ const remaining=Math.max(TIMING.rest,signal.status().hold+100)-(performance.now()-session.restSince);
+ if(remaining>0)await sleep(remaining,session);else check(session);
+ await signal.output();
+}
 async function pulse(state,withSpeech,session){
  check(session);await rest(session);
  const event=new Promise((resolve,reject)=>{
@@ -61,7 +75,7 @@ async function pulse(state,withSpeech,session){
   const timer=setTimeout(()=>finish(new Error('La señal simulada no activó GHOST. Vuelve a iniciar la presentación con esta ventana activa.')),4000);
   window.addEventListener('ghost-full-demo-action',listener);session.abort.signal.addEventListener('abort',onAbort,{once:true});
  });
- signal.state(state);await event;await sleep(Math.max(TIMING.hold,signal.status().hold+100),session);
+ session.restSince=null;signal.state(state);await event;await sleep(Math.max(TIMING.hold,signal.status().hold+100),session);
  if(withSpeech)await lastSpeech;
  await rest(session);
 }
@@ -81,8 +95,11 @@ async function select(text,session){
  throw new Error('No se pudo recorrer el vocabulario de la presentación.');
 }
 async function word(category,text,session){
- if(core.state().category!==null)await select('Volver a categorías',session);
- await select(category,session);await select(text,session);
+ if(core.state().categoryLabel!==category){
+  if(core.state().category!==null)await select('Volver a categorías',session);
+  await select(category,session);
+ }
+ await select(text,session);
 }
 function stop(message='Presentación detenida · Ctrl + Alt + F para reiniciar.'){
  const session=run;if(!session)return;
@@ -100,25 +117,20 @@ async function start(){
    // The controller awaits this task after the detected right/yes/no action.
    lastSpeech.catch(()=>{});
   });
-  signal.begin();voicePair=await loadVoices(session);await rest(session);
+  signal.begin();const plan=nextPlan();voicePair=await loadVoices(session);await rest(session);
   await talk('GHOST ayuda a personas con movilidad reducida a comunicarse mediante movimientos mínimos.','presenter',session);
   await talk('En la primera etapa, la persona solamente dice sí o no.','presenter',session);
   core.stage(1);
   for(const state of ['left','right','left','right'])await pulse(state,true,session);
   core.stage(2);await rest(session);
   await talk('En la segunda etapa, la persona se comunica con frases de uso frecuente que se pueden personalizar.','presenter',session);
-  for(const text of ['Necesito ayuda médica','Quiero agua','Quiero hablar con mi familia','Gracias']){
+  for(const text of plan.phrases){
    await select(text,session);if(core.state().selected!==text)throw new Error('La frase seleccionada no coincide con la presentación.');
    await pulse('right',true,session);
   }
   core.stage(3);await rest(session);
   await talk('En la tercera etapa, la persona combina palabras de distintas categorías para construir sus propios mensajes.','presenter',session);
-  const messages=[
-   [['Acciones','Quiero'],['Acciones','Hablar'],['Personas','Familia']],
-   [['Acciones','Necesito'],['Acciones','Beber'],['Necesidades','Agua']],
-   [['Tiempo','Hoy'],['Acciones','Necesito'],['Necesidades','Descansar']]
-  ];
-  for(const words of messages){
+  for(const words of plan.messages){
    core.clear();
    for(const [category,text]of words)await word(category,text,session);
    const expected=words.map(w=>w[1]).join(' ');
@@ -139,3 +151,5 @@ window.addEventListener('blur',()=>{if(run)stop('Presentación detenida al salir
 window.addEventListener('pagehide',()=>stop());
 // Stop promptly if an attached servo fails, including while the narrator is speaking.
 setInterval(()=>{if(run){try{check(run)}catch(error){stop(error.message)}}},150);
+
+window.addEventListener('ghost-mode-change',()=>{if(run)run.restSince=null});

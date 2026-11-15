@@ -442,7 +442,7 @@ window.GhostFullDemoCore=Object.freeze({
  targets:()=>targets.map(t=>t.item.text),
  current:()=>targets[index]?.item.text,
  advance(){index=(index+1)%Math.max(1,targets.length);highlight()},
- state:()=>({stage:db.settings.stage,category,message,selected:selected?.text,speaking,active:fullDemoActive}),
+ state:()=>({stage:db.settings.stage,category,categoryLabel:CATEGORIES.find(c=>c.id===category)?.label||null,message,selected:selected?.text,speaking,active:fullDemoActive}),
  speaking(value){speaking=value;stopScan();highlight()},
  voice:()=>({name:db.settings.voice,volume:db.settings.volume}),
  clear(){message='';selected=null;category=null;screenPage=0;renderCommunication()}
