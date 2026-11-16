@@ -23,6 +23,17 @@ Los seis grupos visuales muestran iconos, textos y explicaciones: conectar/desco
 
 El inicio mediante atajo debe hacerse **dentro de la nueva URL**; no es un atajo global de Windows/Linux ni se añadió a las versiones antiguas. La duración depende del barrido, paginación y voces, aproximadamente unos minutos. No hay grabación ni voz pregrabada.
 
+## SuperSpeed · una sola selección
+
+La casilla **⚡ SuperSpeed** de Ajustes fáciles activa un perfil de mínima espera, guardado en `ghost_full_demo_superspeed_v1`. Comienza desactivado para conservar el comportamiento normal. Afecta tanto a la comunicación manual de esta copia como a Full Demo.
+
+- Comunicación manual: barrido de 80 ms por opción, pausa posterior y protección temporal entre clics aceptados en 0 ms. Se admiten selecciones y nuevas órdenes STM32 mientras habla. La voz nueva cancela la anterior en vez de esperar su final. Al desactivar se recuperan los valores técnicos guardados, que no se sobrescriben.
+- Full Demo: barrido de 35 ms, activación y reposo mínimos de 65 ms (ampliados según estabilidad), sin espera de 220 ms ni espera de escritura del servo antes de hablar. Se prioriza el audio; el motor puede ir detrás de la voz. La siguiente locución puede cortar frases todavía en reproducción. También se reduce la pausa entre vueltas y se aumenta un poco la velocidad de la voz de presentación.
+- La gráfica se actualiza por fotograma en vez de cada ~66 ms y el ojo en pantalla cambia de posición sin suavizado. Si la lista de voces aún no cargó, se usa la predeterminada sin esperar a completarla.
+- Se conservan los umbrales, la estabilidad configurada del STM32, el requisito de volver a reposo, el protocolo, la exclusión de puertos, los límites de espera de salida y la parada ante errores reales. Una cancelación de voz por interrupción es esperada en este modo y no detiene el bucle.
+
+No ofrece latencia cero: los paquetes USB, el dispositivo de audio y el sintetizador del sistema siguen teniendo demora. Desmarca SuperSpeed cuando prefieras escuchar frases completas o dar más tiempo al ojo mecánico. La verificación usa voces largas y puertos simulados para comprobar interrupciones, persistencia y varias vueltas rápidas; queda pendiente escuchar y observar el hardware real.
+
 ## Guion y dos voces
 
 **Por defecto no hay narrador**: solo se pronuncian Sí/No, las frases elegidas y los mensajes construidos. La casilla «Con presentación hablada» permite añadirlo y se guarda en `ghost_full_demo_presentation_options_v1`. Con la casilla marcada, el presentador dice una breve introducción: «GHOST ayuda a personas con movilidad reducida a comunicarse mediante movimientos mínimos». Después introduce cada etapa con una sola frase. La introducción inicial se dice una vez al arrancar; las explicaciones de etapas se repiten en cada vuelta mientras esa ejecución tenga narrador.

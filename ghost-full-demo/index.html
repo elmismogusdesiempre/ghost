@@ -250,6 +250,7 @@ try{
   }
  }
 }catch{loadNotice='No se pudo recuperar la configuración guardada. Puedes importar tu respaldo en configuración.';}
+let superSpeed=false;try{superSpeed=JSON.parse(localStorage.getItem('ghost_full_demo_superspeed_v1')||'false')===true}catch{}
 let visualSettingsOpen=false;
 let fullDemoActive=false,fullDemoTalk=null,fullDemoSnapshot=null;
 let quickAdjust=false,helpOpen=false;
@@ -272,8 +273,8 @@ function tile(item,action,extra=''){
 function phraseList(){return [...BASIC,...db.phrases[db.settings.profile].filter(w=>!['si','no'].includes(norm(w.text)))];}
 function wordsFor(cat){return db.words.filter(w=>cat==='favoritos'?w.favorite:w.category===cat);}
 function stopScan(){clearTimeout(timer);timer=null;}
-function canScan(){return !visualSettingsOpen&&!fullDemoActive&&!config&&!quickAdjust&&!helpOpen&&db.settings.stage!==1&&activeWindow&&!document.hidden&&!speaking;}
-function scheduleScan(delay=db.settings.speed){
+function canScan(){return !visualSettingsOpen&&!fullDemoActive&&!config&&!quickAdjust&&!helpOpen&&db.settings.stage!==1&&activeWindow&&!document.hidden&&(!speaking||superSpeed);}
+function scheduleScan(delay=superSpeed?80:db.settings.speed){
  stopScan();if(!canScan())return;
  const actual=Math.max(delay,pauseUntil-Date.now());progressStart=Date.now();
  timer=setTimeout(()=>{if(!canScan())return;index=(index+1)%targets.length;highlight();scheduleScan();},actual);
@@ -346,7 +347,7 @@ function addMessageActions(grid){
  grid.append(tile({text:category==='keyboard'?'Borrar letra':'Borrar última palabra',emoji:'⌫'},()=>{message=category==='keyboard'?message.slice(0,-1):message.trimEnd().replace(/\S+\s*$/,'').trimEnd();updateMessage();pauseAfter();},'action'));
  grid.append(tile({text:'Limpiar mensaje',emoji:'✕'},()=>{message='';updateMessage();pauseAfter();},'action'));
 }
-function pauseAfter(){pauseUntil=Date.now()+db.settings.pause;scheduleScan();}
+function pauseAfter(){pauseUntil=Date.now()+(superSpeed?0:db.settings.pause);scheduleScan();}
 function basicSay(i){targets.forEach((t,j)=>t.el.classList.toggle('chosen',i===j));speak(BASIC[i].speech);}
 function speechStatus(text){const el=$('speechStatus');if(el)el.textContent=text;else $('announcement').textContent=text;}
 function finishSpeech(token){if(token!==speechToken)return;speaking=false;clearTimeout(spokenTimer);highlight();scheduleScan();}
@@ -357,8 +358,8 @@ function speak(text){
  cancelSpeech();speechStatus('');
  if(!('speechSynthesis' in window)){notify('La voz no está disponible. El mensaje permanece visible.');return;}
  const token=++speechToken;const u=new SpeechSynthesisUtterance(text);const s=db.settings;const voice=voices.find(v=>v.name===s.voice)||voices.find(v=>v.lang.toLowerCase().startsWith('es'));
- if(voice)u.voice=voice;u.lang=voice?.lang||'es-ES';u.rate=s.rate;u.pitch=s.pitch;u.volume=s.volume;speaking=true;stopScan();highlight();
- u.onend=()=>{if(token!==speechToken)return;if(!config&&s.stage===3&&s.clearAfter){message='';updateMessage();}speechStatus('Mensaje pronunciado.');finishSpeech(token);};
+ if(voice)u.voice=voice;u.lang=voice?.lang||'es-ES';u.rate=s.rate;u.pitch=s.pitch;u.volume=s.volume;speaking=true;stopScan();highlight();if(superSpeed)scheduleScan();
+ u.onend=()=>{if(token!==speechToken)return;if(!config&&s.stage===3&&s.clearAfter&&(!superSpeed||message===text)){message='';updateMessage();}speechStatus('Mensaje pronunciado.');finishSpeech(token);};
  u.onerror=e=>{if(token!==speechToken)return;speechStatus('No se pudo reproducir la voz. El mensaje permanece visible.');notify('No se pudo reproducir la voz. Revisa la voz del dispositivo en configuración.');finishSpeech(token);};
  try{window.speechSynthesis.speak(u);spokenTimer=setTimeout(()=>{if(token===speechToken){cancelSpeech();speechStatus('La voz no respondió. Prueba otra voz en configuración.');highlight();scheduleScan();}},Math.max(15000,text.length*400/s.rate));}catch{finishSpeech(token);notify('No se pudo iniciar la voz del dispositivo.');}
 }
@@ -425,14 +426,19 @@ function toggleConfig(){
 function activateGhostInput(button, source='stm32'){
  if(fullDemoActive&&source!=='presentation')return false;
  if(visualSettingsOpen || config || quickAdjust || helpOpen || document.hidden || ![0,2].includes(button))return false;
- if((source==='stm32'||source==='presentation') && (!activeWindow || speaking))return false;
+ if((source==='stm32'||source==='presentation') && (!activeWindow || (speaking&&!superSpeed)))return false;
  if(!activeWindow){activeWindow=true;highlight();scheduleScan();}
  if(db.settings.stage===1){basicSay(button===0?0:1);return true;}
  if(button===2){speak(db.settings.stage===2?selected?.speech||'':message);return true;}
- if(speaking)return false;
+ if(speaking&&!superSpeed)return false;
  targets[index]?.action();return true;
 }
-window.GhostBridge=Object.freeze({activate:activateGhostInput,available:()=>!visualSettingsOpen&&!config&&!quickAdjust&&!helpOpen&&!document.hidden&&activeWindow&&!speaking,configuration:()=>config||visualSettingsOpen,adjustable:()=>!helpOpen&&(config||quickAdjust||visualSettingsOpen),quickAdjust:()=>quickAdjust,helpOpen:()=>helpOpen,refresh:()=>{if(!config)renderCommunication();}});
+window.GhostBridge=Object.freeze({activate:activateGhostInput,available:()=>!visualSettingsOpen&&!config&&!quickAdjust&&!helpOpen&&!document.hidden&&activeWindow&&(!speaking||superSpeed),configuration:()=>config||visualSettingsOpen,adjustable:()=>!helpOpen&&(config||quickAdjust||visualSettingsOpen),quickAdjust:()=>quickAdjust,helpOpen:()=>helpOpen,refresh:()=>{if(!config)renderCommunication();}});
+
+window.GhostSpeed=Object.freeze({get enabled(){return superSpeed},set(value){
+ superSpeed=value===true;try{localStorage.setItem('ghost_full_demo_superspeed_v1',JSON.stringify(superSpeed))}catch{}
+ pauseUntil=0;lastInput=-Infinity;stopScan();highlight();scheduleScan();window.dispatchEvent(new Event('ghost-speed-change'));
+}});
 
 window.GhostCompanion=Object.freeze({
  open(){
@@ -477,7 +483,7 @@ for(const name of ['mousedown','mouseup','click','dblclick','auxclick','contextm
   if(config||quickAdjust||helpOpen)return;
   e.preventDefault();e.stopImmediatePropagation();
   if(name!=='mousedown'||![0,2].includes(e.button))return;
-  const now=performance.now();if(e.button===lastButton&&now-lastInput<db.settings.debounce)return;
+  const now=performance.now();if(e.button===lastButton&&now-lastInput<(superSpeed?0:db.settings.debounce))return;
   lastInput=now;lastButton=e.button;
   activateGhostInput(e.button, 'mouse');
  },{capture:true});

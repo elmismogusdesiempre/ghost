@@ -335,8 +335,8 @@ function frame(now) {
   const freshEyeSignal = (demo || connected) && !fault && lastADC !== null && lastPacketAt > 0 && now - lastPacketAt <= 1000;
   // During the presentation the eye shows the ACTION direction (high ADC = left).
   const eyeADC=presentation?(presentation.state==='rest'?2047.5:4095-lastADC):lastADC;
-  for (const eye of signalEyes) eye.render(eyeADC, { fresh: freshEyeSignal, demo, now, reducedMotion: reducedEyeMotion.matches });
-  if (now-lastUI > 66) {
+  for (const eye of signalEyes) eye.render(eyeADC, { fresh: freshEyeSignal, demo, now, reducedMotion: window.GhostSpeed?.enabled || reducedEyeMotion.matches });
+  if (now-lastUI > (window.GhostSpeed?.enabled?16:66)) {
     lastUI=now;
     if (!lastPacketAt || now-lastPacketAt>1000) { forwardDetector.reset(); wasAvailable=false; }
     updateUI();draw($('signalCanvas'));draw($('dockCanvas'));

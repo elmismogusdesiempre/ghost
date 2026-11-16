@@ -1,6 +1,8 @@
 import {nextPresentation} from './presentation-plan.mjs';
 const core=window.GhostFullDemoCore,signal=window.GhostFullDemoSignal;
-const TIMING={scan:120,hold:350,rest:260,settle:220};
+const NORMAL_TIMING={scan:120,hold:350,rest:260,settle:220};
+const FAST_TIMING={scan:35,hold:65,rest:65,settle:0};
+const TIMING=new Proxy(NORMAL_TIMING,{get:(target,key)=>window.GhostSpeed.enabled?FAST_TIMING[key]:target[key]});
 const OPTIONS_KEY='ghost_full_demo_presentation_options_v1';
 let options={narrator:false};try{options.narrator=JSON.parse(localStorage.getItem(OPTIONS_KEY)||'{}').narrator===true}catch{}
 const ROTATION_KEY='ghost_full_demo_rotation_v1';
@@ -36,26 +38,26 @@ function sleep(ms,session){return new Promise((resolve,reject)=>{
 })}
 async function loadVoices(session){
  let available=speechSynthesis.getVoices();
- for(let i=0;!available.length&&i<12;i++){await sleep(100,session);available=speechSynthesis.getVoices()}
+ for(let i=0;!available.length&&!window.GhostSpeed.enabled&&i<12;i++){await sleep(100,session);available=speechSynthesis.getVoices()}
  return chooseVoices(available,core.voice().name);
 }
 async function talk(text,role,session){
  check(session);core.speaking(true);caption(role==='presenter'?'Presentador':'Voz de GHOST',text);
- if(role==='user'){
+ if(role==='user'&&!window.GhostSpeed.enabled){
   // Packet → UI state → serial write → small mechanical settling time → speech.
   await Promise.resolve();await signal.output();await sleep(TIMING.settle,session);
  }
  check(session);
  const id=++speechId,u=new SpeechSynthesisUtterance(text),voice=voicePair[role];
  if(voice)u.voice=voice;u.lang=voice?.lang||'es-ES';u.volume=core.voice().volume;
- u.pitch=voicePair.fallback?(role==='presenter'?0.8:1.3):1;u.rate=role==='presenter'?1:0.95;
+ u.pitch=voicePair.fallback?(role==='presenter'?0.8:1.3):1;u.rate=window.GhostSpeed.enabled?(role==='presenter'?1.1:1.25):(role==='presenter'?1:0.95);
  speechSynthesis.cancel();speechSynthesis.resume();
  await new Promise((resolve,reject)=>{
   let done=false;
   const finish=error=>{if(done)return;done=true;clearTimeout(timer);session.abort.signal.removeEventListener('abort',onAbort);if(id===speechId)core.speaking(false);error?reject(error):resolve()};
   const onAbort=()=>{speechSynthesis.cancel();finish(abortError())};
   const timer=setTimeout(()=>{speechSynthesis.cancel();finish(new Error('La voz del sistema no respondió. Prueba la voz en configuración y reinicia la presentación.'))},Math.max(20000,text.length*250));
-  u.onend=()=>finish();u.onerror=e=>finish(new Error('No se pudo reproducir la voz del sistema ('+e.error+'). Revisa la voz y reinicia Full Demo.'));
+  u.onend=()=>finish();u.onerror=e=>{if(window.GhostSpeed.enabled&&['canceled','interrupted'].includes(e.error)&&(id!==speechId||session.abort.signal.aborted)){finish();return}finish(new Error('No se pudo reproducir la voz del sistema ('+e.error+'). Revisa la voz y reinicia Full Demo.'))};
   session.abort.signal.addEventListener('abort',onAbort,{once:true});
   try{speechSynthesis.speak(u)}catch(e){finish(e)}
  });
@@ -64,7 +66,7 @@ async function talk(text,role,session){
 }
 async function rest(session){
  if(signal.status().state!=='rest'||session.restSince==null){signal.state('rest');session.restSince=performance.now()}
- const remaining=Math.max(TIMING.rest,signal.status().hold+100)-(performance.now()-session.restSince);
+ const remaining=Math.max(TIMING.rest,signal.status().hold+(window.GhostSpeed.enabled?50:100))-(performance.now()-session.restSince);
  if(remaining>0)await sleep(remaining,session);else check(session);
  await signal.output();
 }
@@ -77,8 +79,8 @@ async function pulse(state,withSpeech,session){
   const timer=setTimeout(()=>finish(new Error('La señal simulada no activó GHOST. Vuelve a iniciar la presentación con esta ventana activa.')),4000);
   window.addEventListener('ghost-full-demo-action',listener);session.abort.signal.addEventListener('abort',onAbort,{once:true});
  });
- session.restSince=null;signal.state(state);await event;await sleep(Math.max(TIMING.hold,signal.status().hold+100),session);
- if(withSpeech)await lastSpeech;
+ session.restSince=null;signal.state(state);await event;await sleep(Math.max(TIMING.hold,signal.status().hold+(window.GhostSpeed.enabled?50:100)),session);
+ if(withSpeech&&!window.GhostSpeed.enabled)await lastSpeech;
  await rest(session);
 }
 async function select(text,session){
@@ -118,7 +120,7 @@ async function start(){
   core.begin(text=>{
    lastSpeech=talk(text,'user',session);
    // The controller awaits this task after the detected right/yes/no action.
-   lastSpeech.catch(()=>{});
+   lastSpeech.catch(error=>{if(run===session&&window.GhostSpeed.enabled&&error.name!=='AbortError')stop(error.message)});
   });
   signal.begin();voicePair=await loadVoices(session);await rest(session);
   if(session.narrator)await talk('GHOST ayuda a personas con movilidad reducida a comunicarse mediante movimientos mínimos.','presenter',session);
@@ -143,7 +145,7 @@ async function start(){
    await pulse('right',true,session);
   }
   await rest(session);await signal.output();check(session);
-  caption('Demo en bucle','Vuelta completada. Continúa con ejemplos diferentes…');await sleep(700,session);
+  caption('Demo en bucle','Vuelta completada. Continúa con ejemplos diferentes…');await sleep(window.GhostSpeed.enabled?80:700,session);
   }
  }catch(error){if(run===session)stop(error.name==='AbortError'?'Presentación detenida.':error.message)}
 }
