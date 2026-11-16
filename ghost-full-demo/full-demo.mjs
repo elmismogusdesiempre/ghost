@@ -57,7 +57,7 @@ async function talk(text,role,session){
   const finish=error=>{if(done)return;done=true;clearTimeout(timer);session.abort.signal.removeEventListener('abort',onAbort);if(id===speechId)core.speaking(false);error?reject(error):resolve()};
   const onAbort=()=>{speechSynthesis.cancel();finish(abortError())};
   const timer=setTimeout(()=>{speechSynthesis.cancel();finish(new Error('La voz del sistema no respondió. Prueba la voz en configuración y reinicia la presentación.'))},Math.max(20000,text.length*250));
-  u.onend=()=>finish();u.onerror=e=>{if(window.GhostSpeed.enabled&&['canceled','interrupted'].includes(e.error)&&(id!==speechId||session.abort.signal.aborted)){finish();return}finish(new Error('No se pudo reproducir la voz del sistema ('+e.error+'). Revisa la voz y reinicia Full Demo.'))};
+  u.onend=()=>finish();u.onerror=e=>{if(window.GhostSpeed.enabled&&['canceled','interrupted'].includes(e.error)){finish();return}finish(new Error('No se pudo reproducir la voz del sistema ('+e.error+'). Revisa la voz y reinicia Full Demo.'))};
   session.abort.signal.addEventListener('abort',onAbort,{once:true});
   try{speechSynthesis.speak(u)}catch(e){finish(e)}
  });
