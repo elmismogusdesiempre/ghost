@@ -13,13 +13,22 @@ export const COMPOSED_MESSAGES=Object.freeze([
  [['Acciones','Quiero'],['Acciones','Beber'],['Comida','Leche']],
  [['Tiempo','Hoy'],['Acciones','Necesito'],['Necesidades','Ayuda']]
 ]);
-function cursor(value,fallback,length){return Number.isSafeInteger(value)&&value>=0?value%length:fallback}
-function take(bank,start,count){return Array.from({length:count},(_,i)=>bank[(start+i)%bank.length])}
-export function nextPresentation(saved={}){
- const phrases=cursor(saved?.phrases,4,COMMON_PHRASES.length),messages=cursor(saved?.messages,3,COMPOSED_MESSAGES.length);
- return {
-  phrases:take(COMMON_PHRASES,phrases,4),
-  messages:take(COMPOSED_MESSAGES,messages,3).map(words=>words.map(word=>[...word])),
-  next:{phrases:(phrases+4)%COMMON_PHRASES.length,messages:(messages+3)%COMPOSED_MESSAGES.length}
- };
+function shuffle(values,random){
+ const result=[...values];
+ for(let i=result.length-1;i>0;i--){const n=Number(random());const j=Math.min(i,Math.max(0,Math.floor((Number.isFinite(n)?n:0)*(i+1))));[result[i],result[j]]=[result[j],result[i]]}
+ return result;
+}
+function previous(bank,cursor,count){
+ if(!Number.isSafeInteger(cursor)||cursor<0)return [];
+ return Array.from({length:count},(_,i)=>bank[(cursor-count+i+bank.length*2)%bank.length]);
+}
+export function nextPresentation(saved={},random=Math.random){
+ const ids=COMPOSED_MESSAGES.map((_,i)=>i);
+ // Migrate old rotation cursors without immediately repeating the old examples.
+ const lastP=Array.isArray(saved?.lastPhrases)?saved.lastPhrases:previous(COMMON_PHRASES,saved?.phrases,4);
+ const lastM=Array.isArray(saved?.lastMessages)?saved.lastMessages:previous(ids,saved?.messages,3);
+ const p=COMMON_PHRASES.filter(v=>!lastP.includes(v)),m=ids.filter(v=>!lastM.includes(v));
+ const phrases=shuffle(p.length>=4?p:COMMON_PHRASES,random).slice(0,4);
+ const messages=shuffle(m.length>=3?m:ids,random).slice(0,3);
+ return {phrases,messages:messages.map(i=>COMPOSED_MESSAGES[i].map(word=>[...word])),next:{version:2,lastPhrases:phrases,lastMessages:messages}};
 }

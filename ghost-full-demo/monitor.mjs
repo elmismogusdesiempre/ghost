@@ -369,5 +369,18 @@ window.GhostFullDemoSignal=Object.freeze({
  onServoFailure:null
 });
 
+// The companion panel calls the existing operations, never a second serial stack.
+window.GhostMonitorControls=Object.freeze({
+ status:()=>({supported,connected,connecting,stopping,demo,enabled,fault,stmMessage:$('monitorError').textContent||connectionMessage,servo:servo.phase,servoMessage:servo.message,mirror:servo.mirror,showDock:settings.showDock,showEye:settings.showEye}),
+ connectSTM(){if(demo&&!presentation)toggleDemo();return connect()},
+ disconnectSTM:disconnect,
+ connectServo:()=>servo.connect(),disconnectServo:()=>servo.disconnect(),
+ mirror(value){$('servoMirror').checked=value;$('servoMirror').dispatchEvent(new Event('change',{bubbles:true}))},
+ toggleDemo(){if(!presentation)toggleDemo()},
+ useSTM(value){$('stmEnabled').checked=value;$('stmEnabled').dispatchEvent(new Event('change',{bubbles:true}))},
+ showDock(value){settings.showDock=value;saveSettings();syncForm();syncDock()},
+ showEye(value){settings.showEye=value;saveSettings();syncForm();syncEyes()}
+});
+
 $('monitorInfo').textContent = supported ? 'Chrome/Edge de escritorio · HTTPS · permiso de puerto requerido. La adquisición no necesita MATLAB. Las acciones están desactivadas hasta que las habilites.' : 'Web Serial no está disponible aquí. Abre esta URL HTTPS en Chrome o Edge de escritorio. GHOST sigue funcionando con los clics del mouse.';
 syncForm();syncEyes();if(settings.demoOnStart)toggleDemo();else{syncDock();updateUI();}saveSettings();requestAnimationFrame(frame);

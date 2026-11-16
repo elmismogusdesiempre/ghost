@@ -80,7 +80,7 @@ body.communicating .compose-message .message-text:not(.empty){font-size:clamp(14
 <p class="hint">Mientras esta ayuda está abierta, la comunicación está pausada y el cursor está visible. La señal y la gráfica continúan.</p>
 <table class="shortcut-table"><thead><tr><th>Atajo</th><th>Acción</th></tr></thead><tbody>
 <tr><td>Ctrl + Alt + F</td><td>Iniciar / detener Full Demo automática (Esc también detiene)</td></tr><tr><td>Ctrl + Alt + 1</td><td>Etapa 1 · Sí / No</td></tr><tr><td>Ctrl + Alt + 2</td><td>Etapa 2 · Frases útiles</td></tr><tr><td>Ctrl + Alt + 3</td><td>Etapa 3 · Construir mensajes</td></tr>
-<tr><td id="helpConfigShortcut">Ctrl + Alt + M</td><td>Entrar o salir de configuración</td></tr>
+<tr><td>Ctrl + Alt + T</td><td>Ajustes técnicos completos</td></tr><tr><td id="helpConfigShortcut">Ctrl + Alt + M</td><td>Abrir o cerrar ajustes visuales del acompañante</td></tr>
 <tr><td>Ctrl + Alt + U</td><td>Ajuste rápido: cursor y sliders, conservando visible la pantalla de comunicación</td></tr>
 <tr><td>Ctrl + F1</td><td>Abrir o cerrar esta ayuda</td></tr><tr><td>Esc</td><td>Cerrar ayuda o salir del ajuste rápido</td></tr>
 </tbody></table>
@@ -250,6 +250,7 @@ try{
   }
  }
 }catch{loadNotice='No se pudo recuperar la configuración guardada. Puedes importar tu respaldo en configuración.';}
+let visualSettingsOpen=false;
 let fullDemoActive=false,fullDemoTalk=null,fullDemoSnapshot=null;
 let quickAdjust=false,helpOpen=false;
 let config=false,category=null,index=0,targets=[],message='',selected=null,timer=null,pauseUntil=0,lastInput=-Infinity,lastButton=-1,voices=[],speaking=false,speechToken=0,spokenTimer=null,progressStart=0,currentTab='general';
@@ -271,7 +272,7 @@ function tile(item,action,extra=''){
 function phraseList(){return [...BASIC,...db.phrases[db.settings.profile].filter(w=>!['si','no'].includes(norm(w.text)))];}
 function wordsFor(cat){return db.words.filter(w=>cat==='favoritos'?w.favorite:w.category===cat);}
 function stopScan(){clearTimeout(timer);timer=null;}
-function canScan(){return !fullDemoActive&&!config&&!quickAdjust&&!helpOpen&&db.settings.stage!==1&&activeWindow&&!document.hidden&&!speaking;}
+function canScan(){return !visualSettingsOpen&&!fullDemoActive&&!config&&!quickAdjust&&!helpOpen&&db.settings.stage!==1&&activeWindow&&!document.hidden&&!speaking;}
 function scheduleScan(delay=db.settings.speed){
  stopScan();if(!canScan())return;
  const actual=Math.max(delay,pauseUntil-Date.now());progressStart=Date.now();
@@ -423,7 +424,7 @@ function toggleConfig(){
 }
 function activateGhostInput(button, source='stm32'){
  if(fullDemoActive&&source!=='presentation')return false;
- if(config || quickAdjust || helpOpen || document.hidden || ![0,2].includes(button))return false;
+ if(visualSettingsOpen || config || quickAdjust || helpOpen || document.hidden || ![0,2].includes(button))return false;
  if((source==='stm32'||source==='presentation') && (!activeWindow || speaking))return false;
  if(!activeWindow){activeWindow=true;highlight();scheduleScan();}
  if(db.settings.stage===1){basicSay(button===0?0:1);return true;}
@@ -431,7 +432,22 @@ function activateGhostInput(button, source='stm32'){
  if(speaking)return false;
  targets[index]?.action();return true;
 }
-window.GhostBridge=Object.freeze({activate:activateGhostInput,available:()=>!config&&!quickAdjust&&!helpOpen&&!document.hidden&&activeWindow&&!speaking,configuration:()=>config,adjustable:()=>!helpOpen&&(config||quickAdjust),quickAdjust:()=>quickAdjust,helpOpen:()=>helpOpen,refresh:()=>{if(!config)renderCommunication();}});
+window.GhostBridge=Object.freeze({activate:activateGhostInput,available:()=>!visualSettingsOpen&&!config&&!quickAdjust&&!helpOpen&&!document.hidden&&activeWindow&&!speaking,configuration:()=>config||visualSettingsOpen,adjustable:()=>!helpOpen&&(config||quickAdjust||visualSettingsOpen),quickAdjust:()=>quickAdjust,helpOpen:()=>helpOpen,refresh:()=>{if(!config)renderCommunication();}});
+
+window.GhostCompanion=Object.freeze({
+ open(){
+  returnToCommunication();visualSettingsOpen=true;stopScan();cancelSpeech();
+  document.body.classList.add('visual-settings-open');window.dispatchEvent(new Event('ghost-mode-change'));
+ },
+ close(){
+  visualSettingsOpen=false;document.body.classList.remove('visual-settings-open');
+  window.dispatchEvent(new Event('ghost-mode-change'));highlight();scheduleScan();
+ },
+ technical(){window.GhostQuickSettings?.close();if(!config)toggleConfig()},
+ stage:()=>db.settings.stage,
+ setStage(value){switchStage(value)},
+ get isOpen(){return visualSettingsOpen}
+});
 
 window.GhostFullDemoCore=Object.freeze({
  begin(talk){
@@ -457,6 +473,7 @@ window.GhostFullDemoCore=Object.freeze({
 // Capture before any target handlers: a switch click never depends on pointer location.
 for(const name of ['mousedown','mouseup','click','dblclick','auxclick','contextmenu']){
  window.addEventListener(name,e=>{
+  if(visualSettingsOpen||e.target.closest?.('[data-companion-control]'))return;
   if(config||quickAdjust||helpOpen)return;
   e.preventDefault();e.stopImmediatePropagation();
   if(name!=='mousedown'||![0,2].includes(e.button))return;
@@ -475,15 +492,17 @@ function switchStage(stage){
  if(config)toggleConfig();else renderCommunication();
 }
 window.addEventListener('keydown',e=>{
+ if(visualSettingsOpen&&((e.ctrlKey&&e.altKey&&(e.code==='KeyU'||/^(?:Digit|Numpad)[123]$/.test(e.code)))||(e.ctrlKey&&!e.altKey&&e.code==='F1')))window.GhostQuickSettings?.close();
  if(fullDemoActive&&e.ctrlKey&&e.altKey&&!e.shiftKey&&(/^(?:Digit|Numpad)[123]$/.test(e.code)||['KeyM','KeyG','KeyY','KeyU'].includes(e.code)))window.GhostFullDemoController?.stop('Presentación detenida para configurar.');
  if(fullDemoActive&&e.ctrlKey&&!e.altKey&&e.code==='F1')window.GhostFullDemoController?.stop('Presentación detenida para consultar la ayuda.');
+ if(e.ctrlKey&&e.altKey&&!e.shiftKey&&e.code==='KeyT'){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat){window.GhostFullDemoController?.stop();window.GhostCompanion.technical()}return;}
  if(e.ctrlKey&&!e.altKey&&!e.shiftKey&&e.code==='F1'){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)toggleShortcuts();return;}
  if(e.ctrlKey&&e.altKey&&!e.shiftKey&&e.code==='KeyU'){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)setQuickAdjust(!quickAdjust);return;}
  if(e.key==='Escape'&&(helpOpen||quickAdjust)){e.preventDefault();e.stopImmediatePropagation();if(helpOpen)closeShortcuts();else setQuickAdjust(false);return;}
  const stageMatch=/^(?:Digit|Numpad)([123])$/.exec(e.code);
  if(e.ctrlKey&&e.altKey&&!e.shiftKey&&stageMatch){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)switchStage(Number(stageMatch[1]));return;}
- if(e.ctrlKey&&e.altKey&&!e.shiftKey&&e.code===db.settings.shortcut){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)toggleConfig();return;}
- if(!config&&!quickAdjust&&!helpOpen&&['Tab','Enter',' ','ContextMenu'].includes(e.key)){e.preventDefault();e.stopImmediatePropagation();}
+ if(e.ctrlKey&&e.altKey&&!e.shiftKey&&e.code===db.settings.shortcut){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat){if(window.GhostQuickSettings)window.GhostQuickSettings.toggle();else toggleConfig()}return;}
+ if(!visualSettingsOpen&&!config&&!quickAdjust&&!helpOpen&&['Tab','Enter',' ','ContextMenu'].includes(e.key)){e.preventDefault();e.stopImmediatePropagation();}
 },{capture:true});
 window.addEventListener('blur',()=>{activeWindow=false;stopScan();highlight();});
 window.addEventListener('focus',()=>{activeWindow=true;highlight();scheduleScan();});
@@ -497,7 +516,7 @@ function populateVoices(){
 const configFields={cfgMessageColor:['messageColor',String],cfgStage:['stage',Number],cfgProfile:['profile',String],cfgSpeed:['speed',v=>Number(v)*1000],cfgPause:['pause',v=>Number(v)*1000],cfgDebounce:['debounce',Number],cfgShortcut:['shortcut',String],cfgCols:['cols',Number],cfgScale:['scale',Number],cfgVisual:['visual',String],cfgContrast:['contrast',Boolean],cfgClear:['clearAfter',Boolean],cfgVoice:['voice',String],cfgRate:['rate',Number],cfgPitch:['pitch',Number],cfgVolume:['volume',Number]};
 function syncSettings(){
  for(const [id,[key]] of Object.entries(configFields)){const el=$(id);if(el.type==='checkbox')el.checked=db.settings[key];else el.value=['speed','pause'].includes(key)?db.settings[key]/1000:db.settings[key];}
- $('shortcutHelp').textContent=`${shortcutLabel()} alterna entre comunicación y configuración. Ctrl + Alt + 1: Sí/No; Ctrl + Alt + 2: frases útiles; Ctrl + Alt + 3: construir mensajes. Ctrl + Alt + U: ajuste rápido del monitor; Ctrl + F1: ayuda de atajos. Estos atajos de etapa abren directamente la comunicación y guardan la etapa elegida. El cursor desaparece en comunicación y vuelve aquí. Los clics se reciben dentro de esta página; mantén la ventana activa. En Sí/No: izquierdo = sí y derecho = no. En las otras etapas: izquierdo = seleccionar y derecho = hablar.`;
+ $('shortcutHelp').textContent=`${shortcutLabel()} abre los ajustes visuales sobre GHOST. Ctrl + Alt + T abre la configuración técnica completa. Ctrl + Alt + 1: Sí/No; Ctrl + Alt + 2: frases útiles; Ctrl + Alt + 3: construir mensajes. Ctrl + Alt + U: ajuste rápido del monitor; Ctrl + F1: ayuda de atajos. Estos atajos de etapa abren directamente la comunicación y guardan la etapa elegida. El cursor desaparece en comunicación y vuelve aquí. Los clics se reciben dentro de esta página; mantén la ventana activa. En Sí/No: izquierdo = sí y derecho = no. En las otras etapas: izquierdo = seleccionar y derecho = hablar.`;
  populateVoices();
 }
 for(const [id,[key,convert]] of Object.entries(configFields))$(id).addEventListener('change',e=>{
@@ -564,4 +583,5 @@ if(loadNotice)notify(loadNotice);
 </script>
 <script type="module" src="./monitor.mjs" onerror="const status=document.getElementById('monitorLoadStatus');if(status)status.textContent='No se pudo cargar el monitor. Recarga la página para volver a intentarlo.';"></script>
 <script type="module" src="./full-demo.mjs"></script>
+<script type="module" src="./quick-settings.mjs"></script>
 </body></html>

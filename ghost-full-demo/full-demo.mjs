@@ -1,6 +1,8 @@
 import {nextPresentation} from './presentation-plan.mjs';
 const core=window.GhostFullDemoCore,signal=window.GhostFullDemoSignal;
 const TIMING={scan:120,hold:350,rest:260,settle:220};
+const OPTIONS_KEY='ghost_full_demo_presentation_options_v1';
+let options={narrator:false};try{options.narrator=JSON.parse(localStorage.getItem(OPTIONS_KEY)||'{}').narrator===true}catch{}
 const ROTATION_KEY='ghost_full_demo_rotation_v1';
 let rotation={};try{rotation=JSON.parse(localStorage.getItem(ROTATION_KEY)||'{}')}catch{}
 function nextPlan(){
@@ -10,8 +12,8 @@ function nextPlan(){
 }
 const bar=document.createElement('div');bar.id='fullDemoBar';bar.setAttribute('role','status');bar.setAttribute('aria-live','polite');document.getElementById('communication').before(bar);
 const style=document.createElement('style');style.textContent='#fullDemoBar{order:-1;flex:0 0 auto;background:var(--soft);color:var(--ink);padding:8px 16px;font-size:12px;line-height:1.45;min-height:34px}#fullDemoBar strong{letter-spacing:.08em}';document.head.append(style);
-function caption(role,text){bar.replaceChildren();const label=document.createElement('strong');label.textContent='FULL DEMO · '+role+' · ';bar.append(label,document.createTextNode(text));}
-caption('Presentación automática','Conecta y configura el servo. Ctrl + Alt + F inicia o detiene; Esc detiene.');
+function caption(role,text){const launcher=bar.querySelector('[data-companion-control]');bar.replaceChildren();const label=document.createElement('strong');label.textContent='FULL DEMO · '+(window.GhostFullDemoController?.cycle?'Vuelta '+window.GhostFullDemoController.cycle+' · ':'')+role+' · ';bar.append(label,document.createTextNode(text));if(launcher)bar.append(launcher);}
+caption('Demo en bucle','⚙ Ajustes: conecta el ojo mecánico. Ctrl + Alt + F inicia o detiene; Esc detiene.');
 export function chooseVoices(list,preferred=''){
  const spanish=list.filter(v=>v.lang?.toLowerCase().startsWith('es'));
  const pool=spanish.length?spanish:list;
@@ -108,28 +110,31 @@ function stop(message='Presentación detenida · Ctrl + Alt + F para reiniciar.'
 }
 async function start(){
  if(run){stop();return}
+ window.GhostQuickSettings?.close();
  if(!('speechSynthesis' in window)){caption('No disponible','Este navegador no dispone de voz sintetizada del sistema.');return}
  try{signal.assertReady()}catch(e){caption('Preparación',e.message);return}
- const session={abort:new AbortController(),withServo:signal.status().servo==='connected'};run=session;
+ const session={abort:new AbortController(),withServo:signal.status().servo==='connected',narrator:options.narrator,cycle:0};run=session;
  try{
   core.begin(text=>{
    lastSpeech=talk(text,'user',session);
    // The controller awaits this task after the detected right/yes/no action.
    lastSpeech.catch(()=>{});
   });
-  signal.begin();const plan=nextPlan();voicePair=await loadVoices(session);await rest(session);
-  await talk('GHOST ayuda a personas con movilidad reducida a comunicarse mediante movimientos mínimos.','presenter',session);
-  await talk('En la primera etapa, la persona solamente dice sí o no.','presenter',session);
-  core.stage(1);
+  signal.begin();voicePair=await loadVoices(session);await rest(session);
+  if(session.narrator)await talk('GHOST ayuda a personas con movilidad reducida a comunicarse mediante movimientos mínimos.','presenter',session);
+  while(run===session){
+  check(session);const plan=nextPlan();session.cycle++;core.stage(1);core.clear();
+  window.dispatchEvent(new CustomEvent('ghost-full-demo-cycle',{detail:{cycle:session.cycle,phrases:plan.phrases,messages:plan.messages.map(words=>words.map(w=>w[1]).join(' ')),narrator:session.narrator}}));
+  if(session.narrator)await talk('En la primera etapa, la persona solamente dice sí o no.','presenter',session);
   for(const state of ['left','right','left','right'])await pulse(state,true,session);
   core.stage(2);await rest(session);
-  await talk('En la segunda etapa, la persona se comunica con frases de uso frecuente que se pueden personalizar.','presenter',session);
+  if(session.narrator)await talk('En la segunda etapa, la persona se comunica con frases de uso frecuente que se pueden personalizar.','presenter',session);
   for(const text of plan.phrases){
    await select(text,session);if(core.state().selected!==text)throw new Error('La frase seleccionada no coincide con la presentación.');
    await pulse('right',true,session);
   }
   core.stage(3);await rest(session);
-  await talk('En la tercera etapa, la persona combina palabras de distintas categorías para construir sus propios mensajes.','presenter',session);
+  if(session.narrator)await talk('En la tercera etapa, la persona combina palabras de distintas categorías para construir sus propios mensajes.','presenter',session);
   for(const words of plan.messages){
    core.clear();
    for(const [category,text]of words)await word(category,text,session);
@@ -138,10 +143,13 @@ async function start(){
    await pulse('right',true,session);
   }
   await rest(session);await signal.output();check(session);
-  stop('Presentación finalizada · Ctrl + Alt + F para repetir.');
+  caption('Demo en bucle','Vuelta completada. Continúa con ejemplos diferentes…');await sleep(700,session);
+  }
  }catch(error){if(run===session)stop(error.name==='AbortError'?'Presentación detenida.':error.message)}
 }
-window.GhostFullDemoController=Object.freeze({start,stop,get active(){return !!run}});
+window.GhostFullDemoController=Object.freeze({start,stop,get active(){return !!run},get cycle(){return run?.cycle||0},get narrator(){return options.narrator},
+ setNarrator(value){options.narrator=value===true;try{localStorage.setItem(OPTIONS_KEY,JSON.stringify(options))}catch{}}
+});
 window.addEventListener('keydown',event=>{
  if(event.ctrlKey&&event.altKey&&!event.shiftKey&&event.code==='KeyF'){event.preventDefault();event.stopImmediatePropagation();if(!event.repeat)void start()}
  else if(event.key==='Escape'&&run){event.preventDefault();event.stopImmediatePropagation();stop()}
