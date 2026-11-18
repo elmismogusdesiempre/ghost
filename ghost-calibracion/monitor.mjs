@@ -342,7 +342,7 @@ function frame(now) {
   tickDemo(now);
   const freshEyeSignal = (demo || connected) && !fault && lastADC !== null && lastPacketAt > 0 && now - lastPacketAt <= 1000;
   // During the presentation the eye shows the ACTION direction (high ADC = left).
-  const eyeADC=presentation?(presentation.state==='rest'?2047.5:4095-lastADC):lastADC;
+  const eyeADC=presentation?(presentation.state==='rest'?2047.5:4095-lastADC):!demo&&calibration.enabled&&lastADC!==null?4095-lastADC:lastADC;
   for (const eye of signalEyes) eye.render(eyeADC, { fresh: freshEyeSignal, demo, now, reducedMotion: window.GhostSpeed?.enabled || reducedEyeMotion.matches });
   if (now-lastUI > (window.GhostSpeed?.enabled?16:66)) {
     lastUI=now;

@@ -24,7 +24,7 @@ Se conserva siempre el **ADC bruto** y se presenta por separado del **ADC interp
 - Se toma la mediana de reposo y una franja que cubre sus fluctuaciones (percentiles 2–98 más margen).
 - Se comprueba que los dos movimientos quedan en lados opuestos del reposo y separados de su ruido. Se admite que el sentido eléctrico esté invertido.
 - Una transformación continua por tramos mantiene ese descanso dentro de la banda de reposo del monitor y amplía las variaciones de cada lado según lo que se capturó para esa persona.
-- El ADC interpretado alimenta la gráfica, el ojo de software, los estados del servo y los detectores originales de clics. No se añade otro detector de acciones. Se conservan la estabilidad temporal, una acción por activación y la necesidad de volver a reposo.
+- El ADC interpretado alimenta la gráfica, los estados del servo y los detectores originales de clics. Con perfil activo, el ojo en pantalla muestra la dirección lógica calibrada; sin perfil conserva la representación de amplitud original. No se añade otro detector de acciones. Se conservan la estabilidad temporal, una acción por activación y la necesidad de volver a reposo.
 
 Así, por ejemplo, reposo cerca de 2000 y movimientos de solo unas decenas de cuentas pueden aprovecharse aunque nunca alcancen por sí solos 1500/2500. La calibración no mide ángulos reales, no es ganancia electrónica ni puede separar una señal del ruido si son indistinguibles. Set rechaza movimientos que se mezclan con el reposo o que no permiten diferenciar ambos sentidos. Hay que validar comodidad y fiabilidad con la persona real.
 
